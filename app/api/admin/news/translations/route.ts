@@ -1,0 +1,35 @@
+import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth";
+import { getSupabase } from "@/lib/supabase";
+
+export async function GET(req: NextRequest) {
+  try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+  const url = new URL(req.url);
+  const postId = url.searchParams.get("postId");
+  const locale = url.searchParams.get("locale");
+  if (!postId || !locale) return NextResponse.json({ error: "Missing params" }, { status: 400 });
+  const supabase = getSupabase();
+  const { data } = await supabase.from("NewsPostTranslation").select("*").eq("postId", postId).eq("locale", locale).maybeSingle();
+  return NextResponse.json({ translation: data || null });
+}
+
+export async function POST(req: NextRequest) {
+  try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+  const { postId, locale, title, excerpt, body } = await req.json();
+  if (!postId || !locale || !title) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  const supabase = getSupabase();
+  const { data, error } = await supabase.from("NewsPostTranslation").upsert(
+    { postId, locale, title, excerpt: excerpt || "", body: body || "", updatedAt: new Date().toISOString() },
+    { onConflict: "postId,locale" }
+  ).select("*").single();
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ translation: data });
+}
+
+export async function DELETE(req: NextRequest) {
+  try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
+  const { postId, locale } = await req.json();
+  const supabase = getSupabase();
+  await supabase.from("NewsPostTranslation").delete().eq("postId", postId).eq("locale", locale);
+  return NextResponse.json({ ok: true });
+}
