@@ -9,6 +9,8 @@ interface Slide {
   subtitle_ar: string; subtitle_en: string; subtitle_fr: string; subtitle_tr: string;
 }
 
+
+
 interface Props {
   locale: string;
   dict: Record<string, string>;
@@ -16,6 +18,7 @@ interface Props {
   heroSlides?: Slide[] | null;
   accentColor?: string | null;
   primaryColor?: string | null;
+  data?: any; // <--- تمت الإضافة
 }
 
 const QUICK_AMOUNTS = [10, 25, 50, 100, 250];

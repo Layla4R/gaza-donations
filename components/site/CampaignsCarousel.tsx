@@ -10,8 +10,8 @@ interface Campaign {
   donorCount: number; category?: string; defaultAmount?: number;
 }
 
-export default function CampaignsCarousel({ campaigns, locale, dict }: {
-  campaigns: Campaign[]; locale: string; dict: Record<string, string>;
+export default function CampaignsCarousel({ campaigns, locale, dict , data}: {
+  campaigns: Campaign[]; locale: string; dict: Record<string, string>; data?: any 
 }) {
   const [active, setActive] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);

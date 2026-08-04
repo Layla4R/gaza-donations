@@ -1,5 +1,5 @@
-import { getSupabaseOrNull } from "@/lib/supabase";
 import { loadTranslations } from "@/lib/i18n";
+import { getHomeData } from "@/lib/services/home.service";
 import HeroSection from "@/components/site/HeroSection";
 import CampaignsCarousel from "@/components/site/CampaignsCarousel";
 import NewsSection from "@/components/site/NewsSection";
@@ -13,83 +13,101 @@ export const revalidate = 0;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
   const dict = await loadTranslations(locale);
-  const supabase = getSupabaseOrNull();
-  const settings = supabase
-    ? (await supabase.from("SiteSettings").select("siteName, footerDescription").eq("id", "default").maybeSingle()).data
-    : null;
+  const data = await getHomeData(locale);
+  const settings = data?.settings;
+  
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
-  const description = settings?.footerDescription
-    || dict["footer.description"]
-    || (locale === "ar"
-      ? "منصة تبرعات إنسانية شفافة وآمنة لدعم الأسر المحتاجة حول العالم"
-      : "A transparent and secure humanitarian donation platform supporting families in need worldwide");
-  return {
-    title: siteName,
-    description,
-    openGraph: { title: siteName, description, type: "website" },
-  };
+  const description = settings?.footerDescription || dict["footer.description"] || "منصة تبرعات إنسانية شفافة";
+  return { title: siteName, description, openGraph: { title: siteName, description, type: "website" } };
 }
 
 export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
-  const supabase = getSupabaseOrNull();
+  const dict = await loadTranslations(locale);
+  
+  // 1. جلب البيانات من لوحة التحكم
+  const data = await getHomeData(locale) || {};
+  const settings = data.settings || {};
+  const campaigns = data.campaigns || [];
+  const posts = data.posts || [];
+  const stats = data.stats || { total: 0, families: 0 };
+  const pageSections = data.pageSections || [];
+  
+  const sections = Array.isArray(pageSections) ? pageSections : [];
+  const heroImage = settings?.heroImage || null;
 
-  const [settingsRes, campaignsRes, postsRes, dict] = await Promise.all([
-    supabase ? supabase.from("SiteSettings").select("heroImage, heroSlides, accentColor, primaryColor").eq("id","default").maybeSingle() : Promise.resolve({ data: null }),
-    supabase ? supabase.from("Campaign").select("*").eq("isActive", true).order("isFeatured", { ascending: false }).limit(12) : Promise.resolve({ data: [] }),
-    supabase ? supabase.from("NewsPost").select("id,title,excerpt,coverImage,slug,publishedAt").eq("isPublished", true).order("publishedAt", { ascending: false }).limit(3) : Promise.resolve({ data: [] }),
-    loadTranslations(locale),
-  ]);
-  const heroImage = settingsRes?.data?.heroImage || null;
-  const heroSlides = settingsRes?.data?.heroSlides ? JSON.parse(settingsRes.data.heroSlides || "[]") : null;
-
-  let campaigns = campaignsRes?.data || [];
-  let posts = postsRes?.data || [];
-
-  if (locale !== "ar" && supabase && campaigns.length > 0) {
-    const { data: ctrans } = await supabase
-      .from("CampaignTranslation").select("campaignId, title, summary")
-      .eq("locale", locale).in("campaignId", campaigns.map((c: any) => c.id));
-    if (ctrans?.length) {
-      const cm: Record<string, any> = {};
-      for (const t of ctrans) cm[t.campaignId] = t;
-      campaigns = campaigns.map((c: any) => cm[c.id] ? { ...c, title: cm[c.id].title, summary: cm[c.id].summary } : c);
-    }
+  let rawSlides = [];
+  if (settings?.heroSlides) {
+    try { rawSlides = typeof settings.heroSlides === "string" ? JSON.parse(settings.heroSlides) : settings.heroSlides; } 
+    catch (e) { rawSlides = []; }
   }
 
-  if (locale !== "ar" && supabase && posts.length > 0) {
-    const { data: ptrans } = await supabase
-      .from("NewsPostTranslation").select("postId, title, excerpt")
-      .eq("locale", locale).in("postId", posts.map((p: any) => p.id));
-    if (ptrans?.length) {
-      const pm: Record<string, any> = {};
-      for (const t of ptrans) pm[t.postId] = t;
-      posts = posts.map((p: any) => pm[p.id] ? { ...p, title: pm[p.id].title, excerpt: pm[p.id].excerpt } : p);
-    }
-  }
-
-  // Real-time stats for achievements section
-  let statsTotal = 0;
-  let statsFamilies = 0;
-  if (supabase) {
-    try {
-      const [donRes, camRes] = await Promise.all([
-        supabase.from("Donation").select("amount").eq("status", "COMPLETED").limit(50000),
-        supabase.from("Campaign").select("donorCount").eq("isActive", true).limit(100),
-      ]);
-      statsTotal = (donRes.data || []).reduce((s: number, d: any) => s + Number(d.amount), 0);
-      statsFamilies = (camRes.data || []).reduce((s: number, c: any) => s + (c.donorCount || 0), 0);
-    } catch {}
-  }
-
+  // 2. البناء الديناميكي للصفحة
   return (
-    <div>
-      <HeroSection locale={locale} dict={dict} heroImage={heroImage} heroSlides={heroSlides} accentColor={settingsRes?.data?.accentColor} primaryColor={settingsRes?.data?.primaryColor} />
-      <CampaignsCarousel campaigns={campaigns} locale={locale} dict={dict} />
-      {posts.length > 0 && <NewsSection posts={posts} locale={locale} dict={dict} />}
-      <DonateWidget locale={locale} dict={dict} accentColor={settingsRes?.data?.accentColor} />
-      <AchievementsSection locale={locale} dict={dict} totalRaised={statsTotal} totalFamilies={statsFamilies} />
-      <FaqSection locale={locale} dict={dict} />
-      <NewsletterSection locale={locale} dict={dict} accentColor={settingsRes?.data?.accentColor} />
-    </div>
+    <main>
+      {sections.map((section: any) => {
+        // حماية البيانات لتجنب الخطأ 500
+        const sectionData = section.props || {};
+
+        switch (section.type) {
+          case "hero":
+            const sliderSlides = rawSlides.map((slide: any, index: number) => {
+              if (index === 0 && section.props) {
+                return {
+                  ...slide,
+                  image: sectionData.backgroundImage || slide.image,
+                  title_ar: sectionData.title || slide.title_ar,
+                  title_en: sectionData.title || slide.title_en,
+                  subtitle_ar: sectionData.subtitle || slide.subtitle_ar,
+                  subtitle_en: sectionData.subtitle || slide.subtitle_en,
+                };
+              }
+              return slide;
+            });
+
+            return (
+              <HeroSection
+                key={section.id}
+                locale={locale}
+                dict={dict}
+                heroImage={heroImage}
+                heroSlides={sliderSlides} 
+                accentColor={settings?.accentColor}
+                primaryColor={settings?.primaryColor}
+                data={sectionData} // تمرير البيانات الإضافية إن وجدت
+              />
+            );
+
+          case "stats":
+            return (
+              <AchievementsSection
+                key={section.id}
+                locale={locale}
+                dict={dict}
+                totalRaised={stats?.total || 0}
+                totalFamilies={stats?.families || 0}
+                data={sectionData} // نمرر البيانات القادمة من الأدمن هنا
+              />
+            );
+
+          case "campaigns_grid":
+            return <CampaignsCarousel key={section.id} campaigns={campaigns} locale={locale} dict={dict} data={sectionData} />;
+
+          case "stories":
+            return posts.length > 0 ? <NewsSection key={section.id} posts={posts} locale={locale} dict={dict} data={sectionData} /> : null;
+
+          case "donation_buttons":
+            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={settings?.accentColor} data={sectionData} />;
+
+          case "faq":
+            return <FaqSection key={section.id} locale={locale} dict={dict} data={sectionData} />;
+
+          case "newsletter":
+            return <NewsletterSection key={section.id} locale={locale} dict={dict} accentColor={settings?.accentColor} data={sectionData} />;
+
+          default:
+            return null;
+        }
+      })}
+    </main>
   );
 }

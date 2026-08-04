@@ -11,50 +11,74 @@ export default async function AdminDashboard() {
   try { await requireAdmin(); } catch { redirect("/admin/login"); }
   const supabase = getSupabase();
 
-  const [campaignsRes, donationsRes, , subscribersRes, usersRes, recentDonationsRes, unreadMessagesRes] = await Promise.all([
-    supabase.from("Campaign").select("id, title, raisedAmount, goalAmount, donorCount, isActive").order("raisedAmount", { ascending: false }).limit(100),
-    supabase.from("Donation").select("amount", { count: "exact", head: false }).eq("status", "COMPLETED").limit(10000), // Aggregate total raised
-    Promise.resolve({ count: 0 }),  // pages count not used in UI
+  // حساب التواريخ مرة واحدة وبشكل دقيق
+  const now = new Date();
+  const since30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const since60 = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString();
+  const since7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  // تحسين جذري للاستعلامات: طلب ما نحتاجه فقط وتوحيد الـ limits مع الموقع
+  const [
+    campaignsRes, 
+    donationsRes, 
+    subscribersRes, 
+    usersRes, 
+    recentDonationsRes, 
+    unreadMessagesRes,
+    last30Res,
+    prev30Res,
+    recentAmountsRes
+  ] = await Promise.all([
+    // 1. جلب أفضل 5 حملات فقط (لأن الواجهة تعرض 5)
+    supabase.from("Campaign").select("id, title, raisedAmount, goalAmount, donorCount, isActive").order("raisedAmount", { ascending: false }).limit(5),
+    
+    // 2. توحيد الـ limit مع الموقع لعدم حدوث اختلاف في مجموع المبالغ
+    supabase.from("Donation").select("amount", { count: "exact" }).eq("status", "COMPLETED").limit(50000), 
+    
+    // 3. العدادات السريعة (بدون جلب البيانات كاملة، جلب الـ ID فقط للعد)
     supabase.from("Subscriber").select("id", { count: "exact", head: true }),
     supabase.from("User").select("id", { count: "exact", head: true }).eq("role", "DONOR"),
+    
+    // 4. أحدث 5 تبرعات
     supabase.from("Donation").select("id, amount, currency, donorName, donorEmail, userId, status, provider, frequency, createdAt, campaign:Campaign(title)").order("createdAt", { ascending: false }).limit(5),
+    
+    // 5. الرسائل غير المقروءة
     supabase.from("ContactMessage").select("id", { count: "exact", head: true }).eq("isRead", false),
+
+    // 6. استعلامات التريند (النمو) مع تقليل حجم البيانات المسترجعة
+    supabase.from("Donation").select("amount").eq("status", "COMPLETED").gte("createdAt", since30),
+    supabase.from("Donation").select("amount").eq("status", "COMPLETED").gte("createdAt", since60).lt("createdAt", since30),
+    supabase.from("Donation").select("amount, createdAt").eq("status", "COMPLETED").gte("createdAt", since7)
   ]);
 
   const campaigns = campaignsRes.data || [];
   const donationsData = donationsRes.data || [];
+  
+  // حساب المجموع بشكل دقيق ومتطابق مع صفحة الموقع
   const totalRaised = donationsData.reduce((s: number, d: any) => s + Number(d.amount), 0);
-  const totalRaisedTruncated = donationsData.length >= 10000; // May be understated if > 10k donations
-  const completedDonationsCount = donationsRes.count || 0; // Total completed donations (not unique donors)
+  const totalRaisedTruncated = donationsData.length >= 50000; 
+  const completedDonationsCount = donationsRes.count || 0; 
+  
   const subscribersCount = subscribersRes.count || 0;
   const donorAccounts = usersRes.count || 0;
   const recentDonations = recentDonationsRes.data || [];
   const unreadMessages = unreadMessagesRes.count || 0;
 
-  // Last 30 days vs previous 30 days — for trend indicator (combined with main queries)
-  const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const since60 = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-  const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-  const [{ data: last30Data }, { data: prev30Data }, { data: recentAmounts }] = await Promise.all([
-    supabase.from("Donation").select("amount").eq("status", "COMPLETED").gte("createdAt", since30).limit(5000),
-    supabase.from("Donation").select("amount").eq("status", "COMPLETED").gte("createdAt", since60).lt("createdAt", since30).limit(5000),
-    supabase.from("Donation").select("amount, createdAt").eq("status", "COMPLETED").gte("createdAt", since7).limit(2000),
-  ]);
-  const last30Total = (last30Data || []).reduce((s: number, d: any) => s + Number(d.amount), 0);
-  const prev30Total = (prev30Data || []).reduce((s: number, d: any) => s + Number(d.amount), 0);
+  // حساب مؤشر النمو (Trend)
+  const last30Total = (last30Res.data || []).reduce((s: number, d: any) => s + Number(d.amount), 0);
+  const prev30Total = (prev30Res.data || []).reduce((s: number, d: any) => s + Number(d.amount), 0);
   const trendPct = prev30Total > 0 ? Math.round(((last30Total - prev30Total) / prev30Total) * 100) : null;
 
-  // recentAmounts already fetched above in combined Promise.all
-  const now = new Date();
+  // بيانات المخطط البياني (Chart)
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(now);
     d.setDate(d.getDate() - (6 - i));
     return d.toISOString().slice(0, 10);
   });
+  
   const byDay: Record<string, number> = {};
   for (const day of last7) byDay[day] = 0;
-  for (const d of recentAmounts || []) {
+  for (const d of recentAmountsRes.data || []) {
     const day = (d.createdAt as string)?.slice(0, 10);
     if (day && byDay[day] !== undefined) byDay[day] += Number(d.amount);
   }
@@ -66,11 +90,11 @@ export default async function AdminDashboard() {
     { label: "Donor Accounts", value: formatNumber(donorAccounts), icon: "shield-check", color: "brand", link: "/admin/donors" },
     { label: "Newsletter Subscribers", value: formatNumber(subscribersCount), icon: "mail", color: "brand", link: "/admin/subscribers" },
   ];
+  
   const unreadCard = unreadMessages > 0 ? { label: "Unread Messages", value: String(unreadMessages), icon: "mail" as const, color: "danger", link: "/admin/messages" } : null;
 
   return (
     <div className="p-6 sm:p-8 space-y-8">
-
       {/* Stat cards */}
       <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {cards.map(c => (
@@ -84,7 +108,7 @@ export default async function AdminDashboard() {
                 </div>
               )}
               {c.label === "Total Raised" && totalRaisedTruncated && (
-                <div className="mt-1 text-[9px] text-warning">⚠ 10k+ donations — figure may be partial</div>
+                <div className="mt-1 text-[9px] text-warning">⚠ 50k+ donations — figure may be partial</div>
               )}
             </div>
             <div className="w-10 h-10 rounded-xl bg-brand/8 text-brand flex items-center justify-center group-hover:bg-brand/15 transition">
@@ -133,7 +157,7 @@ export default async function AdminDashboard() {
             <Link href="/admin/campaigns" className="text-brand text-sm hover:underline">View all →</Link>
           </div>
           <div className="space-y-3">
-            {campaigns.slice(0, 5).map((c: any) => {
+            {campaigns.map((c: any) => {
               const pct = Math.min(100, Math.round((Number(c.raisedAmount) / (Number(c.goalAmount) || 1)) * 100));
               return (
                 <Link key={c.id} href={`/admin/campaigns/${c.id}`} className="block group">

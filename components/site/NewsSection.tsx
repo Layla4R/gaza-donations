@@ -7,13 +7,22 @@ interface Post {
   excerpt: string; coverImage?: string | null; publishedAt: string;
 }
 
-export default function NewsSection({ posts, locale, dict }: {
-  posts: Post[]; locale: string; dict: Record<string, string>;
-}) {
+interface NewsSectionProps {
+  posts: Post[];
+  locale: string;
+  dict: Record<string, string>;
+  data?: any; // إضافة خاصية الداتا لاستقبال التعديلات من لوحة التحكم
+}
+
+export default function NewsSection({ posts, locale, dict, data }: NewsSectionProps) {
   const p = locale === "ar" ? "" : `/${locale}`;
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
   const dateLocale = locale === "ar" ? "ar-EG" : locale === "tr" ? "tr-TR" : locale === "fr" ? "fr-FR" : "en-GB";
+
+  // قراءة القيم من الداتا القادمة من الأدمن، أو استخدام القيم الافتراضية
+  const sectionTitle = data?.title || t("news.title","الأخبار والمقالات","News & Articles","Actualités & Articles","Haberler & Makaleler");
+  const sectionEyebrow = data?.subtitle || t("news.eyebrow","من ميدان العمل","From the Field","Du Terrain","Sahadan");
 
   return (
     <section className="py-20 bg-white">
@@ -22,10 +31,10 @@ export default function NewsSection({ posts, locale, dict }: {
           <div>
             <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-[0.3em] uppercase mb-3">
               <span className="w-6 h-px bg-brand/40 inline-block" />
-              {t("news.eyebrow","من ميدان العمل","From the Field","Du Terrain","Sahadan")}
+              {sectionEyebrow}
             </span>
             <h2 className="font-display text-4xl font-extrabold text-ink">
-              {t("news.title","الأخبار والمقالات","News & Articles","Actualités & Articles","Haberler & Makaleler")}
+              {sectionTitle}
             </h2>
           </div>
           <Link href={`${p}/news`} className="flex items-center gap-2 text-brand font-bold hover:underline text-sm">

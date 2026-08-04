@@ -2,13 +2,29 @@
 import { useState } from "react";
 import Icon from "@/components/icons";
 
-export default function NewsletterSection({ locale, dict, accentColor }: { locale: string; dict: Record<string, string>; accentColor?: string | null }) {
+interface NewsletterProps {
+  locale: string;
+  dict: Record<string, string>;
+  accentColor?: string | null;
+  data?: any; // إضافة خاصية الداتا لاستقبال التعديلات
+}
+
+export default function NewsletterSection({ locale, dict, accentColor, data }: NewsletterProps) {
   const accent = accentColor || "#F00F5A";
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle"|"loading"|"success"|"error">("idle");
 
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
+
+  // قراءة القيم من الداتا القادمة من الأدمن، أو استخدام القيم الافتراضية
+  const sectionTitle = data?.title || t("newsletter.title", "اشترك في نشرتنا البريدية", "Subscribe to Our Newsletter", "Abonnez-vous à Notre Newsletter", "Bültenimize Abone Olun");
+  const sectionSubtitle = data?.subtitle || t("newsletter.subtitle", 
+    "كن أول من يعلم بأثر تبرعاته وآخر أخبار حملاتنا الإنسانية مباشرة في بريدك.", 
+    "Be the first to know about your donation impact and the latest from our humanitarian campaigns.", 
+    "Soyez le premier informé de l'impact de vos dons et des dernières nouvelles de nos campagnes.", 
+    "Bağışlarınızın etkisini ve insani kampanyalarımızın son haberlerini ilk öğrenen siz olun."
+  );
 
   async function subscribe(e: React.FormEvent) {
     e.preventDefault();
@@ -50,17 +66,12 @@ export default function NewsletterSection({ locale, dict, accentColor }: { local
 
         {/* Title */}
         <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
-          {t("newsletter.title", "اشترك في نشرتنا البريدية", "Subscribe to Our Newsletter", "Abonnez-vous à Notre Newsletter", "Bültenimize Abone Olun")}
+          {sectionTitle}
         </h2>
 
         {/* Subtitle */}
         <p className="text-white/65 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-          {t("newsletter.subtitle",
-            "كن أول من يعلم بأثر تبرعاته وآخر أخبار حملاتنا الإنسانية مباشرة في بريدك.",
-            "Be the first to know about your donation impact and the latest from our humanitarian campaigns.",
-            "Soyez le premier informé de l'impact de vos dons et des dernières nouvelles de nos campagnes.",
-            "Bağışlarınızın etkisini ve insani kampanyalarımızın son haberlerini ilk öğrenen siz olun."
-          )}
+          {sectionSubtitle}
         </p>
 
         {/* Form */}

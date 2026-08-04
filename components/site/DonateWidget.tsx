@@ -4,8 +4,7 @@ import Icon from "@/components/icons";
 
 const AMOUNTS = [5, 10, 25, 50, 100, 250];
 
-export default function DonateWidget({ locale, dict, accentColor }: { locale: string; dict: Record<string, string>; accentColor?: string | null }) {
-  const accent = accentColor || "#F00F5A";
+export default function DonateWidget({ locale, dict, accentColor, data }: { locale: string; dict: Record<string, string>; accentColor?: string | null; data?: any }) {  const accent = accentColor || "#F00F5A";
   const [amount, setAmount] = useState(25);
   const [custom, setCustom] = useState("");
   const [freq, setFreq] = useState<"ONE_TIME"|"MONTHLY">("ONE_TIME");
@@ -14,10 +13,11 @@ export default function DonateWidget({ locale, dict, accentColor }: { locale: st
   const [loading, setLoading] = useState<"stripe"|"paypal"|null>(null);
   const [error, setError] = useState("");
 
-  const final = custom ? Math.max(1, Number(custom)) : amount;
+ const final = custom ? Math.max(1, Number(custom)) : amount;
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
-
+  const title = data?.headline || data?.title || t("donate.widget_title","كل درهم بيغير حياة","Every Dollar Changes a Life","Chaque Euro Change une Vie","Her Dolar Bir Hayat Değiştirir");
+  const subtitle = data?.subheading || data?.subtitle || data?.body || data?.description || t("donate.widget_body", "تبرعك يصل مباشرة للمستحقين دون وسيط. نحن نضمن الشفافية الكاملة ونوفر تقارير دورية عن أثر تبرعاتك.", "Your donation reaches beneficiaries directly without intermediaries. We guarantee full transparency and provide regular reports on the impact of your donations.", "Votre don parvient directement aux bénéficiaires sans intermédiaires. Nous garantissons une transparence totale.", "Bağışınız doğrudan yararlanıcılara ulaşır. Tam şeffaflık garantisi ve düzenli etki raporları sunuyoruz.");
   async function pay(provider: "stripe"|"paypal") {
     if (!name.trim() || !email.trim()) { setError(t("donate.name","الاسم والبريد مطلوبان","Name and email required","Nom et email requis","Ad ve e-posta gerekli")); return; }
     setLoading(provider); setError("");
@@ -46,15 +46,10 @@ export default function DonateWidget({ locale, dict, accentColor }: { locale: st
               {t("donate.eyebrow","تبرع الآن","Donate Now","Faire un Don","Bağış Yap")}
             </span>
             <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink mb-5 leading-tight">
-              {t("donate.widget_title","كل درهم بيغير حياة","Every Dollar Changes a Life","Chaque Euro Change une Vie","Her Dolar Bir Hayat Değiştirir")}
+              {title}
             </h2>
             <p className="text-muted text-lg leading-relaxed mb-8">
-              {t("donate.widget_body",
-                "تبرعك يصل مباشرة للمستحقين دون وسيط. نحن نضمن الشفافية الكاملة ونوفر تقارير دورية عن أثر تبرعاتك.",
-                "Your donation reaches beneficiaries directly without intermediaries. We guarantee full transparency and provide regular reports on the impact of your donations.",
-                "Votre don parvient directement aux bénéficiaires sans intermédiaires. Nous garantissons une transparence totale.",
-                "Bağışınız doğrudan yararlanıcılara ulaşır. Tam şeffaflık garantisi ve düzenli etki raporları sunuyoruz."
-              )}
+              {subtitle}  
             </p>
             <div className="flex flex-col gap-4">
               {[

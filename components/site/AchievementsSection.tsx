@@ -11,29 +11,6 @@ interface Achievement {
   color: string;
 }
 
-const ACHIEVEMENTS: Achievement[] = [
-  {
-    icon: "heart", value: 12500, suffix: "+", color: "#F00F5A",
-    label_ar: "أسرة مستفيدة", label_en: "Families Helped", label_fr: "Familles Aidées", label_tr: "Yardım Edilen Aile",
-    desc_ar: "أسرة تلقت مساعدات مباشرة", desc_en: "Families received direct aid", desc_fr: "Familles ont reçu une aide directe", desc_tr: "Aile doğrudan yardım aldı",
-  },
-  {
-    icon: "hand-heart", value: 2800000, suffix: "$", color: "#0069D2",
-    label_ar: "إجمالي التبرعات", label_en: "Total Donations", label_fr: "Total des Dons", label_tr: "Toplam Bağış",
-    desc_ar: "دولار جُمعت ووُزِّعت بشفافية", desc_en: "Raised & distributed transparently", desc_fr: "Collectés et distribués en toute transparence", desc_tr: "Şeffaf şekilde toplanıp dağıtıldı",
-  },
-  {
-    icon: "globe", value: 18, suffix: "", color: "#7C3AED",
-    label_ar: "دولة نصل إليها", label_en: "Countries Reached", label_fr: "Pays Touchés", label_tr: "Ulaşılan Ülke",
-    desc_ar: "حول العالم تصل مساعداتنا", desc_en: "Worldwide we deliver aid", desc_fr: "À travers le monde notre aide arrive", desc_tr: "Dünya genelinde yardım ulaştırıyoruz",
-  },
-  {
-    icon: "shield-check", value: 98, suffix: "%", color: "#059669",
-    label_ar: "من التبرعات للمستحقين", label_en: "Goes to Beneficiaries", label_fr: "Aux Bénéficiaires", label_tr: "Yararlanıcılara Gidiyor",
-    desc_ar: "نسبة ما يصل للمستحقين مباشرة", desc_en: "Of every dollar reaches those in need", desc_fr: "De chaque euro atteint les bénéficiaires", desc_tr: "Her dolar ihtiyaç sahiplerine ulaşıyor",
-  },
-];
-
 function useCountUp(target: number, duration = 2000, started: boolean) {
   const [count, setCount] = useState(0);
   useEffect(() => {
@@ -89,19 +66,57 @@ function StatCard({ item, locale, dict, started }: { item: Achievement; locale: 
   );
 }
 
-export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0 }: { locale: string; dict: Record<string, string>; totalRaised?: number; totalFamilies?: number; }) {
-  const ref = useRef<HTMLDivElement>(null);
+export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, data }: { locale: string; dict: Record<string, string>; totalRaised?: number; totalFamilies?: number; data?: any }) {  const ref = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
-
-  // Use real DB stats if available, otherwise hardcoded defaults
-  const achievements: Achievement[] = ACHIEVEMENTS.map((a, i) => ({
-    ...a,
-    value: i === 0 && totalFamilies > 100 ? totalFamilies
-         : i === 1 && totalRaised > 1000 ? Math.round(totalRaised)
-         : a.value,
-  }));
+  const title = data?.headline || data?.title || t("achievements.title", "أثرنا بالأرقام", "Our Impact in Numbers", "Notre Impact en Chiffres", "Rakamlarla Etkimiz");
+  const subtitle = data?.subheading || data?.subtitle || data?.description || t("achievements.subtitle", "بشفافية كاملة نشارككم أرقام ما أنجزناه معاً بفضل دعمكم المستمر", "With full transparency, we share the numbers of what we have achieved together thanks to your continued support", "Avec une transparence totale, nous partageons les chiffres de ce que nous avons accompli ensemble", "Tam şeffaflıkla, sürekli desteğiniz sayesinde birlikte başardıklarımızın rakamlarını paylaşıyoruz");
+  const achievements: Achievement[] = Array.isArray(data?.items) && data.items.length > 0
+    ? data.items.map((item: any) => ({
+        icon: "heart",
+        value: Number(item.value) || 0,
+        suffix: item.suffix || "",
+        color: item.color || "#0069D2",
+        label_ar: item.title || item.label_ar || "",
+        label_en: item.title || item.label_en || "",
+        label_fr: item.title || item.label_fr || "",
+        label_tr: item.title || item.label_tr || "",
+        desc_ar: item.description || item.desc_ar || "",
+        desc_en: item.description || item.desc_en || "",
+        desc_fr: item.description || item.desc_fr || "",
+        desc_tr: item.description || item.desc_tr || "",
+      }))
+    : [
+        {
+          icon: "heart" as const,
+          value: totalFamilies || 0,
+          suffix: "+",
+          color: "#F00F5A",
+          label_ar: "أسرة مستفيدة",
+          label_en: "Families Helped",
+          label_fr: "Familles Aidées",
+          label_tr: "Yardım Edilen Aile",
+          desc_ar: "أسرة تلقت مساعدات مباشرة",
+          desc_en: "Families received direct aid",
+          desc_fr: "Familles ont reçu une aide directe",
+          desc_tr: "Aile doğrudan yardım aldı",
+        },
+        {
+          icon: "hand-heart" as const,
+          value: totalRaised || 0,
+          suffix: "$",
+          color: "#0069D2",
+          label_ar: "إجمالي التبرعات",
+          label_en: "Total Donations",
+          label_fr: "Total des Dons",
+          label_tr: "Toplam Bağış",
+          desc_ar: "دولار جُمعت ووُزِّعت بشفافية",
+          desc_en: "Raised & distributed transparently",
+          desc_fr: "Collectés et distribués en toute transparence",
+          desc_tr: "Şeffaf şekilde toplanıp dağıtıldı",
+        },
+      ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) => {
@@ -128,15 +143,10 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
             <span className="w-6 h-px bg-brand/40 inline-block" />
           </span>
           <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink mb-4 leading-tight">
-            {t("achievements.title", "أثرنا بالأرقام", "Our Impact in Numbers", "Notre Impact en Chiffres", "Rakamlarla Etkimiz")}
+            {title}
           </h2>
           <p className="text-muted text-lg max-w-2xl mx-auto">
-            {t("achievements.subtitle",
-              "بشفافية كاملة نشارككم أرقام ما أنجزناه معاً بفضل دعمكم المستمر",
-              "With full transparency, we share the numbers of what we have achieved together thanks to your continued support",
-              "Avec une transparence totale, nous partageons les chiffres de ce que nous avons accompli ensemble",
-              "Tam şeffaflıkla, sürekli desteğiniz sayesinde birlikte başardıklarımızın rakamlarını paylaşıyoruz"
-            )}
+            {subtitle}
           </p>
         </div>
 
