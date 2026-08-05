@@ -77,7 +77,17 @@ export default async function HomePage({ params: { locale } }: { params: { local
               />
             );
 
-          case "stats":
+        
+
+          case "campaigns_grid":
+            return <CampaignsCarousel key={section.id} campaigns={campaigns} locale={locale} dict={dict} data={sectionData} />;
+
+          case "stories":
+            return posts.length > 0 ? <NewsSection key={section.id} posts={posts} locale={locale} dict={dict} data={sectionData} /> : null;
+
+          case "donation_buttons":
+            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={settings?.accentColor} data={sectionData} />;
+  case "stats":
             return (
               <AchievementsSection
                 key={section.id}
@@ -88,16 +98,6 @@ export default async function HomePage({ params: { locale } }: { params: { local
                 data={sectionData} // نمرر البيانات القادمة من الأدمن هنا
               />
             );
-
-          case "campaigns_grid":
-            return <CampaignsCarousel key={section.id} campaigns={campaigns} locale={locale} dict={dict} data={sectionData} />;
-
-          case "stories":
-            return posts.length > 0 ? <NewsSection key={section.id} posts={posts} locale={locale} dict={dict} data={sectionData} /> : null;
-
-          case "donation_buttons":
-            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={settings?.accentColor} data={sectionData} />;
-
           case "faq":
             return <FaqSection key={section.id} locale={locale} dict={dict} data={sectionData} />;
 
