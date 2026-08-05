@@ -9,8 +9,6 @@ interface Slide {
   subtitle_ar: string; subtitle_en: string; subtitle_fr: string; subtitle_tr: string;
 }
 
-
-
 interface Props {
   locale: string;
   dict: Record<string, string>;
@@ -18,7 +16,7 @@ interface Props {
   heroSlides?: Slide[] | null;
   accentColor?: string | null;
   primaryColor?: string | null;
-  data?: any; // <--- تمت الإضافة
+  data?: any;
 }
 
 const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
@@ -53,13 +51,14 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ];
 
-export default function HeroSection({ locale, dict, heroImage, heroSlides, accentColor, primaryColor , data }: Props) {
+export default function HeroSection({ locale, dict, heroImage, heroSlides, accentColor, primaryColor, data }: Props) {
   const accent = accentColor || "#F00F5A";
   const primary = primaryColor || "#0069D2";
   const p = locale === "ar" ? "" : `/${locale}`;
+  
+  // 1. منطق السلايدر: الاعتماد على السلايدات المضافة في لوحة التحكم، وإلا استخدام الافتراضي
   const adminSlides = data?.items || data?.slides || [];
-  const baseSlides = (heroSlides && heroSlides.length > 0) ? heroSlides : DEFAULT_SLIDES;
-const slides = adminSlides.length > 0 
+  const slides = adminSlides.length > 0 
     ? adminSlides.map((slide: any) => ({
         image: slide.image || slide.backgroundImage || slide.photo || "",
         title_ar: slide.title || slide.headline || slide.title_ar,
@@ -71,10 +70,7 @@ const slides = adminSlides.length > 0
         subtitle_fr: slide.subtitle_fr || slide.subtitle || slide.subheading,
         subtitle_tr: slide.subtitle_tr || slide.subtitle || slide.subheading,
       }))
-    : DEFAULT_SLIDES;
-
-
-
+    : (heroSlides && heroSlides.length > 0 ? heroSlides : DEFAULT_SLIDES);
 
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
@@ -104,14 +100,14 @@ const slides = adminSlides.length > 0
   const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, slides.length, goTo]);
 
   const [hovered, setHovered] = useState(false);
-  // Auto-advance every 6 seconds — pause on hover
+  
   useEffect(() => {
     if (slides.length <= 1 || hovered) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [next, slides.length, hovered]);
 
-  const slide = slides[current];
+  const slide = slides[current] || slides[0];
   const locKey = locale === "ar" ? "ar" : locale === "fr" ? "fr" : locale === "tr" ? "tr" : "en";
 
   async function pay(provider: "stripe" | "paypal") {
@@ -153,7 +149,6 @@ const slides = adminSlides.length > 0
         </div>
       ))}
 
-      {/* Ambient blobs */}
       <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-white/5 blur-3xl pointer-events-none z-[1]" />
       <div className="absolute bottom-1/3 -left-32 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none z-[1]" />
 
@@ -210,9 +205,29 @@ const slides = adminSlides.length > 0
         </div>
       </div>
 
-    
+      {/* ── Slider Controls ── */}
+      {slides.length > 1 && (
+        <>
+          <button onClick={prev} aria-label="Previous slide"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition">
+            <span className="text-xl leading-none">›</span>
+          </button>
+          <button onClick={next} aria-label="Next slide"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition">
+            <span className="text-xl leading-none">‹</span>
+          </button>
+
+          <div className="absolute bottom-[160px] left-1/2 -translate-x-1/2 z-20 flex gap-2">
+            {slides.map((_:any, i:any) => (
+              <button key={i} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} aria-current={i === current ? "true" : undefined}
+                className={`transition-all rounded-full ${i === current ? "w-8 h-2.5 bg-white" : "w-2.5 h-2.5 bg-white/40 hover:bg-white/65"}`} />
+            ))}
+          </div>
+        </>
+      )}
+
       {/* ── Quick Donate Bar ── */}
-      <div className="relative z-10 w-full" style={{ background: "rgba(0,57,135,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+      <div className="relative z-10 w-full" style={{ backgroundColor: primary, backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.15)" }}>        
         <div className="max-w-screen-xl mx-auto px-6 py-5">
           <div className="flex flex-wrap items-center gap-4">
 
@@ -230,7 +245,7 @@ const slides = adminSlides.length > 0
                   className="px-4 py-2 text-xs font-bold transition"
                   style={{
                     background: freq === f ? "rgba(255,255,255,0.9)" : "transparent",
-                    color: freq === f ? "#0057C2" : "rgba(255,255,255,0.65)",
+                    color: freq === f ? primary : "rgba(255,255,255,0.65)", // ✅ تم تصحيح اللون هنا
                   }}>
                   {f === "ONE_TIME"
                     ? t("donate.one_time", "مرة واحدة", "One-time", "Unique", "Tek")
@@ -246,7 +261,7 @@ const slides = adminSlides.length > 0
                   className="px-4 py-2 rounded-xl text-sm font-bold transition hover:-translate-y-0.5"
                   style={{
                     background: final === a && !custom ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.12)",
-                    color: final === a && !custom ? "#0057C2" : "rgba(255,255,255,0.85)",
+                    color: final === a && !custom ? primary : "rgba(255,255,255,0.85)", // ✅ تم تصحيح اللون هنا
                     border: "1px solid rgba(255,255,255,0.2)",
                   }}>
                   ${a}
@@ -303,7 +318,7 @@ const slides = adminSlides.length > 0
                 <div className="flex gap-2 shrink-0 flex-wrap">
                   <button onClick={() => pay("stripe")} disabled={!!loading}
                     className="flex items-center gap-2 font-bold rounded-xl px-5 py-2.5 text-sm transition disabled:opacity-60"
-                    style={{ background: "rgba(255,255,255,0.95)", color: "#0057C2" }}>
+                    style={{ background: "rgba(255,255,255,0.95)", color: primary }}> {/* ✅ تم تصحيح اللون هنا */}
                     {loading === "stripe" ? "..." : <><Icon name="wallet" size={15} /> {t("donate.pay_card", "بطاقة", "Card", "Carte", "Kart")}</>}
                   </button>
                   <button onClick={() => pay("paypal")} disabled={!!loading}
@@ -312,7 +327,7 @@ const slides = adminSlides.length > 0
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="#003087"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
                     {loading === "paypal" ? "..." : "PayPal"}
                   </button>
-                  {/* Fix 37: Add to cart from Hero */}
+                  {/* Add to cart */}
                   <button
                     onClick={() => {
                       if (!final || final <= 0) return;

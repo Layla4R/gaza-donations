@@ -1,12 +1,5 @@
 import type { Config } from "tailwindcss";
 
-// 4Relief Brand Colors (extracted from official logo)
-// Primary Blue:   #0069D2  (the "4" numeral + "ief" text)
-// Dark Blue:      #003C87  (deep blue shadows in logo)
-// Pink/Fuchsia:   #F00F5A  (dominant color — "Relief" text + hand)
-// Pink Dark:      #C3003C  (deeper pink for hover/dark states)
-// Background:     #F8FAFF  (very light blue-white, feels brand-aligned)
-
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
@@ -18,14 +11,17 @@ const config: Config = {
         // Background
         cream: "#F8FAFF",
         beige: "#EEF3FB",
-        // Brand — Blue (primary structural color)
-        brand: "#0069D2",
-        "brand-dark": "#003C87",
-        "brand-light": "#4A9AE8",
-        // Accent — Pink/Fuchsia (CTAs, highlights, donate buttons)
-        accent: "#F00F5A",
-        "accent-dark": "#C3003C",
-        "accent-light": "#FF4D88",
+        
+        // 🌟 جعل ألوان Brand ديناميكية تقرأ من متغيرات CSS
+        brand: "var(--brand, #0069D2)",
+        "brand-dark": "var(--brand-dark, #003C87)",
+        "brand-light": "var(--brand-light, #4A9AE8)",
+        
+        // 🌟 جعل ألوان Accent ديناميكية
+        accent: "var(--accent, #F00F5A)",
+        "accent-dark": "var(--accent-dark, #C3003C)",
+        "accent-light": "var(--accent-light, #FF4D88)",
+        
         // Text
         ink: "#1A1A2E",
         muted: "#5C6880",
@@ -39,13 +35,11 @@ const config: Config = {
         dashbg: "#F4F7FD",
       },
       backgroundImage: {
-        // Pink gradient — donate buttons, hero overlays, CTAs
-        "accent-gradient": "linear-gradient(135deg, #F00F5A 0%, #FF4D88 100%)",
-        // Blue gradient — sections, stats bands, newsletter
-        "brand-gradient": "linear-gradient(135deg, #003C87 0%, #0069D2 100%)",
-        // Subtle page background
+        // 🌟 تحديث التدرجات لتقرأ من المتغيرات الديناميكية أيضاً
+        "accent-gradient": "linear-gradient(135deg, var(--accent, #F00F5A) 0%, var(--accent-light, #FF4D88) 100%)",
+        "brand-gradient": "linear-gradient(135deg, var(--brand-dark, #003C87) 0%, var(--brand, #0069D2) 100%)",
+        
         "section-gradient": "linear-gradient(180deg, #F8FAFF 0%, #EEF3FB 100%)",
-        // Sidebar
         "sidebar-gradient": "linear-gradient(180deg, #0F1E3D 0%, #1A3366 100%)",
       },
       fontFamily: {

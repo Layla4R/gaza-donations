@@ -13,7 +13,7 @@ export const revalidate = 0;
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
   const dict = await loadTranslations(locale);
-  const data = await getHomeData(locale);
+  const data  = await getHomeData(locale);
   const settings = data?.settings;
   
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
@@ -35,17 +35,22 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const sections = Array.isArray(pageSections) ? pageSections : [];
   const heroImage = settings?.heroImage || null;
 
+  // تجهيز الألوان الافتراضية في حال لم يقم الأدمن بتعيينها
+  const primaryColor = settings?.primaryColor || "#0069D2";
+  const accentColor = settings?.accentColor || "#F00F5A";
+console.log("🚀 ~ file: app/[locale]/page.tsx:44 ~ HomePage ~ primaryColor:", accentColor);
   let rawSlides = [];
   if (settings?.heroSlides) {
     try { rawSlides = typeof settings.heroSlides === "string" ? JSON.parse(settings.heroSlides) : settings.heroSlides; } 
     catch (e) { rawSlides = []; }
   }
+console.log( settings);
 
   // 2. البناء الديناميكي للصفحة
   return (
     <main>
+    
       {sections.map((section: any) => {
-        // حماية البيانات لتجنب الخطأ 500
         const sectionData = section.props || {};
 
         switch (section.type) {
@@ -71,13 +76,11 @@ export default async function HomePage({ params: { locale } }: { params: { local
                 dict={dict}
                 heroImage={heroImage}
                 heroSlides={sliderSlides} 
-                accentColor={settings?.accentColor}
-                primaryColor={settings?.primaryColor}
-                data={sectionData} // تمرير البيانات الإضافية إن وجدت
+                accentColor={accentColor}
+                primaryColor={primaryColor}
+                data={sectionData}
               />
             );
-
-        
 
           case "campaigns_grid":
             return <CampaignsCarousel key={section.id} campaigns={campaigns} locale={locale} dict={dict} data={sectionData} />;
@@ -86,8 +89,9 @@ export default async function HomePage({ params: { locale } }: { params: { local
             return posts.length > 0 ? <NewsSection key={section.id} posts={posts} locale={locale} dict={dict} data={sectionData} /> : null;
 
           case "donation_buttons":
-            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={settings?.accentColor} data={sectionData} />;
-  case "stats":
+            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={accentColor} data={sectionData} />;
+            
+          case "stats":
             return (
               <AchievementsSection
                 key={section.id}
@@ -95,14 +99,15 @@ export default async function HomePage({ params: { locale } }: { params: { local
                 dict={dict}
                 totalRaised={stats?.total || 0}
                 totalFamilies={stats?.families || 0}
-                data={sectionData} // نمرر البيانات القادمة من الأدمن هنا
+                data={sectionData}
               />
             );
+            
           case "faq":
             return <FaqSection key={section.id} locale={locale} dict={dict} data={sectionData} />;
 
           case "newsletter":
-            return <NewsletterSection key={section.id} locale={locale} dict={dict} accentColor={settings?.accentColor} data={sectionData} />;
+            return <NewsletterSection key={section.id} locale={locale} dict={dict} accentColor={accentColor} data={sectionData} />;
 
           default:
             return null;

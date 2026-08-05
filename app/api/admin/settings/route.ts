@@ -62,7 +62,6 @@ export async function PATCH(req: NextRequest) {
     "footerTagline",
     "footerDescription",
     "copyrightText",
-    // Payment Gateways
     "enableStripe",
     "enablePaypal",
     "stripeSecretKey",
@@ -80,8 +79,6 @@ export async function PATCH(req: NextRequest) {
     "smtpFrom",
     "smtpFromName",
     "smtpSecure",
-    "heroImage",
-    "heroSlides",
     "socialPosition",
   ]) {
     if (body[key] === undefined) continue;
