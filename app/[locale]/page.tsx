@@ -11,21 +11,27 @@ import type { Metadata } from "next";
 
 export const revalidate = 0;
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
+interface PageProps {
+  params: { locale: string };
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = params;
   const dict = await loadTranslations(locale);
-  const data  = await getHomeData(locale);
-  const settings = data?.settings;
+  const data = await getHomeData(locale);
+  const settings: any = data?.settings || {};
   
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
   const description = settings?.footerDescription || dict["footer.description"] || "منصة تبرعات إنسانية شفافة";
   return { title: siteName, description, openGraph: { title: siteName, description, type: "website" } };
 }
 
-export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
+export default async function HomePage({ params }: PageProps) {
+  const { locale } = params;
   const dict = await loadTranslations(locale);
   
-  const data = await getHomeData(locale) || {};
-  const settings = data.settings || {};
+  const data: any = (await getHomeData(locale)) || {};
+  const settings: any = data.settings || {};
   const campaigns = data.campaigns || [];
   const posts = data.posts || [];
   const stats = data.stats || { total: 0, families: 0 };
@@ -34,20 +40,20 @@ export default async function HomePage({ params: { locale } }: { params: { local
   const sections = Array.isArray(pageSections) ? pageSections : [];
   const heroImage = settings?.heroImage || null;
 
-  // تجهيز الألوان الافتراضية في حال لم يقم الأدمن بتعيينها
   const primaryColor = settings?.primaryColor || "#0069D2";
   const accentColor = settings?.accentColor || "#F00F5A";
-console.log("🚀 ~ file: app/[locale]/page.tsx:44 ~ HomePage ~ primaryColor:", accentColor);
-  let rawSlides = [];
+
+  let rawSlides: any[] = [];
   if (settings?.heroSlides) {
-    try { rawSlides = typeof settings.heroSlides === "string" ? JSON.parse(settings.heroSlides) : settings.heroSlides; } 
-    catch (e) { rawSlides = []; }
+    try { 
+      rawSlides = typeof settings.heroSlides === "string" ? JSON.parse(settings.heroSlides) : settings.heroSlides; 
+    } catch { 
+      rawSlides = []; 
+    }
   }
-console.log( settings);
 
   return (
     <main>
-    
       {sections.map((section: any) => {
         const sectionData = section.props || {};
 
