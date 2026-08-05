@@ -42,7 +42,8 @@ export default function AdminSidebar() {
   const groups = ["", "Content", "Operations", "Admin"];
 
   return (
-    <aside className="w-60 bg-sidebar-gradient text-white min-h-screen flex flex-col shrink-0 border-r border-white/5">
+    // 🌟 تم تعديل min-h-screen إلى h-screen ليتوافق مع الغلاف الخارجي
+    <aside className="w-60 bg-sidebar-gradient text-white h-screen flex flex-col shrink-0 border-r border-white/5">
       {/* Logo */}
       <div className="p-5 border-b border-white/10">
         <Image src="/brand/logo-horizontal-transparent.png" alt="4Relief" width={140} height={56} className="h-9 w-auto object-contain mb-1.5" />
@@ -50,7 +51,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#475569_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-white/30">
         {groups.map((group) => {
           const items = NAV.filter((n) => (n.group || "") === group);
           if (!items.length) return null;

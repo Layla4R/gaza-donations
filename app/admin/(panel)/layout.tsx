@@ -7,18 +7,20 @@ import { ToastProvider } from "@/components/admin/Toast";
 
 export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   const session = await getAdminSession();
-  // Allow ADMIN, EDITOR, VIEWER roles (staff)
   const allowedRoles = ["ADMIN", "EDITOR", "VIEWER"];
   if (!session || !allowedRoles.includes(session.role)) redirect("/admin/login");
 
   return (
     <ToastProvider>
-      <div className="flex min-h-screen bg-dashbg">
+      <div className="flex h-screen overflow-hidden bg-dashbg">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <AdminTopbar />
           <Breadcrumb />
-          <main className="flex-1 overflow-auto">{children}</main>
+          
+          <main className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col min-h-0 scroll-smooth [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-slate-300 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb:hover]:bg-slate-400">
+            {children}
+          </main>
         </div>
       </div>
     </ToastProvider>

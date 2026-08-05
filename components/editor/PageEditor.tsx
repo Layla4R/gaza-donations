@@ -42,7 +42,6 @@ export default function PageEditor({
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
-  // 🌟 الحل السحري: استخدام Refs لضمان عدم إرسال بيانات قديمة عند الحفظ أبداً
   const latestSections = useRef(sections);
   const latestTitle = useRef(title);
   const latestIsPublished = useRef(isPublished);
@@ -58,7 +57,6 @@ export default function PageEditor({
     setSaving(true); setSaveError("");
     try {
       let res: Response;
-      // 🌟 جلب أحدث قيمة حية من الـ Refs بدلاً من الـ State لتجنب الـ Stale Closure
       const currentSections = latestSections.current;
       const currentTitle = latestTitle.current;
       const currentIsPublished = latestIsPublished.current;
@@ -90,13 +88,12 @@ export default function PageEditor({
     } finally { setSaving(false); }
   }
 
-  // Keyboard shortcuts
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
       if (mod && (e.key === "y" || (e.key === "z" && e.shiftKey))) { e.preventDefault(); redo(); }
-      if (mod && e.key === "s") { e.preventDefault(); save(); } // 🌟 الآن الحفظ بالاختصار سيعمل بشكل مثالي
+      if (mod && e.key === "s") { e.preventDefault(); save(); } 
       if (e.key === "Escape") setSelectedId(null);
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault(); deleteSection(selectedId);
@@ -157,7 +154,6 @@ export default function PageEditor({
     setSelectedId(clone.id);
   }
 
-  // 🌟 استخدام الطريقة الآمنة لتحديث الـ State لمنع ضياع البيانات عند الكتابة السريعة
   function updateSectionProps(id: string, props: Record<string, any>) {
     setSections(prev => {
       const next = prev.map(s => s.id === id ? { ...s, props: { ...s.props, ...props } } : s);
@@ -182,8 +178,7 @@ export default function PageEditor({
   const canvasMaxWidth = viewport === "desktop" ? "100%" : viewport === "tablet" ? "768px" : "390px";
 
   return (
-    <div className="flex flex-col h-screen bg-[#F0F2F7]" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-      {saveSuccess && (
+      <div className="flex flex-col w-full flex-1 overflow-hidden bg-[#F0F2F7]" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>      {saveSuccess && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[999] bg-success text-white text-xs font-bold rounded-xl px-5 py-2.5 shadow-lg flex items-center gap-2">
           <Icon name="check" size={14} /> Page saved successfully
         </div>
@@ -191,7 +186,6 @@ export default function PageEditor({
 
       {/* ══ TOP BAR ════════════════════════════════════════════ */}
       <div className="h-[52px] bg-white border-b border-[#E2E5ED] flex items-center px-4 gap-4 shrink-0 shadow-sm z-50">
-        {/* Left: back + title */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <a href="/admin/pages"
             onClick={e => {
@@ -211,7 +205,6 @@ export default function PageEditor({
           )}
         </div>
 
-        {/* Center: viewport + undo/redo */}
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={undo} disabled={historyIdx === 0} title="Undo (⌘Z)"
             className="p-2 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] disabled:opacity-30 transition">
@@ -238,7 +231,6 @@ export default function PageEditor({
           </a>
         </div>
 
-        {/* Right: publish + save */}
         <div className="flex items-center gap-2 flex-1 justify-end">
           {saveError && <span className="text-xs text-red-500 font-medium max-w-[200px] truncate">{saveError}</span>}
           {isDirty && !saving && !saveError && (
@@ -273,7 +265,6 @@ export default function PageEditor({
       <div className="flex flex-1 overflow-hidden">
         {/* ── LEFT PANEL ─────────────────────────────────────── */}
         <div className="w-[260px] bg-white border-r border-[#E2E5ED] flex flex-col shrink-0 overflow-hidden">
-          {/* Tabs */}
           <div className="flex border-b border-[#E2E5ED] shrink-0">
             {([["layers","Layers","layers"] as const, ["blocks","+ Add Block","layout-grid"] as const]).map(([val, label, icon]) => (
               <button key={val} onClick={() => setLeftTab(val)}
