@@ -6,18 +6,16 @@ interface NewsletterProps {
   locale: string;
   dict: Record<string, string>;
   accentColor?: string | null;
-  data?: any; // إضافة خاصية الداتا لاستقبال التعديلات
+  data?: any; 
 }
 
-export default function NewsletterSection({ locale, dict, accentColor, data }: NewsletterProps) {
-  const accent = accentColor || "#F00F5A";
+export default function NewsletterSection({ locale, dict, data }: NewsletterProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle"|"loading"|"success"|"error">("idle");
 
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
-  // قراءة القيم من الداتا القادمة من الأدمن، أو استخدام القيم الافتراضية
   const sectionTitle = data?.title || t("newsletter.title", "اشترك في نشرتنا البريدية", "Subscribe to Our Newsletter", "Abonnez-vous à Notre Newsletter", "Bültenimize Abone Olun");
   const sectionSubtitle = data?.subtitle || t("newsletter.subtitle", 
     "كن أول من يعلم بأثر تبرعاته وآخر أخبار حملاتنا الإنسانية مباشرة في بريدك.", 
@@ -43,8 +41,9 @@ export default function NewsletterSection({ locale, dict, accentColor, data }: N
 
   return (
     <section className="relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#003C87] via-[#0057C2] to-[#0069D2]" />
+      {/* Background - 🌟 استخدام لون الثيم الأساسي الديناميكي */}
+      <div className="absolute inset-0 bg-brand" />
+      
       {/* Decorative elements */}
       <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-white/5" />
       <div className="absolute -left-16 -bottom-16 w-72 h-72 rounded-full bg-white/5" />
@@ -100,10 +99,11 @@ export default function NewsletterSection({ locale, dict, accentColor, data }: N
                 className="w-full bg-white/10 border-2 border-white/25 hover:border-white/40 focus:border-white/70 text-white placeholder-white/40 rounded-2xl px-5 py-4 pr-12 text-sm font-medium focus:outline-none transition backdrop-blur"
               />
             </div>
+            {/* 🌟 زر الاشتراك يستخدم اللون الثانوي الديناميكي */}
             <button
               type="submit"
               disabled={status === "loading"}
-              style={{ background: `linear-gradient(to right, ${accent}, ${accent}cc)` }} className="shrink-0 hover:opacity-90 disabled:opacity-60 text-white font-bold rounded-2xl px-8 py-4 text-sm shadow-lg transition-all hover:-translate-y-0.5 disabled:hover:translate-y-0 flex items-center gap-2 justify-center"
+              className="shrink-0 bg-accent hover:opacity-90 disabled:opacity-60 text-white font-bold rounded-2xl px-8 py-4 text-sm shadow-lg transition-all hover:-translate-y-0.5 disabled:hover:translate-y-0 flex items-center gap-2 justify-center"
             >
               {status === "loading" ? (
                 <><Icon name="minus" size={16} className="animate-spin" /> ...</>

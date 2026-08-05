@@ -41,12 +41,10 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
     "cookie-policy":        { ar: "سياسة ملفات تعريف الارتباط", en: "Cookie Policy", fr: "Politique des Cookies", tr: "Çerez Politikası" },
     "aml-policy":           { ar: "سياسة مكافحة غسيل الأموال", en: "Anti-Money Laundering Policy", fr: "Politique Anti-Blanchiment", tr: "Kara Para Aklamayla Mücadele" },
     complaints:             { ar: "الشكاوى", en: "Complaints Policy", fr: "Politique de Réclamations", tr: "Şikayet Politikası" },
-    license:                { ar: "الترخيص وشروط الاستخدام", en: "License & Terms of Use", fr: "Licence et Conditions d'Utilisation", tr: "Lisans ve Kullanım Koşulları" },
     "financial-transparency": { ar: "الشفافية المالية", en: "Financial Transparency", fr: "Transparence Financière", tr: "Mali Şeffaflık" },
     "how-we-use-donations": { ar: "كيف نستخدم التبرعات", en: "How We Use Donations", fr: "Comment Nous Utilisons les Dons", tr: "Bağışları Nasıl Kullanıyoruz" },
   };
   const LEGAL_SUBTITLES: Record<string, Record<string, string>> = {
-    license: { ar: "حقوق الملكية الفكرية لمنصة 4Relief الإنسانية", en: "Intellectual Property Rights of the 4Relief Humanitarian Platform", fr: "Droits de Propriété Intellectuelle de la Plateforme 4Relief", tr: "4Relief İnsani Yardım Platformunun Fikri Mülkiyet Hakları" },
     privacy: { ar: "حماية بياناتك أولويتنا", en: "Protecting Your Data Is Our Priority", fr: "La Protection de Vos Données Est Notre Priorité", tr: "Verilerinizi Korumak Önceliğimizdir" },
     terms:   { ar: "اتفاقية الاستخدام الملزمة", en: "Binding Usage Agreement", fr: "Accord d'Utilisation Contraignant", tr: "Bağlayıcı Kullanım Sözleşmesi" },
   };

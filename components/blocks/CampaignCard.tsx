@@ -40,7 +40,6 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
 
   const [amount, setAmount] = useState(10);
   const [custom, setCustom] = useState("");
-  // Fix 34: RTL — مرة واحدة على اليمين (default) شهري على اليسار
   const [frequency, setFrequency] = useState<"one_time" | "monthly">("one_time");
   const [step, setStep] = useState<"widget" | "details">("widget");
   const [name, setName] = useState("");
@@ -66,7 +65,7 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
           frequency: frequency.toUpperCase(),
           donorName: name,
           donorEmail: email,
-          campaignId: id || null, // Fix 1: UUID not slug
+          campaignId: id || null,
         }),
       });
       const d = await res.json();
@@ -92,12 +91,12 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
     window.dispatchEvent(new Event("storage"));
   }
 
-  const inp = "w-full border border-line rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white";
+  // 🌟 إزالة الشفافية /30 واستبدالها بـ ring-brand صافي لتجنب كسر المتغيرات
+  const inp = "w-full border border-line rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand bg-white";
 
   return (
     <div className="group bg-white rounded-xl2 overflow-hidden border border-line shadow-sm hover:shadow-xl transition-all hover:-translate-y-0.5 flex flex-col">
       <Link href={`${prefix}/campaigns/${slug}`} className="relative h-44 w-full bg-beige overflow-hidden block shrink-0">
-        {/* Fix 85: fallback على broken image */}
         {coverImage && !imgError ? (
           <Image
             src={coverImage}
@@ -107,7 +106,7 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-brand/20">
+          <div className="w-full h-full flex items-center justify-center text-brand opacity-30">
             <Icon name="hand-heart" size={48} />
           </div>
         )}
@@ -122,6 +121,7 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
           <p className="text-sm text-muted mb-3 line-clamp-2">{summary}</p>
         </Link>
 
+        {/* 🌟 شريط التقدم: يستخدم bg-brand */}
         <div className="w-full bg-line rounded-full h-2 mb-1.5 overflow-hidden">
           <div className="bg-brand h-2 rounded-full" style={{ width: `${pct}%` }} />
         </div>
@@ -133,7 +133,6 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
         <div className="border border-line rounded-xl bg-cream mt-auto overflow-hidden">
           {step === "widget" ? (
             <div className="p-3 space-y-2.5">
-              {/* Fix 34: one_time على اليمين في RTL */}
               <div className="flex rounded-lg overflow-hidden border border-line text-xs font-bold">
                 <button onClick={() => setFrequency("one_time")} className={`flex-1 py-2 transition ${frequency === "one_time" ? "bg-brand text-white" : "bg-white text-muted hover:bg-beige"}`}>{t("one_time")}</button>
                 <button onClick={() => setFrequency("monthly")} className={`flex-1 py-2 transition ${frequency === "monthly" ? "bg-brand text-white" : "bg-white text-muted hover:bg-beige"}`}>{t("monthly")}</button>
@@ -147,13 +146,12 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
                 <button onClick={() => { const v = Math.max(1, finalAmount - 5); setAmount(v); setCustom(String(v)); }} className="w-9 h-9 rounded-lg border border-line bg-white text-ink hover:border-brand flex items-center justify-center text-xl font-light">−</button>
                 <div className="flex-1 relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm font-semibold">$</span>
-                  {/* Fix 41: controlled input صح */}
                   <input
                     type="number" min={1}
                     value={custom !== "" ? custom : String(finalAmount)}
                     onChange={e => setCustom(e.target.value)}
                     onBlur={() => { if (custom === "" || Number(custom) < 1) setCustom(""); }}
-                    className="w-full border border-line rounded-lg py-2 pl-8 pr-3 text-sm text-center focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white"
+                    className="w-full border border-line rounded-lg py-2 pl-8 pr-3 text-sm text-center focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand bg-white"
                   />
                 </div>
                 <button onClick={() => { const v = finalAmount + 5; setAmount(v); setCustom(String(v)); }} className="w-9 h-9 rounded-lg border border-line bg-white text-ink hover:border-brand flex items-center justify-center text-xl font-light">+</button>
@@ -162,8 +160,8 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
                 <button onClick={handleAddToCart} className={`flex items-center gap-1.5 border rounded-xl px-3 py-2.5 text-xs font-bold transition shrink-0 ${added ? "border-success text-success bg-success/5" : "border-brand text-brand hover:bg-brand hover:text-white"}`}>
                   <Icon name={added ? "check" : "layers"} size={14} />{added ? (cartUpdated ? (locale === "ar" ? "تم التحديث ✓" : "Updated ✓") : t("added")) : t("add_to_cart")}
                 </button>
-                {/* Fix 13: بدأ من widget step مش details مباشرة */}
-                <button onClick={() => { setStep("details"); setName(""); setEmail(""); setError(""); }} disabled={!finalAmount || finalAmount <= 0} className="flex-1 bg-accent-gradient hover:opacity-90 text-white font-bold rounded-xl py-2.5 text-sm transition disabled:opacity-50 flex items-center justify-center gap-1.5">
+                {/* 🌟 زر التبرع السريع: تم توحيده إلى bg-accent */}
+                <button onClick={() => { setStep("details"); setName(""); setEmail(""); setError(""); }} disabled={!finalAmount || finalAmount <= 0} className="flex-1 bg-accent hover:opacity-90 text-white font-bold rounded-xl py-2.5 text-sm transition disabled:opacity-50 flex items-center justify-center gap-1.5">
                   <Icon name="heart" size={15} />{t("donate_now")}
                 </button>
               </div>
@@ -177,10 +175,14 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
               <input type="text" placeholder={t("full_name")} value={name} onChange={e => setName(e.target.value)} className={inp} />
               <input type="email" placeholder={t("email")} value={email} onChange={e => setEmail(e.target.value)} className={inp} />
               {error && <p className="text-xs text-danger flex items-center gap-1"><Icon name="x" size={11} />{error}</p>}
-              <button onClick={() => pay("stripe")} disabled={!!loading} className="w-full bg-brand hover:bg-brand-dark text-white font-bold rounded-xl py-2.5 text-sm transition disabled:opacity-60 flex items-center justify-center gap-1.5">
+              
+              {/* 🌟 زر الدفع (Stripe): تم توحيده إلى bg-brand */}
+              <button onClick={() => pay("stripe")} disabled={!!loading} className="w-full bg-brand hover:opacity-90 text-white font-bold rounded-xl py-2.5 text-sm transition disabled:opacity-60 flex items-center justify-center gap-1.5">
                 <Icon name="wallet" size={15} />
                 {loading === "stripe" ? "..." : t("pay_card")}
               </button>
+              
+              {/* ملاحظة: زر PayPal تُرك بألوانه الرسمية (أصفر/أزرق) لأنها هوية بصرية ثابتة للشركة ولا يُفضل تغييرها */}
               <button onClick={() => pay("paypal")} disabled={!!loading} className="w-full bg-[#FFC439] hover:bg-[#f0b429] text-[#003087] font-bold rounded-xl py-2.5 text-sm transition disabled:opacity-60 flex items-center justify-center gap-1.5">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="#003087"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
                 {loading === "paypal" ? "..." : "PayPal"}
