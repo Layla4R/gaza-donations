@@ -29,25 +29,50 @@ export interface PageSection {
 export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
     type: "hero",
-    label: "Hero Section",
-    description: "Full-width banner with background image and CTA buttons",
+    label: "Hero Slider",
+    description: "Full-width image slider with text and CTA buttons",
     icon: "home",
     category: "layout",
     defaultProps: {
-      title: "Together We Create Hope",
-      subtitle: "A transparent and secure donation platform supporting families in need around the world.",
-      buttonText: "Donate Now",
-      buttonLink: "/donate",
-      backgroundImage: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1600&auto=format&fit=crop",
       overlayOpacity: "0.45",
+      slides: [
+        {
+          title: "معاً نصنع الأمل",
+          subtitle: "منصة تبرعات شفافة وآمنة لدعم الأسر المحتاجة حول العالم.",
+          backgroundImage: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1600&auto=format&fit=crop",
+          buttonText: "تبرع الآن",
+          buttonLink: "/donate"
+        },
+        {
+          title: "يدٌ تمتد لكل محتاج",
+          subtitle: "تبرعك يصل مباشرة للمستحقين دون وسيط بشفافية كاملة.",
+          backgroundImage: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=1920&q=80",
+          buttonText: "تصفح الحملات",
+          buttonLink: "/campaigns"
+        },
+        {
+          title: "كل درهم يغير حياة",
+          subtitle: "من الغذاء والمأوى إلى التعليم والرعاية الصحية — معك نصنع الفرق.",
+          backgroundImage: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=1920&q=80",
+          buttonText: "تبرع الآن",
+          buttonLink: "/donate"
+        }
+      ]
     },
     fields: [
-      { key: "title", label: "Headline", type: "text", placeholder: "Main hero title" },
-      { key: "subtitle", label: "Subheading", type: "textarea", placeholder: "Supporting description text" },
-      { key: "buttonText", label: "Button Label", type: "text" },
-      { key: "buttonLink", label: "Button URL", type: "text" },
-      { key: "backgroundImage", label: "Background Image", type: "image", hint: "Use high-res image (1920×1080 recommended)" },
       { key: "overlayOpacity", label: "Overlay Darkness (0–1)", type: "text", hint: "0 = transparent, 1 = fully dark" },
+      {
+        key: "slides", 
+        label: "Slider Images", 
+        type: "list", // هنا يكمن السحر: تحويله إلى مصفوفة قابلة للإضافة
+        itemFields: [
+          { key: "title", label: "Headline", type: "text", placeholder: "Main hero title" },
+          { key: "subtitle", label: "Subheading", type: "textarea", placeholder: "Supporting description text" },
+          { key: "buttonText", label: "Button Label", type: "text" },
+          { key: "buttonLink", label: "Button URL", type: "text" },
+          { key: "backgroundImage", label: "Background Image", type: "image", hint: "Use high-res image (1920×1080 recommended)" }
+        ]
+      }
     ],
   },
   {
