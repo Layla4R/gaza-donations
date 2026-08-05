@@ -13,7 +13,6 @@ const LEGAL_SLUGS: Array<{ slug: string; key: string }> = [
   { slug: "cookie-policy",          key: "legal.cookie_policy"         },
   { slug: "aml-policy",             key: "legal.aml_policy"            },
   { slug: "complaints",             key: "legal.complaints"            },
-  { slug: "license",                key: "legal.license"               },
   { slug: "financial-transparency", key: "legal.financial_transparency"},
   { slug: "how-we-use-donations",   key: "legal.how_we_use_donations"  },
 ];
@@ -181,11 +180,11 @@ export default function SiteFooter({ navItems, settings, locale, dict }: {
                 info@forrelief.org
               </li>
             )}
-            <li className="text-xs text-white/40 pt-4 border-t border-white/10">
+            {/* <li className="text-xs text-white/40 pt-4 border-t border-white/10">
               {d("footer.developed_by", { ar: "طُوِّر بواسطة", en: "Developed by", fr: "Développé par", tr: "Geliştiren" })}{" "}
               <a href="https://webek.org" target="_blank" rel="noopener noreferrer"
                 className="text-brand-light hover:text-white underline">WEBEK</a>
-            </li>
+            </li> */}
           </ul>
         </div>
       </div>

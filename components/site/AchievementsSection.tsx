@@ -8,7 +8,6 @@ interface Achievement {
   suffix: string;
   label_ar: string; label_en: string; label_fr: string; label_tr: string;
   desc_ar: string; desc_en: string; desc_fr: string; desc_tr: string;
-  color: string;
 }
 
 function useCountUp(target: number, duration = 2000, started: boolean) {
@@ -41,43 +40,53 @@ function StatCard({ item, locale, dict, started }: { item: Achievement; locale: 
   };
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-line p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-      {/* Background accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl" style={{ background: item.color }} />
-      <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full opacity-5 group-hover:opacity-10 transition-opacity" style={{ background: item.color }} />
+    <div className="group relative bg-white rounded-2xl border border-line p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col items-center text-center">
+      {/* Background accent - 🌟 يأخذ لون الثيم bg-brand */}
+      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-brand transition-opacity" />
+      <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-brand opacity-5 group-hover:opacity-10 transition-opacity" />
 
-      {/* Icon */}
-      <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5" style={{ background: `${item.color}15` }}>
-        <Icon name={item.icon} size={26} style={{ color: item.color } as any} />
+      {/* Icon - 🌟 لون الثيم مع خلفية مناسبة */}
+      <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 mx-auto bg-cream border border-line text-brand">
+        <Icon name={item.icon} size={26} />
       </div>
 
-      {/* Number */}
-      <div className="flex items-baseline gap-1 mb-1">
-        {item.suffix === "$" && <span className="font-display text-3xl font-extrabold" style={{ color: item.color }}>$</span>}
-        <span className="font-display text-4xl font-extrabold" style={{ color: item.color }}>
+      {/* Number - 🌟 لون الثيم مع توسيط وترتيب ذكي للرموز */}
+      <div className="flex items-baseline justify-center gap-1 mb-2" dir="ltr">
+        {(item.suffix === "%" || item.suffix === "+") && (
+          <span className="font-display text-3xl font-extrabold text-brand">{item.suffix}</span>
+        )}
+        
+        <span className="font-display text-4xl font-extrabold text-brand">
           {formatCount(count)}
         </span>
-        {item.suffix !== "$" && <span className="font-display text-3xl font-extrabold" style={{ color: item.color }}>{item.suffix}</span>}
+        
+        {item.suffix !== "%" && item.suffix !== "+" && item.suffix !== "" && (
+          <span className="font-display text-3xl font-extrabold text-brand">{item.suffix}</span>
+        )}
       </div>
 
-      <h3 className="font-display text-lg font-bold text-ink mb-2">{label}</h3>
+      <h3 className="font-display text-lg font-bold text-ink mb-1.5">{label}</h3>
       <p className="text-muted text-sm leading-relaxed">{desc}</p>
     </div>
   );
 }
 
-export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, data }: { locale: string; dict: Record<string, string>; totalRaised?: number; totalFamilies?: number; data?: any }) {  const ref = useRef<HTMLDivElement>(null);
+export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, data }: { locale: string; dict: Record<string, string>; totalRaised?: number; totalFamilies?: number; data?: any }) { 
+  const ref = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
+  
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
+  
   const title = data?.headline || data?.title || t("achievements.title", "أثرنا بالأرقام", "Our Impact in Numbers", "Notre Impact en Chiffres", "Rakamlarla Etkimiz");
   const subtitle = data?.subheading || data?.subtitle || data?.description || t("achievements.subtitle", "بشفافية كاملة نشارككم أرقام ما أنجزناه معاً بفضل دعمكم المستمر", "With full transparency, we share the numbers of what we have achieved together thanks to your continued support", "Avec une transparence totale, nous partageons les chiffres de ce que nous avons accompli ensemble", "Tam şeffaflıkla, sürekli desteğiniz sayesinde birlikte başardıklarımızın rakamlarını paylaşıyoruz");
+  
+  // 🌟 القراءة بالكامل من الأدمن (مع التخليص من خاصية اللون الثابت)
   const achievements: Achievement[] = Array.isArray(data?.items) && data.items.length > 0
     ? data.items.map((item: any) => ({
-        icon: "heart",
+        icon: item.icon || "heart",
         value: Number(item.value) || 0,
         suffix: item.suffix || "",
-        color: item.color || "#0069D2",
         label_ar: item.title || item.label_ar || "",
         label_en: item.title || item.label_en || "",
         label_fr: item.title || item.label_fr || "",
@@ -89,32 +98,14 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
       }))
     : [
         {
-          icon: "heart" as const,
-          value: totalFamilies || 0,
-          suffix: "+",
-          color: "#F00F5A",
-          label_ar: "أسرة مستفيدة",
-          label_en: "Families Helped",
-          label_fr: "Familles Aidées",
-          label_tr: "Yardım Edilen Aile",
-          desc_ar: "أسرة تلقت مساعدات مباشرة",
-          desc_en: "Families received direct aid",
-          desc_fr: "Familles ont reçu une aide directe",
-          desc_tr: "Aile doğrudan yardım aldı",
+          icon: "heart" as const, value: totalFamilies || 0, suffix: "+",
+          label_ar: "أسرة مستفيدة", label_en: "Families Helped", label_fr: "Familles Aidées", label_tr: "Yardım Edilen Aile",
+          desc_ar: "أسرة تلقت مساعدات مباشرة", desc_en: "Families received direct aid", desc_fr: "Familles ont reçu une aide directe", desc_tr: "Aile doğrudan yardım aldı",
         },
         {
-          icon: "hand-heart" as const,
-          value: totalRaised || 0,
-          suffix: "$",
-          color: "#0069D2",
-          label_ar: "إجمالي التبرعات",
-          label_en: "Total Donations",
-          label_fr: "Total des Dons",
-          label_tr: "Toplam Bağış",
-          desc_ar: "دولار جُمعت ووُزِّعت بشفافية",
-          desc_en: "Raised & distributed transparently",
-          desc_fr: "Collectés et distribués en toute transparence",
-          desc_tr: "Şeffaf şekilde toplanıp dağıtıldı",
+          icon: "hand-heart" as const, value: totalRaised || 0, suffix: "$",
+          label_ar: "إجمالي التبرعات", label_en: "Total Donations", label_fr: "Total des Dons", label_tr: "Toplam Bağış",
+          desc_ar: "دولار جُمعت ووُزِّعت بشفافية", desc_en: "Raised & distributed transparently", desc_fr: "Collectés et distribués en toute transparence", desc_tr: "Şeffaf şekilde toplanıp dağıtıldı",
         },
       ];
 
@@ -165,7 +156,8 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
             { icon: "hand-heart" as const, ar: "شفافية مالية كاملة", en: "Full Financial Transparency", fr: "Transparence Financière", tr: "Finansal Şeffaflık" },
           ].map((b, i) => (
             <div key={i} className="flex items-center gap-3 text-muted">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center shrink-0">
+              {/* 🌟 تعديل الأيقونات السفلية لتقرأ من لون الثيم بأمان */}
+              <div className="w-10 h-10 rounded-xl bg-cream border border-line flex items-center justify-center shrink-0">
                 <Icon name={b.icon} size={18} className="text-brand" />
               </div>
               <span className="text-sm font-semibold">

@@ -4,20 +4,23 @@ import Icon from "@/components/icons";
 
 const AMOUNTS = [5, 10, 25, 50, 100, 250];
 
-export default function DonateWidget({ locale, dict, accentColor, data }: { locale: string; dict: Record<string, string>; accentColor?: string | null; data?: any }) {  const accent = accentColor || "#F00F5A";
+export default function DonateWidget({ locale, dict, accentColor, data }: { locale: string; dict: Record<string, string>; accentColor?: string | null; data?: any }) {
   const [amount, setAmount] = useState(25);
   const [custom, setCustom] = useState("");
   const [freq, setFreq] = useState<"ONE_TIME"|"MONTHLY">("ONE_TIME");
   const [step, setStep] = useState<"amount"|"details">("amount");
-  const [name, setName] = useState(""); const [email, setEmail] = useState("");
+  const [name, setName] = useState(""); 
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState<"stripe"|"paypal"|null>(null);
   const [error, setError] = useState("");
 
- const final = custom ? Math.max(1, Number(custom)) : amount;
+  const final = custom ? Math.max(1, Number(custom)) : amount;
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
+  
   const title = data?.headline || data?.title || t("donate.widget_title","كل درهم بيغير حياة","Every Dollar Changes a Life","Chaque Euro Change une Vie","Her Dolar Bir Hayat Değiştirir");
   const subtitle = data?.subheading || data?.subtitle || data?.body || data?.description || t("donate.widget_body", "تبرعك يصل مباشرة للمستحقين دون وسيط. نحن نضمن الشفافية الكاملة ونوفر تقارير دورية عن أثر تبرعاتك.", "Your donation reaches beneficiaries directly without intermediaries. We guarantee full transparency and provide regular reports on the impact of your donations.", "Votre don parvient directement aux bénéficiaires sans intermédiaires. Nous garantissons une transparence totale.", "Bağışınız doğrudan yararlanıcılara ulaşır. Tam şeffaflık garantisi ve düzenli etki raporları sunuyoruz.");
+  
   async function pay(provider: "stripe"|"paypal") {
     if (!name.trim() || !email.trim()) { setError(t("donate.name","الاسم والبريد مطلوبان","Name and email required","Nom et email requis","Ad ve e-posta gerekli")); return; }
     setLoading(provider); setError("");
@@ -59,7 +62,8 @@ export default function DonateWidget({ locale, dict, accentColor, data }: { loca
                 { icon: "globe"       as const, ar: "معتمد دولياً ومرخص",             en: "Internationally certified",          fr: "Certifié internationalement",       tr: "Uluslararası sertifikalı" },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-brand/8 text-brand flex items-center justify-center shrink-0">
+                  {/* 🌟 تم استبدال الشفافية هنا باستخدام bg-cream */}
+                  <div className="w-10 h-10 rounded-xl bg-cream border border-line text-brand flex items-center justify-center shrink-0">
                     <Icon name={item.icon} size={18} />
                   </div>
                   <span className="text-ink/80 font-medium">{t(`donate.feat${i}`, item.ar, item.en, item.fr, item.tr)}</span>
@@ -70,12 +74,13 @@ export default function DonateWidget({ locale, dict, accentColor, data }: { loca
 
           {/* Right — widget card */}
           <div>
-            <div className="bg-gradient-to-br from-[#003C87] to-[#0069D2] rounded-3xl p-8 shadow-2xl shadow-brand/20">
+            {/* 🌟 تم استبدال التدرج الثابت باللون الأساسي الديناميكي (bg-brand) */}
+            <div className="bg-brand rounded-3xl p-8 shadow-2xl shadow-brand/20">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-white font-display font-bold text-xl">
                   {t("donate.title","تبرع الآن","Donate Now","Faire un Don","Bağış Yap")}
                 </h3>
-                <span className="text-white/60 text-sm font-bold text-brand-light">4Relief</span>
+                <span className="text-white/60 text-sm font-bold">4Relief</span>
               </div>
 
               {step === "amount" ? (
@@ -111,8 +116,9 @@ export default function DonateWidget({ locale, dict, accentColor, data }: { loca
                   </div>
 
                   {/* CTA */}
+                  {/* 🌟 تم التخلص من الستايل المضمن واستخدام كلاس bg-accent مباشرة */}
                   <button onClick={() => setStep("details")}
-                    style={{ background: `linear-gradient(to right, ${accent}, ${accent}cc)` }} className="w-full hover:opacity-90 text-white font-bold rounded-2xl py-4 text-base shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    className="w-full bg-accent hover:opacity-90 text-white font-bold rounded-2xl py-4 text-base shadow-lg transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
                     <Icon name="heart" size={20} />
                     {t("donate.title","تبرع بـ","Donate","Faire un Don","Bağış Yap")} ${final}
                     {freq === "MONTHLY" && <span className="text-white/70 text-sm font-normal">/{t("donate.monthly","شهر","month","mois","ay")}</span>}
@@ -136,10 +142,13 @@ export default function DonateWidget({ locale, dict, accentColor, data }: { loca
                   <input value={name} onChange={e => setName(e.target.value)} placeholder={t("donate.name","الاسم الكامل","Full Name","Nom Complet","Ad Soyad")} className={inp} />
                   <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("donate.email","البريد الإلكتروني","Email Address","Adresse Email","E-posta")} className={inp} />
                   {error && <p className="text-red-300 text-xs">{error}</p>}
+                  
+                  {/* 🌟 زر Stripe يستخدم النص بلون bg-brand عند تفعيله */}
                   <button onClick={() => pay("stripe")} disabled={!!loading}
                     className="w-full bg-white text-brand font-bold rounded-2xl py-3.5 transition hover:bg-white/90 disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
                     <Icon name="wallet" size={16} />{loading === "stripe" ? "..." : `${t("donate.pay_card","الدفع بالبطاقة","Pay with Card","Payer par Carte","Kart ile Öde")} — $${final}`}
                   </button>
+                  
                   <button onClick={() => pay("paypal")} disabled={!!loading}
                     className="w-full bg-[#003087] hover:bg-[#002574] text-white font-bold rounded-2xl py-3.5 transition disabled:opacity-60 flex items-center justify-center gap-2 text-sm">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>

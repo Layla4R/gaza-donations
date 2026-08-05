@@ -45,15 +45,12 @@ export default function CampaignsCarousel({ campaigns, locale, dict, data }: {
   const maxIdx = Math.max(0, total - visibleCount);
   const isRTL = locale === "ar";
   const cardWidthPct = 100 / visibleCount;
-  // Gap compensation: 20px gap / visibleCount cards per view
-  // translateX in % of container. Each card is cardWidthPct% wide including gap proportionally.
-  // In RTL flex layouts, translateX is ALWAYS negative to go forward
-  // (flex-direction is reversed by the browser in RTL, so left scroll = positive direction)
   const translateX = -1 * active * cardWidthPct;
   const p = locale === "ar" ? "" : `/${locale}`;
 
   return (
-    <section className="py-20" style={{ background: "#F0F4FF" }}>
+    // تم تغيير لون الخلفية الثابت إلى bg-cream ليقرأ من إعدادات Tailwind
+    <section className="py-20 bg-cream">
       <div className="max-w-screen-xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-12">
