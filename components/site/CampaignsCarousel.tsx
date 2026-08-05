@@ -10,7 +10,7 @@ interface Campaign {
   donorCount: number; category?: string; defaultAmount?: number;
 }
 
-export default function CampaignsCarousel({ campaigns, locale, dict , data}: {
+export default function CampaignsCarousel({ campaigns, locale, dict, data }: {
   campaigns: Campaign[]; locale: string; dict: Record<string, string>; data?: any 
 }) {
   const [active, setActive] = useState(0);
@@ -30,9 +30,18 @@ export default function CampaignsCarousel({ campaigns, locale, dict , data}: {
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
-  if (campaigns.length === 0) return null;
+  // 1. تطبيق الحد الأقصى للحملات القادم من لوحة التحكم (Limit)
+  const limit = data?.limit ? parseInt(data.limit, 10) : campaigns.length;
+  const displayCampaigns = campaigns.slice(0, limit);
 
-  const total = campaigns.length;
+  if (displayCampaigns.length === 0) return null;
+
+  // 2. قراءة العنوان والنص الفرعي من الأدمن، مع وضع نصوص افتراضية للـ Fallback
+  const sectionTitle = data?.title || t("campaigns.title", "الحملات النشطة", "Active Campaigns", "Campagnes Actives", "Aktif Kampanyalar");
+  const sectionSubtitle = data?.subtitle || t("campaigns.subtitle", "ادعم الحملات الإنسانية واصنع الفرق", "Support humanitarian campaigns and make a difference", "Soutenez les campagnes humanitaires", "İnsani kampanyaları destekleyin");
+  const sectionEyebrow = data?.eyebrow || t("campaigns.eyebrow", "اختر الحملة التي تريد دعمها", "Choose a Campaign", "Choisissez une Campagne", "Bir Kampanya Seçin");
+
+  const total = displayCampaigns.length;
   const maxIdx = Math.max(0, total - visibleCount);
   const isRTL = locale === "ar";
   const cardWidthPct = 100 / visibleCount;
@@ -50,14 +59,14 @@ export default function CampaignsCarousel({ campaigns, locale, dict , data}: {
         <div className="text-center mb-12">
           <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-[0.3em] uppercase mb-3">
             <span className="w-6 h-px bg-brand/40 inline-block" />
-            {t("campaigns.eyebrow", "اختر الحملة التي تريد دعمها", "Choose a Campaign", "Choisissez une Campagne", "Bir Kampanya Seçin")}
+            {sectionEyebrow}
             <span className="w-6 h-px bg-brand/40 inline-block" />
           </span>
           <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink mb-3">
-            {t("campaigns.title", "الحملات النشطة", "Active Campaigns", "Campagnes Actives", "Aktif Kampanyalar")}
+            {sectionTitle}
           </h2>
           <p className="text-muted text-lg max-w-xl mx-auto">
-            {t("campaigns.subtitle", "ادعم الحملات الإنسانية واصنع الفرق", "Support humanitarian campaigns and make a difference", "Soutenez les campagnes humanitaires", "İnsani kampanyaları destekleyin")}
+            {sectionSubtitle}
           </p>
         </div>
 
@@ -89,7 +98,7 @@ export default function CampaignsCarousel({ campaigns, locale, dict , data}: {
               className="flex transition-transform duration-500 ease-in-out"
               style={{ transform: `translateX(${translateX}%)`, gap: "20px" }}
             >
-              {campaigns.map(c => (
+              {displayCampaigns.map(c => (
                 <div
                   key={c.id}
                   style={{
