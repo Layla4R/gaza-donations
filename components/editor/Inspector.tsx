@@ -1,6 +1,6 @@
 "use client";
 import { adminFetch } from "@/lib/admin-fetch";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { PageSection, getBlockDefinition, FieldDef } from "@/lib/blocks";
 import Icon from "@/components/icons";
 
@@ -35,6 +35,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
       {field.hint && <span className="text-[#9CA3AF] font-normal normal-case ml-1">— {field.hint}</span>}
     </label>
   );
+  
   const inp = "w-full border border-[#E5E7EB] focus:border-[#6366F1] rounded-xl py-2.5 px-3.5 text-sm text-[#111] bg-[#F9FAFB] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/10 transition placeholder-[#9CA3AF]";
 
   if (field.type === "text") return (
@@ -93,7 +94,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
   );
 
   if (field.type === "list") return (
-    <ListEditor field={field} value={value || []} onChange={onChange} />
+    <ListEditor field={field} value={Array.isArray(value) ? value : []} onChange={onChange} />
   );
 
   return null;
@@ -103,7 +104,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
 function ImageField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   const [uploading, setUploading] = useState(false);
   const [tab, setTab] = useState<"upload"|"url">("upload");
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -122,9 +123,8 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
 
   return (
     <div>
-      <label className="block text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider mb-2">{label}</label>
+      {label && <label className="block text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider mb-2">{label}</label>}
 
-      {/* Preview */}
       {value && (
         <div className="relative mb-3 rounded-xl overflow-hidden border border-[#E5E7EB] bg-[#F9FAFB] group">
           <img src={value} alt="" className="w-full h-36 object-cover" />
@@ -137,7 +137,6 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
         </div>
       )}
 
-      {/* Upload / URL tabs */}
       <div className="border border-[#E5E7EB] rounded-xl overflow-hidden">
         <div className="flex border-b border-[#E5E7EB]">
           {(["upload","url"] as const).map(t => (
@@ -185,7 +184,11 @@ function ListEditor({ field, value, onChange }: { field: FieldDef; value: any[];
   }
 
   function updateItem(i: number, key: string, val: string) {
-    onChange(value.map((item, idx) => idx === i ? { ...item, [key]: val } : item));
+    const next = value.map((item, idx) => {
+      if (idx === i) return { ...item, [key]: val };
+      return item;
+    });
+    onChange(next);
   }
 
   function moveItem(i: number, dir: "up"|"down") {
@@ -256,6 +259,3 @@ function ListEditor({ field, value, onChange }: { field: FieldDef; value: any[];
     </div>
   );
 }
-
-// Need this for the file input ref
-import { useRef } from "react";

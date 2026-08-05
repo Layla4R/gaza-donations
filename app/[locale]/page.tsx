@@ -24,7 +24,6 @@ export async function generateMetadata({ params: { locale } }: { params: { local
 export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
   const dict = await loadTranslations(locale);
   
-  // 1. جلب البيانات من لوحة التحكم
   const data = await getHomeData(locale) || {};
   const settings = data.settings || {};
   const campaigns = data.campaigns || [];
@@ -46,7 +45,6 @@ console.log("🚀 ~ file: app/[locale]/page.tsx:44 ~ HomePage ~ primaryColor:", 
   }
 console.log( settings);
 
-  // 2. البناء الديناميكي للصفحة
   return (
     <main>
     

@@ -1,6 +1,5 @@
 "use client";
 import { adminFetch } from "@/lib/admin-fetch";
-
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
   BLOCK_DEFINITIONS, BLOCK_CATEGORIES, PageSection,
@@ -26,7 +25,6 @@ export default function PageEditor({
     page.sections.length > 0 ? page.sections[0].id : null
   );
   const [title, setTitle] = useState(page.title);
-  const origTitle = useRef(page.title);
   const [isPublished, setIsPublished] = useState(page.isPublished);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string>("");
@@ -40,11 +38,57 @@ export default function PageEditor({
   const [blockSearch, setBlockSearch] = useState("");
   const [blockCat, setBlockCat] = useState("all");
   const [rightCollapsed, setRightCollapsed] = useState(false);
+  
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  // 🌟 الحل السحري: استخدام Refs لضمان عدم إرسال بيانات قديمة عند الحفظ أبداً
+  const latestSections = useRef(sections);
+  const latestTitle = useRef(title);
+  const latestIsPublished = useRef(isPublished);
+
+  useEffect(() => { latestSections.current = sections; }, [sections]);
+  useEffect(() => { latestTitle.current = title; }, [title]);
+  useEffect(() => { latestIsPublished.current = isPublished; }, [isPublished]);
+
   const selected = sections.find(s => s.id === selectedId) ?? null;
   const selectedDef = selected ? getBlockDefinition(selected.type) : null;
+
+  async function save() {
+    setSaving(true); setSaveError("");
+    try {
+      let res: Response;
+      // 🌟 جلب أحدث قيمة حية من الـ Refs بدلاً من الـ State لتجنب الـ Stale Closure
+      const currentSections = latestSections.current;
+      const currentTitle = latestTitle.current;
+      const currentIsPublished = latestIsPublished.current;
+
+      if (isTranslation) {
+        res = await adminFetch("/api/admin/pages/translations", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pageId: page.id, locale, title: currentTitle, sections: currentSections }),
+        });
+      } else {
+        res = await adminFetch(`/api/admin/pages/${page.id}`, {
+          method: "PATCH", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: currentTitle, sections: currentSections, isPublished: currentIsPublished, showInMenu: page.showInMenu }),
+        });
+      }
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        setSaveError(d.error || "Failed to save. Please try again.");
+      } else {
+        setSavedAt(new Date().toLocaleTimeString());
+        setIsDirty(false);
+        setSaveError("");
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2500);
+        try { await adminFetch("/api/revalidate", { method: "POST" }); } catch {}
+      }
+    } catch {
+      setSaveError("Network error — check your connection.");
+    } finally { setSaving(false); }
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -52,7 +96,7 @@ export default function PageEditor({
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
       if (mod && (e.key === "y" || (e.key === "z" && e.shiftKey))) { e.preventDefault(); redo(); }
-      if (mod && e.key === "s") { e.preventDefault(); save(); }
+      if (mod && e.key === "s") { e.preventDefault(); save(); } // 🌟 الآن الحفظ بالاختصار سيعمل بشكل مثالي
       if (e.key === "Escape") setSelectedId(null);
       if ((e.key === "Delete" || e.key === "Backspace") && selectedId && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
         e.preventDefault(); deleteSection(selectedId);
@@ -68,11 +112,6 @@ export default function PageEditor({
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
   }, [selectedId, historyIdx, history, isDirty, saving]);
-
-  // Auto-save indicator
-  useEffect(() => {
-    if (sections !== history[historyIdx]) return;
-  }, [sections]);
 
   const pushHistory = useCallback((next: PageSection[]) => {
     setHistory(h => [...h.slice(0, historyIdx + 1), next]);
@@ -90,7 +129,6 @@ export default function PageEditor({
     pushHistory(next);
     setSelectedId(s.id);
     setLeftTab("layers");
-    // Scroll canvas to bottom
     setTimeout(() => canvasRef.current?.scrollTo({ top: 99999, behavior: "smooth" }), 100);
   }
 
@@ -119,47 +157,20 @@ export default function PageEditor({
     setSelectedId(clone.id);
   }
 
+  // 🌟 استخدام الطريقة الآمنة لتحديث الـ State لمنع ضياع البيانات عند الكتابة السريعة
   function updateSectionProps(id: string, props: Record<string, any>) {
-    const next = sections.map(s => s.id === id ? { ...s, props: { ...s.props, ...props } } : s);
-    setSections(next);
+    setSections(prev => {
+      const next = prev.map(s => s.id === id ? { ...s, props: { ...s.props, ...props } } : s);
+      
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+      autoSaveTimer.current = setTimeout(() => {
+        setHistory(h => [...h.slice(0, historyIdx + 1), next]);
+        setHistoryIdx(i => i + 1);
+      }, 1000);
+      
+      return next;
+    });
     setIsDirty(true);
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    autoSaveTimer.current = setTimeout(() => {
-      setHistory(h => [...h.slice(0, historyIdx + 1), next]);
-      setHistoryIdx(i => i + 1);
-    }, 1000);
-  }
-
-  async function save() {
-    setSaving(true); setSaveError("");
-    try {
-      let res: Response;
-      if (isTranslation) {
-        res = await adminFetch("/api/admin/pages/translations", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pageId: page.id, locale, title, sections }),
-        });
-      } else {
-        res = await adminFetch(`/api/admin/pages/${page.id}`, {
-          method: "PATCH", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, sections, isPublished, showInMenu: page.showInMenu }),
-        });
-      }
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        setSaveError(d.error || "Failed to save. Please try again.");
-      } else {
-        setSavedAt(new Date().toLocaleTimeString());
-        setIsDirty(false);
-        setSaveError("");
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 2500);
-        // Revalidate public pages cache
-        try { await adminFetch("/api/revalidate", { method: "POST" }); } catch {}
-      }
-    } catch {
-      setSaveError("Network error — check your connection.");
-    } finally { setSaving(false); }
   }
 
   const filteredBlocks = BLOCK_DEFINITIONS.filter(def => {
@@ -180,7 +191,6 @@ export default function PageEditor({
 
       {/* ══ TOP BAR ════════════════════════════════════════════ */}
       <div className="h-[52px] bg-white border-b border-[#E2E5ED] flex items-center px-4 gap-4 shrink-0 shadow-sm z-50">
-
         {/* Left: back + title */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <a href="/admin/pages"
@@ -261,7 +271,6 @@ export default function PageEditor({
 
       {/* ══ BODY ════════════════════════════════════════════════ */}
       <div className="flex flex-1 overflow-hidden">
-
         {/* ── LEFT PANEL ─────────────────────────────────────── */}
         <div className="w-[260px] bg-white border-r border-[#E2E5ED] flex flex-col shrink-0 overflow-hidden">
           {/* Tabs */}
@@ -278,7 +287,6 @@ export default function PageEditor({
 
           {leftTab === "blocks" ? (
             <div className="flex flex-col flex-1 overflow-hidden">
-              {/* Search */}
               <div className="p-3 pb-2 border-b border-[#F3F4F6]">
                 <div className="relative">
                   <Icon name="search" size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
@@ -287,7 +295,6 @@ export default function PageEditor({
                     className="w-full border border-[#E5E7EB] rounded-lg py-2 pl-8 pr-3 text-xs text-[#374151] bg-[#F9FAFB] focus:outline-none focus:border-[#6366F1] focus:bg-white transition" />
                 </div>
               </div>
-              {/* Category pills */}
               {!blockSearch && (
                 <div className="px-3 py-2 flex flex-wrap gap-1 border-b border-[#F3F4F6]">
                   {BLOCK_CATEGORIES.map(cat => (
@@ -302,7 +309,6 @@ export default function PageEditor({
                   ))}
                 </div>
               )}
-              {/* Blocks */}
               <div className="flex-1 overflow-y-auto p-2">
                 <div className="grid grid-cols-1 gap-1">
                   {filteredBlocks.map(def => (
@@ -324,7 +330,6 @@ export default function PageEditor({
               </div>
             </div>
           ) : (
-            /* Layers */
             <div className="flex-1 overflow-y-auto">
               <div className="p-3">
                 <div className="flex items-center justify-between mb-2">
@@ -362,7 +367,6 @@ export default function PageEditor({
                           </div>
                           <span className="flex-1 text-xs font-semibold truncate">{def?.label || s.type}</span>
                           <span className={`text-[10px] font-mono ${isActive ? "text-[#A5B4FC]" : "text-[#D1D5DB]"}`}>{idx + 1}</span>
-                          {/* Quick actions on hover */}
                           <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition">
                             <button onClick={e => { e.stopPropagation(); moveSection(s.id, "up"); }} disabled={idx === 0}
                               className="p-0.5 rounded hover:bg-[#E0E7FF] text-[#6366F1] disabled:opacity-20">
@@ -415,7 +419,6 @@ export default function PageEditor({
                   onDuplicate={() => duplicateSection(section.id)}
                 />
               ))}
-              {/* Drop zone */}
               <div
                 onClick={() => setLeftTab("blocks")}
                 className="border-2 border-dashed border-[#E5E7EB] hover:border-[#C4B5FD] m-4 mt-0 rounded-xl py-5 flex items-center justify-center gap-2 text-[#9CA3AF] hover:text-[#6366F1] cursor-pointer transition group">
@@ -429,7 +432,6 @@ export default function PageEditor({
         {/* ── RIGHT INSPECTOR ────────────────────────────────── */}
         {!rightCollapsed && (
           <div className="w-[280px] bg-white border-l border-[#E2E5ED] flex flex-col shrink-0 overflow-hidden">
-            {/* Header */}
             <div className="h-[44px] flex items-center justify-between px-4 border-b border-[#E2E5ED] shrink-0">
               {selected && selectedDef ? (
                 <div className="flex items-center gap-2 min-w-0">
@@ -448,7 +450,6 @@ export default function PageEditor({
 
             {selected ? (
               <div className="flex-1 overflow-y-auto">
-                {/* Block actions */}
                 <div className="flex items-center gap-1 px-3 py-2 border-b border-[#F3F4F6]">
                   <button onClick={() => moveSection(selected.id, "up")} disabled={sections.indexOf(selected) === 0}
                     className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg hover:bg-[#F3F4F6] disabled:opacity-30 text-[#6B7280] text-[11px] font-medium transition">
@@ -467,7 +468,6 @@ export default function PageEditor({
                     <Icon name="trash" size={12} />Del
                   </button>
                 </div>
-                {/* Properties */}
                 <Inspector
                   section={selected}
                   onChange={props => updateSectionProps(selected.id, props)}
@@ -485,7 +485,6 @@ export default function PageEditor({
           </div>
         )}
 
-        {/* Collapsed inspector toggle */}
         {rightCollapsed && (
           <button onClick={() => setRightCollapsed(false)}
             className="fixed right-0 top-1/2 -translate-y-1/2 bg-white border border-[#E2E5ED] border-r-0 rounded-l-xl p-2 shadow-md text-[#6B7280] hover:text-[#6366F1] transition z-40">
@@ -497,7 +496,6 @@ export default function PageEditor({
   );
 }
 
-// ── Section wrapper in canvas ─────────────────────────────────
 function SectionWrapper({ section, idx, total, isSelected, onSelect, onDelete, onMoveUp, onMoveDown, onDuplicate }: {
   section: PageSection; idx: number; total: number; isSelected: boolean;
   onSelect: () => void; onDelete: () => void; onMoveUp: () => void; onMoveDown: () => void; onDuplicate: () => void;
@@ -511,7 +509,6 @@ function SectionWrapper({ section, idx, total, isSelected, onSelect, onDelete, o
           ? "outline outline-2 outline-[#6366F1] outline-offset-0"
           : "hover:outline hover:outline-1 hover:outline-[#C4B5FD] hover:outline-offset-0"
       }`}>
-      {/* Label */}
       <div className={`absolute top-0 left-0 z-10 flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold shadow-sm transition-opacity ${
         isSelected ? "opacity-100 bg-[#6366F1] text-white" : "opacity-0 group-hover:opacity-100 bg-white text-[#6366F1] border border-[#C4B5FD]"
       }`} style={{ borderBottomRightRadius: 8, borderTopLeftRadius: 0 }}>
@@ -519,7 +516,6 @@ function SectionWrapper({ section, idx, total, isSelected, onSelect, onDelete, o
         {def?.label || section.type}
       </div>
 
-      {/* Toolbar (only when selected) */}
       {isSelected && (
         <div className="absolute top-0 right-0 z-10 flex items-center gap-0.5 p-1.5 bg-[#6366F1] shadow-sm" style={{ borderBottomLeftRadius: 10 }}>
           {[
@@ -529,8 +525,7 @@ function SectionWrapper({ section, idx, total, isSelected, onSelect, onDelete, o
             { icon: "trash", label: "Delete", action: onDelete, disabled: false, danger: true },
           ].map(btn => (
             <button key={btn.label} onClick={e => { e.stopPropagation(); btn.action(); }}
-              disabled={btn.disabled}
-              title={btn.label}
+              disabled={btn.disabled} title={btn.label}
               className={`w-7 h-7 rounded-lg flex items-center justify-center text-white transition disabled:opacity-30 ${
                 btn.danger ? "hover:bg-red-500/70" : "hover:bg-white/20"
               }`}>
@@ -540,7 +535,6 @@ function SectionWrapper({ section, idx, total, isSelected, onSelect, onDelete, o
         </div>
       )}
 
-      {/* Section number badge */}
       <div className={`absolute bottom-2 right-2 z-10 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition ${
         isSelected ? "bg-[#6366F1] text-white" : "bg-white/90 text-[#9CA3AF] border border-[#E5E7EB]"
       }`}>{idx + 1}</div>
