@@ -53,11 +53,29 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ];
 
-export default function HeroSection({ locale, dict, heroImage, heroSlides, accentColor, primaryColor }: Props) {
+export default function HeroSection({ locale, dict, heroImage, heroSlides, accentColor, primaryColor , data }: Props) {
   const accent = accentColor || "#F00F5A";
   const primary = primaryColor || "#0069D2";
   const p = locale === "ar" ? "" : `/${locale}`;
-  const slides = (heroSlides && heroSlides.length > 0) ? heroSlides : DEFAULT_SLIDES;
+  const adminSlides = data?.items || data?.slides || [];
+  const baseSlides = (heroSlides && heroSlides.length > 0) ? heroSlides : DEFAULT_SLIDES;
+const slides = adminSlides.length > 0 
+    ? adminSlides.map((slide: any) => ({
+        image: slide.image || slide.backgroundImage || slide.photo || "",
+        title_ar: slide.title || slide.headline || slide.title_ar,
+        title_en: slide.title_en || slide.title || slide.headline,
+        title_fr: slide.title_fr || slide.title || slide.headline,
+        title_tr: slide.title_tr || slide.title || slide.headline,
+        subtitle_ar: slide.subtitle || slide.subheading || slide.description || slide.subtitle_ar,
+        subtitle_en: slide.subtitle_en || slide.subtitle || slide.subheading,
+        subtitle_fr: slide.subtitle_fr || slide.subtitle || slide.subheading,
+        subtitle_tr: slide.subtitle_tr || slide.subtitle || slide.subheading,
+      }))
+    : DEFAULT_SLIDES;
+
+
+
+
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
 
@@ -121,7 +139,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
   return (
     <section onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} className="relative flex flex-col overflow-hidden -mt-20" style={{ minHeight: "100vh" }}>
       {/* ── Slider Background ── */}
-      {slides.map((sl, i) => (
+      {slides.map((sl: any, i: number) => (
         <div key={i} className="absolute inset-0 transition-opacity duration-700"
           style={{ opacity: i === current && !animating ? 1 : 0, zIndex: 0 }}>
           <img
@@ -192,29 +210,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
         </div>
       </div>
 
-      {/* ── Slider Controls ── */}
-      {slides.length > 1 && (
-        <>
-          {/* Prev/Next arrows */}
-          <button onClick={prev} aria-label="Previous slide"
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition">
-            <span className="text-xl leading-none">›</span>
-          </button>
-          <button onClick={next} aria-label="Next slide"
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition">
-            <span className="text-xl leading-none">‹</span>
-          </button>
-
-          {/* Dots */}
-          <div className="absolute bottom-[160px] left-1/2 -translate-x-1/2 z-20 flex gap-2">
-            {slides.map((_, i) => (
-              <button key={i} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`} aria-current={i === current ? "true" : undefined}
-                className={`transition-all rounded-full ${i === current ? "w-8 h-2.5 bg-white" : "w-2.5 h-2.5 bg-white/40 hover:bg-white/65"}`} />
-            ))}
-          </div>
-        </>
-      )}
-
+    
       {/* ── Quick Donate Bar ── */}
       <div className="relative z-10 w-full" style={{ background: "rgba(0,57,135,0.97)", backdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
         <div className="max-w-screen-xl mx-auto px-6 py-5">
@@ -338,33 +334,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
             </div>
           )}
         </div>
-      </div>
-
-      {/* ── Achievements Strip ── */}
-      <div className="relative z-10 w-full bg-white border-t border-line">
-        <div className="max-w-screen-xl mx-auto px-6 py-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-0 sm:divide-x sm:divide-line">
-            {[
-              { value: "12,500+", icon: "heart"        as const, ar: "أسرة مستفيدة",          en: "Families Helped",         fr: "Familles Aidées",       tr: "Yardım Edilen Aile",   color: "#F00F5A" },
-              { value: "$2.8M+", icon: "hand-heart"    as const, ar: "إجمالي التبرعات",        en: "Total Donations",         fr: "Total des Dons",        tr: "Toplam Bağış",         color: "#0069D2" },
-              { value: "18",     icon: "globe"         as const, ar: "دولة نصل إليها",          en: "Countries Reached",       fr: "Pays Touchés",          tr: "Ulaşılan Ülke",        color: "#7C3AED" },
-              { value: "98%",   icon: "shield-check"  as const, ar: "للمستفيدين مباشرة",       en: "Goes to Beneficiaries",   fr: "Aux Bénéficiaires",     tr: "Yararlanıcılara",      color: "#059669" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 sm:px-6 first:sm:ps-0 last:sm:pe-0">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${item.color}18` }}>
-                  <Icon name={item.icon} size={18} style={{ color: item.color } as any} />
-                </div>
-                <div>
-                  <div className="font-display font-extrabold text-lg text-ink leading-tight" style={{ color: item.color }}>{item.value}</div>
-                  <div className="text-xs text-muted font-semibold leading-tight">
-                    {locale === "ar" ? item.ar : locale === "fr" ? item.fr : locale === "tr" ? item.tr : item.en}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      </div>     
     </section>
   );
 }
