@@ -1,40 +1,50 @@
 import Link from "next/link";
+import Icon from "@/components/icons";
 
 type Locale = "ar" | "en" | "fr" | "tr";
 
 // ── Helpers ───────────────────────────────────────────────────
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-10">
-      <h2 className="font-display text-2xl font-bold text-ink mb-4 pb-2 border-b border-line">{title}</h2>
-      <div className="space-y-3 text-muted leading-relaxed">{children}</div>
+    <div className="mb-10 bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+      <h2 className="font-display text-xl sm:text-2xl font-extrabold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-brand shrink-0" />
+        {title}
+      </h2>
+      <div className="space-y-3 text-slate-600 leading-relaxed">{children}</div>
     </div>
   );
 }
+
 function P({ children }: { children: React.ReactNode }) {
-  return <p className="text-[15px] leading-loose">{children}</p>;
+  return <p className="text-sm sm:text-base leading-relaxed text-slate-600">{children}</p>;
 }
+
 function UL({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-2 mr-4">
+    <ul className="space-y-2.5 my-2">
       {items.map((item, i) => (
-        <li key={i} className="flex items-start gap-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand mt-2.5 shrink-0" />
-          <span className="text-[15px] leading-loose">{item}</span>
+        <li key={i} className="flex items-start gap-3">
+          <div className="w-1.5 h-1.5 rounded-full bg-brand mt-2 shrink-0" />
+          <span className="text-sm sm:text-base text-slate-600 leading-relaxed">{item}</span>
         </li>
       ))}
     </ul>
   );
 }
+
 function ContactCTA({ locale, email, label }: { locale: string; email: string; label: string }) {
   const text: Record<string, string> = { ar: "تواصل معنا", en: "Contact Us", fr: "Nous Contacter", tr: "Bize Ulaşın" };
   return (
-    <div className="mt-10 rounded-2xl bg-brand/5 border border-brand/15 p-6 text-center">
-      <p className="font-semibold text-ink mb-1">{label}</p>
-      <p className="text-muted text-sm mb-4">{email}</p>
-      <a href={`mailto:${email}`} className="inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl px-6 py-3 text-sm transition">
-        {text[locale] || text.en}
-      </a>
+    <div className="mt-12 rounded-3xl bg-slate-900 p-8 text-center text-white shadow-xl relative overflow-hidden">
+      <div className="relative z-10 max-w-lg mx-auto">
+        <p className="font-extrabold text-base sm:text-lg mb-1 text-white">{label}</p>
+        <p className="text-white/60 text-xs sm:text-sm mb-6 font-mono">{email}</p>
+        <a href={`mailto:${email}`} className="inline-flex items-center gap-2 bg-brand hover:opacity-90 active:scale-95 text-white font-bold rounded-xl px-7 py-3 text-xs sm:text-sm transition-all shadow-md">
+          <Icon name="mail" size={16} />
+          {text[locale] || text.en}
+        </a>
+      </div>
     </div>
   );
 }
@@ -89,7 +99,6 @@ function PrivacyContent({ locale }: { locale: string }) {
       <ContactCTA locale={locale} email="privacy@forrelief.org" label="Gizliliğiniz hakkında sorularınız mı var? Veri Koruma Yetkilimiz 72 saat içinde yanıt verir." />
     </>
   );
-  // Default: Arabic
   return (
     <>
       <Section title="سياسة الخصوصية وحماية البيانات (متوافقة مع GDPR)">
@@ -371,15 +380,15 @@ function ComplaintsContent({ locale }: { locale: string }) {
   return (
     <>
       <Section title={ti.ch}>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid sm:grid-cols-2 gap-3.5 pt-1">
           {emails.map(e => (
-            <div key={e.email} className="flex items-center gap-3 p-3 rounded-xl bg-[#F4F7FD] border border-line">
-              <div className="w-8 h-8 rounded-lg bg-brand/10 text-brand flex items-center justify-center shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <div key={e.email} className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+              <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                <Icon name="mail" size={16} />
               </div>
-              <div>
-                <p className="text-xs text-muted">{e.label[l as keyof typeof e.label]}</p>
-                <a href={`mailto:${e.email}`} className="text-sm font-semibold text-brand hover:underline">{e.email}</a>
+              <div className="overflow-hidden">
+                <p className="text-[11px] text-slate-400 font-semibold">{e.label[l as keyof typeof e.label]}</p>
+                <a href={`mailto:${e.email}`} className="text-xs font-bold text-slate-900 hover:text-brand transition truncate block">{e.email}</a>
               </div>
             </div>
           ))}
@@ -389,11 +398,14 @@ function ComplaintsContent({ locale }: { locale: string }) {
       <Section title={ti.at}><UL items={types[l]} /></Section>
 
       <Section title={ti.p}>
-        <ol className="space-y-4">
+        <ol className="space-y-4 pt-1">
           {locSteps.map(([title, desc], i) => (
-            <li key={i} className="flex gap-4">
-              <div className="w-8 h-8 rounded-full bg-brand text-white text-sm font-bold flex items-center justify-center shrink-0">{i+1}</div>
-              <div><p className="font-semibold text-ink mb-0.5">{title}</p><p className="text-muted text-sm leading-relaxed">{desc}</p></div>
+            <li key={i} className="flex gap-4 items-start">
+              <div className="w-7 h-7 rounded-full bg-brand text-white text-xs font-extrabold flex items-center justify-center shrink-0 mt-0.5 shadow-sm">{i+1}</div>
+              <div>
+                <p className="font-bold text-slate-900 text-sm sm:text-base mb-0.5">{title}</p>
+                <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">{desc}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -405,7 +417,6 @@ function ComplaintsContent({ locale }: { locale: string }) {
     </>
   );
 }
-
 
 // ── Financial Transparency ────────────────────────────────────
 function FinancialTransparencyContent({ locale }: { locale: string }) {
@@ -461,8 +472,6 @@ function FinancialTransparencyContent({ locale }: { locale: string }) {
 function LicenseContent({ locale }: { locale: string }) {
   const l = (["ar","en","fr","tr"].includes(locale) ? locale : "ar") as Locale;
 
-  const updated = "12 يوليو 2026 | July 12, 2026 | 12 juillet 2026 | 12 Temmuz 2026";
-
   const stats = [
     { n: "200+",  ar: "موقع ومنصة رقمية",          en: "Websites & Platforms",        fr: "Sites & Plateformes",           tr: "Web Sitesi & Platform"       },
     { n: "1M+",   ar: "سطر كود برمجي",              en: "Lines of Code",               fr: "Lignes de Code",                tr: "Satır Kod"                   },
@@ -477,7 +486,7 @@ function LicenseContent({ locale }: { locale: string }) {
       updated:     "آخر تحديث",
       s1:          "1. المنصة والمطوّر",
       s1p1:        "منصة 4Relief الإنسانية مملوكة لمؤسسة 4Relief الإنسانية، وقد تم تصميمها وتطويرها وبناؤها من الصفر بواسطة شركة WEBEK LTD (webek.org)، وهي شركة متخصصة في تطوير البرمجيات والمنصات الرقمية على نطاق واسع.",
-      s1p2:        "WEBEK LTD شركة لها باع طويل في الصناعة الرقمية، نفّذت أكثر من 200 موقع ومنصة رقمية متكاملة لعملاء في مختلف القطاعات حول العالم، وكتبت ما يزيد على مليون سطر كود برمجي عالي الجودة. تمتلك خبرة موثّقة ومتخصصة في بناء منصات التبرع الإنسانية، ومنصات التجارة الإلكترونية، وأنظمة إدارة المحتوى، وتطبيقات SaaS المتقدمة.",
+      s1p2:        "WEBEK LTD شركة لها باع طويل في الصناعة الرقمية، نفّذت أكثر من 200 موقع ومنصة رقمية متكاملة لعملاء في مختلف القطاعات حول العالم، وكتبت ما يزيد على مليون سطر كود برمجي عالي الجودة.",
       s1stats:     "إنجازات WEBEK LTD",
       s2:          "2. حقوق الملكية الفكرية",
       s2p1:        "جميع حقوق التصميم الجرافيكي، وواجهات المستخدم (UI/UX)، والكود البرمجي بكافة طبقاته، والبنية التقنية للمنصة هي ملك حصري لشركة WEBEK LTD ومحمية بموجب قوانين حقوق الملكية الفكرية الدولية والمحلية المعمول بها.",
@@ -490,222 +499,207 @@ function LicenseContent({ locale }: { locale: string }) {
       s3banned:    "الاستخدامات المحظورة",
       s3b:         ["استخدام المنصة أو أي جزء منها لأغراض تجارية أو إعادة بيعها بأي شكل", "نسخ التصميم أو الكود أو قاعدة البيانات لإنشاء منصات مشابهة", "استخدام برامج الزحف أو السكريبتات الآلية لاستخراج بيانات المنصة", "محاولة اختراق أو تعطيل أنظمة المنصة أو قواعد بياناتها", "انتحال صفة المؤسسة أو موظفيها أو شركائها", "نشر أي محتوى مضلل أو مسيء أو يخالف القوانين النافذة"],
       s4:          "4. إخلاء المسؤولية وحدود الضمانات",
-      s4p1:        "تُقدَّم المنصة وجميع خدماتها بحالتها الراهنة دون أي ضمانات صريحة أو ضمنية من أي نوع. لا تضمن مؤسسة 4Relief أن المنصة ستكون متاحة بشكل مستمر وخالية من الأخطاء والانقطاعات في جميع الأوقات.",
-      s4p2:        "لا تتحمل مؤسسة 4Relief ولا شركة WEBEK LTD أي مسؤولية عن الأضرار المباشرة أو غير المباشرة أو العرضية أو التبعية الناتجة عن استخدام المنصة أو عدم القدرة على استخدامها لأي سبب كان.",
-      s4p3:        "في حالة حدوث خلل تقني يؤثر على عمليات التبرع، يتعهد الفريق التقني بمعالجته في أسرع وقت ممكن وإعلام المتبرعين المتأثرين بالإجراءات والحلول المتاحة.",
+      s4p1:        "تُقدَّم المنصة وجميع خدماتها بحالتها الراهنة دون أي ضمانات صريحة أو ضمنية من أي نوع.",
+      s4p2:        "لا تتحمل مؤسسة 4Relief ولا شركة WEBEK LTD أي مسؤولية عن الأضرار المباشرة أو غير المباشرة أو العرضية أو التبعية الناتجة عن استخدام المنصة.",
+      s4p3:        "في حالة حدوث خلل تقني يؤثر على عمليات التبرع، يتعهد الفريق التقني بمعالجته في أسرع وقت ممكن.",
       s5:          "5. الخدمات الخارجية وبوابات الدفع",
-      s5p1:        "تعتمد المنصة على خدمات دفع خارجية موثوقة وهي Stripe وPayPal لمعالجة التبرعات بأمان. هذه الخدمات مستقلة تماماً عن مؤسسة 4Relief وتخضع لشروط استخدامها وسياسات خصوصيتها الخاصة.",
+      s5p1:        "تعتمد المنصة على خدمات دفع خارجية موثوقة وهي Stripe وPayPal لمعالجة التبرعات بأمان.",
       s5items:     ["لا تقوم مؤسسة 4Relief ولا WEBEK LTD بتخزين أرقام بطاقات الائتمان أو البيانات المالية الحساسة على خوادمها", "جميع المعاملات المالية تتم عبر بوابات دفع معتمدة ومشفرة بتقنية SSL/TLS", "في حالة أي نزاع أو إشكالية متعلقة بعمليات الدفع، يُرجى التواصل مع فريق الدعم فوراً", "تطبّق المنصة معايير PCI DSS الدولية لأمان بيانات بطاقات الدفع"],
       s6:          "6. التعديلات على هذا الترخيص",
-      s6p1:        "تحتفظ مؤسسة 4Relief بالحق الكامل في تعديل أو تحديث أو استبدال شروط هذا الترخيص في أي وقت تشاء. سيتم إخطار المستخدمين المسجلين بأي تغييرات جوهرية عبر البريد الإلكتروني أو من خلال إشعار واضح على المنصة.",
-      s6p2:        "استمرارك في استخدام المنصة بعد نشر أي تعديلات يُعدّ موافقة ضمنية وكاملة منك على الشروط المعدّلة. إن لم توافق على الشروط المعدّلة، عليك التوقف فوراً عن استخدام المنصة.",
+      s6p1:        "تحتفظ مؤسسة 4Relief بالحق الكامل في تعديل أو تحديث أو استبدال شروط هذا الترخيص في أي وقت تشاء.",
+      s6p2:        "استمرارك في استخدام المنصة بعد نشر أي تعديلات يُعدّ موافقة ضمنية وكاملة منك على الشروط المعدّلة.",
       s7:          "7. القانون الحاكم والاختصاص القضائي",
-      s7p1:        "تخضع هذه الشروط وتُفسَّر وفقاً للقوانين المعمول بها في نطاق عمل مؤسسة 4Relief الإنسانية. أي نزاع ينشأ عن أو يتعلق بهذه الشروط أو باستخدام المنصة يخضع للاختصاص القضائي الحصري للمحاكم المختصة.",
-      s7p2:        "في حالة اعتبار أي بند من بنود هذه الشروط غير ساري أو غير قابل للتطبيق لأي سبب، يظل سريان وصحة باقي البنود محفوظَين بالكامل دون أي تأثير.",
+      s7p1:        "تخضع هذه الشروط وتُفسَّر وفقاً للقوانين المعمول بها في نطاق عمل مؤسسة 4Relief الإنسانية.",
+      s7p2:        "في حالة اعتبار أي بند من بنود هذه الشروط غير ساري، يظل سريان وصحة باقي البنود محفوظَين بالكامل.",
       s8:          "8. التواصل بشأن الترخيص",
       cta1:        "للاستفسارات العامة والقانونية — مؤسسة 4Relief الإنسانية",
       cta2:        "للاستفسارات التقنية المتعلقة بالمنصة والكود — WEBEK LTD",
     },
     en: {
       badge:       "Platform License & Terms of Use",
-      intro:       "This page sets out the complete legal terms for using the 4Relief Humanitarian Platform, clarifying intellectual property rights, licensing terms, limitations of liability, and usage restrictions. Please read these terms carefully before using the platform.",
+      intro:       "This page sets out the complete legal terms for using the 4Relief Humanitarian Platform, clarifying intellectual property rights, licensing terms, limitations of liability, and usage restrictions.",
       updated:     "Last Updated",
       s1:          "1. The Platform & Developer",
-      s1p1:        "The 4Relief Humanitarian Platform is owned by the 4Relief Humanitarian Foundation and was designed, developed, and built from scratch by WEBEK LTD (webek.org), a company specializing in large-scale software and digital platform development.",
-      s1p2:        "WEBEK LTD has an extensive and proven track record in the digital industry, having delivered over 200 complete websites and digital platforms to clients across various sectors worldwide, writing more than one million lines of high-quality code. The company holds documented and specialized expertise in humanitarian donation platforms, e-commerce systems, content management systems, and advanced SaaS applications.",
+      s1p1:        "The 4Relief Humanitarian Platform is owned by 4Relief Humanitarian Foundation and was designed, developed, and built from scratch by WEBEK LTD (webek.org).",
+      s1p2:        "WEBEK LTD has an extensive and proven track record in the digital industry, having delivered over 200 complete websites and digital platforms worldwide.",
       s1stats:     "WEBEK LTD Achievements",
       s2:          "2. Intellectual Property Rights",
-      s2p1:        "All rights to the graphic design, user interfaces (UI/UX), source code at all levels, and technical architecture of the Platform are the exclusive property of WEBEK LTD and are protected under applicable international and local intellectual property laws.",
-      s2p2:        "The Platform's content including texts, articles, images, logos, trademarks, and visual identity belonging to 4Relief Humanitarian Foundation are protected and reserved exclusively and solely to it.",
-      s2items:     ["Copying, modifying, distributing, or republishing any part of the Platform's design, code, or content without explicit prior written permission from rights holders is strictly prohibited", "All logos, trademarks, and product names mentioned are the property of their respective owners", "Any unauthorized use exposes the perpetrator to legal liability under applicable laws"],
+      s2p1:        "All rights to the graphic design, UI/UX, source code, and technical architecture are the exclusive property of WEBEK LTD.",
+      s2p2:        "The Platform's content belonging to 4Relief Humanitarian Foundation is protected and reserved exclusively to it.",
+      s2items:     ["Copying, modifying, or distributing any part of the Platform without permission is prohibited", "All trademarks belong to their respective owners", "Unauthorized use exposes the perpetrator to legal liability"],
       s3:          "3. License Granted to Users",
-      s3p1:        "4Relief Humanitarian Foundation grants users a limited, non-exclusive, non-transferable, non-sublicensable license to use the Platform exclusively for the purposes of donating, following humanitarian campaigns, and communicating with the Foundation.",
+      s3p1:        "4Relief Foundation grants users a limited, non-exclusive license to use the Platform exclusively for donating and following campaigns.",
       s3allowed:   "Permitted Uses",
-      s3a:         ["Viewing Platform content and reading articles and reports", "Making donations to support humanitarian campaigns", "Creating a personal account and monitoring donation history", "Communicating with the Foundation team through available channels", "Sharing campaign links on social media"],
+      s3a:         ["Viewing Platform content", "Making donations", "Creating a personal account", "Communicating with the Foundation", "Sharing campaign links"],
       s3banned:    "Prohibited Uses",
-      s3b:         ["Using the Platform or any part thereof for commercial purposes or reselling it in any form", "Copying the design, code, or database to create similar platforms", "Using crawlers or automated scripts to extract Platform data", "Attempting to hack or disrupt the Platform's systems or databases", "Impersonating the Foundation, its staff, or partners", "Publishing misleading, abusive, or legally non-compliant content"],
-      s4:          "4. Disclaimer & Limitation of Warranties",
-      s4p1:        "The Platform and all its services are provided as-is without warranties of any kind, express or implied. 4Relief Foundation does not guarantee that the Platform will be available continuously and free from errors or interruptions at all times.",
-      s4p2:        "Neither 4Relief Foundation nor WEBEK LTD shall be liable for any direct, indirect, incidental, or consequential damages resulting from the use of or inability to use the Platform for any reason whatsoever.",
-      s4p3:        "In the event of a technical fault affecting donation operations, the technical team commits to resolving it as quickly as possible and informing affected donors of available procedures and solutions.",
-      s5:          "5. Third-Party Services & Payment Gateways",
-      s5p1:        "The Platform relies on trusted third-party payment services — Stripe and PayPal — to securely process donations. These services are entirely independent of 4Relief Foundation and are governed by their own terms of use and privacy policies.",
-      s5items:     ["Neither 4Relief Foundation nor WEBEK LTD stores credit card numbers or sensitive financial data on their servers", "All financial transactions are processed through certified, SSL/TLS-encrypted payment gateways", "In the event of any dispute or issue related to payment transactions, please contact the support team immediately", "The Platform applies PCI DSS international standards for payment card data security"],
-      s6:          "6. Amendments to This License",
-      s6p1:        "4Relief Foundation reserves the full right to amend, update, or replace these license terms at any time. Registered users will be notified of any material changes by email or through a clear notice on the Platform.",
-      s6p2:        "Your continued use of the Platform after any amendments are published constitutes your implicit and complete acceptance of the amended terms. If you do not agree to the amended terms, you must immediately cease using the Platform.",
-      s7:          "7. Governing Law & Jurisdiction",
-      s7p1:        "These terms are governed by and interpreted in accordance with the laws applicable in the jurisdiction where 4Relief Humanitarian Foundation operates. Any dispute arising from or related to these terms or Platform use is subject to the exclusive jurisdiction of the competent courts.",
-      s7p2:        "If any provision of these terms is found to be invalid or unenforceable for any reason, the validity and enforceability of the remaining provisions shall be fully preserved without any effect.",
-      s8:          "8. Contact Regarding This License",
+      s3b:         ["Commercial use or reselling", "Copying design or code", "Using automated scripts", "Hacking attempts", "Impersonation", "Publishing illegal content"],
+      s4:          "4. Disclaimer & Warranties",
+      s4p1:        "The Platform is provided as-is without warranties.",
+      s4p2:        "Neither 4Relief nor WEBEK LTD shall be liable for indirect damages.",
+      s4p3:        "Technical team commits to resolving issues promptly.",
+      s5:          "5. Third-Party Services",
+      s5p1:        "The Platform relies on Stripe and PayPal for payment processing.",
+      s5items:     ["No credit card data is stored on our servers", "Transactions are encrypted via SSL/TLS", "Contact support for payment disputes", "PCI DSS standards are applied"],
+      s6:          "6. Amendments",
+      s6p1:        "4Relief reserves the right to amend these terms.",
+      s6p2:        "Continued use constitutes acceptance of amendments.",
+      s7:          "7. Governing Law",
+      s7p1:        "Governed by applicable laws of 4Relief Foundation's jurisdiction.",
+      s7p2:        "Invalidity of one provision does not affect others.",
+      s8:          "8. Contact",
       cta1:        "General & legal inquiries — 4Relief Humanitarian Foundation",
-      cta2:        "Technical platform & code inquiries — WEBEK LTD",
+      cta2:        "Technical inquiries — WEBEK LTD",
     },
     fr: {
       badge:       "Licence de Plateforme et Conditions d'Utilisation",
-      intro:       "Cette page définit les conditions juridiques complètes d'utilisation de la plateforme humanitaire 4Relief, clarifiant les droits de propriété intellectuelle, les conditions de licence, les limitations de responsabilité et les restrictions d'utilisation.",
+      intro:       "Cette page définit les conditions juridiques complètes d'utilisation de la plateforme humanitaire 4Relief.",
       updated:     "Dernière mise à jour",
       s1:          "1. La Plateforme et le Développeur",
-      s1p1:        "La plateforme humanitaire 4Relief appartient à la Fondation humanitaire 4Relief et a été conçue, développée et construite de zéro par WEBEK LTD (webek.org), une société spécialisée dans le développement de logiciels et de plateformes numériques à grande échelle.",
-      s1p2:        "WEBEK LTD possède un bilan solide et avéré dans l'industrie numérique, ayant livré plus de 200 sites web et plateformes numériques complets à des clients dans divers secteurs, rédigé plus d'un million de lignes de code de haute qualité, avec une expertise documentée dans les plateformes de dons humanitaires et les applications SaaS avancées.",
+      s1p1:        "La plateforme appartient à la Fondation 4Relief et a été développée par WEBEK LTD (webek.org).",
+      s1p2:        "WEBEK LTD possède une solide expérience avec plus de 200 projets livrés.",
       s1stats:     "Réalisations de WEBEK LTD",
       s2:          "2. Droits de Propriété Intellectuelle",
-      s2p1:        "Tous les droits sur la conception graphique, les interfaces utilisateur, le code source et l'architecture technique de la Plateforme sont la propriété exclusive de WEBEK LTD et sont protégés par les lois applicables sur la propriété intellectuelle.",
-      s2p2:        "Le contenu de la Plateforme appartenant à la Fondation humanitaire 4Relief est protégé et réservé exclusivement à celle-ci.",
-      s2items:     ["La copie, modification ou distribution de toute partie de la Plateforme sans autorisation écrite préalable est strictement interdite", "Tous les logos et marques déposées mentionnés appartiennent à leurs propriétaires respectifs", "Toute utilisation non autorisée expose son auteur à des poursuites judiciaires"],
-      s3:          "3. Licence Accordée aux Utilisateurs",
-      s3p1:        "La Fondation 4Relief accorde aux utilisateurs une licence limitée, non exclusive, non transférable pour utiliser la Plateforme uniquement à des fins de dons et de suivi des campagnes humanitaires.",
+      s2p1:        "Tous les droits sur la conception et le code appartiennent à WEBEK LTD.",
+      s2p2:        "Le contenu appartient exclusivement à la Fondation 4Relief.",
+      s2items:     ["Reproduction interdite sans autorisation", "Les marques appartiennent à leurs propriétaires", "Utilisation non autorisée passible de poursuites"],
+      s3:          "3. Licence Utilisateur",
+      s3p1:        "Licence limitée accordée pour effectuer des dons et suivre les activités.",
       s3allowed:   "Utilisations Autorisées",
-      s3a:         ["Consulter le contenu de la Plateforme", "Effectuer des dons pour soutenir des campagnes humanitaires", "Créer un compte personnel et suivre l'historique des dons", "Communiquer avec l'équipe de la Fondation", "Partager des liens de campagnes sur les réseaux sociaux"],
+      s3a:         ["Consulter le contenu", "Effectuer des dons", "Gérer son compte", "Contacter l'équipe", "Partager des liens"],
       s3banned:    "Utilisations Interdites",
-      s3b:         ["Utiliser la Plateforme à des fins commerciales ou la revendre", "Copier le design ou le code pour créer des plateformes similaires", "Utiliser des robots d'exploration pour extraire des données", "Tenter de pirater ou perturber les systèmes de la Plateforme", "Usurper l'identité de la Fondation ou de ses partenaires", "Publier du contenu trompeur ou illégal"],
-      s4:          "4. Exclusion de Responsabilité",
-      s4p1:        "La Plateforme est fournie telle quelle sans aucune garantie. La Fondation 4Relief ne garantit pas que la Plateforme sera disponible en permanence et sans erreurs.",
-      s4p2:        "Ni la Fondation 4Relief ni WEBEK LTD ne seront responsables des dommages directs ou indirects résultant de l'utilisation de la Plateforme.",
-      s4p3:        "En cas de défaillance technique, l'équipe s'engage à résoudre le problème dans les meilleurs délais.",
-      s5:          "5. Services Tiers et Passerelles de Paiement",
-      s5p1:        "La Plateforme utilise Stripe et PayPal pour traiter les dons en toute sécurité. Ces services sont régis par leurs propres conditions indépendantes.",
-      s5items:     ["Aucune donnée financière sensible n'est stockée sur nos serveurs", "Toutes les transactions sont cryptées SSL/TLS", "Pour tout litige de paiement, contactez immédiatement le support", "La Plateforme applique les normes PCI DSS"],
-      s6:          "6. Modifications de la Licence",
-      s6p1:        "La Fondation 4Relief se réserve le droit de modifier ces conditions à tout moment avec notification aux utilisateurs enregistrés.",
-      s6p2:        "La poursuite de l'utilisation de la Plateforme après modifications vaut acceptation des nouvelles conditions.",
-      s7:          "7. Droit Applicable et Juridiction",
-      s7p1:        "Ces conditions sont régies par les lois applicables dans la juridiction de la Fondation 4Relief.",
-      s7p2:        "Si une disposition est invalide, les autres restent pleinement en vigueur.",
+      s3b:         ["Usage commercial", "Copier le code", "Bots automatiques", "Piratage", "Usurpation d'identité", "Contenu illégal"],
+      s4:          "4. Responsabilité",
+      s4p1:        "Service fourni tel quel.",
+      s4p2:        "Pas de responsabilité pour dommages indirects.",
+      s4p3:        "Résolution rapide des erreurs techniques.",
+      s5:          "5. Paiements Tiers",
+      s5p1:        "Paiements sécurisés via Stripe et PayPal.",
+      s5items:     ["Pas de stockage de données bancaires", "Cryptage SSL/TLS", "Support disponible pour litiges", "Normes PCI DSS"],
+      s6:          "6. Modifications",
+      s6p1:        "Droits de modification réservés.",
+      s6p2:        "Acceptation tacite lors de l'utilisation continue.",
+      s7:          "7. Droit Applicable",
+      s7p1:        "Régi par le droit applicable de la Fondation.",
+      s7p2:        "Maintien des clauses valides.",
       s8:          "8. Contact",
-      cta1:        "Questions générales et juridiques — Fondation humanitaire 4Relief",
-      cta2:        "Questions techniques — WEBEK LTD",
+      cta1:        "Demandes générales — Fondation 4Relief",
+      cta2:        "Demandes techniques — WEBEK LTD",
     },
     tr: {
       badge:       "Platform Lisansı ve Kullanım Koşulları",
-      intro:       "Bu sayfa, 4Relief İnsani Yardım Platformunu kullanmaya ilişkin yasal koşulları, fikri mülkiyet haklarını, lisans koşullarını, sorumluluk sınırlarını ve kullanım kısıtlamalarını kapsamlı biçimde açıklamaktadır.",
+      intro:       "Bu sayfa, 4Relief Platformunu kullanmaya ilişkin yasal koşulları açıklamaktadır.",
       updated:     "Son Güncelleme",
       s1:          "1. Platform ve Geliştirici",
-      s1p1:        "4Relief İnsani Yardım Platformu, 4Relief İnsani Yardım Vakfı'na aittir ve büyük ölçekli yazılım ve dijital platform geliştirme konusunda uzmanlaşmış WEBEK LTD (webek.org) tarafından sıfırdan tasarlanmış, geliştirilmiş ve inşa edilmiştir.",
-      s1p2:        "WEBEK LTD, dijital endüstride kapsamlı ve kanıtlanmış bir sicile sahip olup dünya genelinde çeşitli sektörlerdeki müşterilere 200'den fazla eksiksiz web sitesi ve dijital platform teslim etmiş, bir milyondan fazla satır yüksek kaliteli kod yazmıştır.",
+      s1p1:        "4Relief Platformu, 4Relief Vakfı'na aittir ve WEBEK LTD (webek.org) tarafından geliştirilmiştir.",
+      s1p2:        "WEBEK LTD, 200'den fazla başarılı dijital proje teslim etmiştir.",
       s1stats:     "WEBEK LTD Başarıları",
       s2:          "2. Fikri Mülkiyet Hakları",
-      s2p1:        "Platformun grafik tasarımı, kullanıcı arayüzleri, kaynak kodu ve teknik mimarisine ilişkin tüm haklar WEBEK LTD'nin münhasır mülkiyetindedir.",
-      s2p2:        "4Relief İnsani Yardım Vakfı'na ait Platform içeriği korunmakta ve yalnızca Vakfa ayrılmaktadır.",
-      s2items:     ["Hak sahiplerinden önceden yazılı izin alınmadan Platformun herhangi bir bölümünün kopyalanması kesinlikle yasaktır", "Belirtilen tüm logolar ve ticari markalar ilgili sahiplerine aittir", "İzinsiz kullanım yasal yaptırımlara yol açar"],
-      s3:          "3. Kullanıcılara Verilen Lisans",
-      s3p1:        "4Relief Vakfı, kullanıcılara yalnızca bağış yapmak ve insani yardım kampanyalarını takip etmek amacıyla Platformu kullanmak için sınırlı, münhasır olmayan, devredilemez bir lisans vermektedir.",
+      s2p1:        "Tasarım ve kod hakları WEBEK LTD'ye aittir.",
+      s2p2:        "İçerik hakları 4Relief Vakfı'na aittir.",
+      s2items:     ["İzinsiz kopyalama yasaktır", "Markalar sahiplerine aittir", "İzinsiz kullanım yasal yaptırım gerektirir"],
+      s3:          "3. Kullanıcı Lisansı",
+      s3p1:        "Sadece bağış yapma ve takip amacıyla sınırlı lisans verilmiştir.",
       s3allowed:   "İzin Verilen Kullanımlar",
-      s3a:         ["Platform içeriğini görüntüleme", "İnsani yardım kampanyalarına bağış yapma", "Kişisel hesap oluşturma ve bağış geçmişini takip etme", "Vakıf ekibiyle iletişime geçme", "Kampanya bağlantılarını sosyal medyada paylaşma"],
+      s3a:         ["İçerik görüntüleme", "Bağış yapma", "Hesap oluşturma", "İletişime geçme", "Paylaşım yapma"],
       s3banned:    "Yasaklanan Kullanımlar",
-      s3b:         ["Platformu ticari amaçlarla kullanmak veya yeniden satmak", "Benzer platformlar oluşturmak için tasarım veya kodu kopyalamak", "Platform verilerini çıkarmak için botlar kullanmak", "Platform sistemlerini hacklemek veya aksatmak", "Vakfın kimliğine bürünmek", "Yanıltıcı veya yasadışı içerik yayınlamak"],
+      s3b:         ["Ticari kullanım", "Kod kopyalama", "Bot kullanımı", "Saldırı girişimleri", "Kimlik bürünme", "Yasadışı içerik"],
       s4:          "4. Sorumluluk Reddi",
-      s4p1:        "Platform, açık veya zımni hiçbir garanti verilmeksizin olduğu gibi sunulmaktadır.",
-      s4p2:        "Ne 4Relief Vakfı ne de WEBEK LTD, Platformun kullanımından kaynaklanan zararlardan sorumlu tutulamaz.",
-      s4p3:        "Teknik bir arıza durumunda ekip, sorunu mümkün olan en kısa sürede çözmeyi taahhüt eder.",
-      s5:          "5. Üçüncü Taraf Hizmetleri ve Ödeme Ağ Geçitleri",
-      s5p1:        "Platform, bağışları güvenli şekilde işlemek için Stripe ve PayPal kullanmaktadır. Bu hizmetler kendi bağımsız koşullarına tabidir.",
-      s5items:     ["Sunucularımızda hassas finansal veri saklanmamaktadır", "Tüm işlemler SSL/TLS şifreli ağ geçitleri aracılığıyla gerçekleştirilir", "Ödeme anlaşmazlıkları için hemen destek ekibiyle iletişime geçin", "Platform PCI DSS standartlarını uygulamaktadır"],
-      s6:          "6. Lisans Değişiklikleri",
-      s6p1:        "4Relief Vakfı, bu koşulları dilediği zaman değiştirme hakkını saklı tutar ve kayıtlı kullanıcılara bildirim gönderir.",
-      s6p2:        "Değişikliklerden sonra Platformu kullanmaya devam etmek, yeni koşulların kabulü anlamına gelir.",
-      s7:          "7. Geçerli Hukuk ve Yargı Yetkisi",
-      s7p1:        "Bu koşullar, 4Relief Vakfı'nın faaliyet gösterdiği yargı bölgesinde geçerli olan yasalara tabidir.",
-      s7p2:        "Bir hükmün geçersiz olması, diğer hükümlerin geçerliliğini etkilemez.",
-      s8:          "8. Lisansla İlgili İletişim",
-      cta1:        "Genel ve hukuki sorular — 4Relief İnsani Yardım Vakfı",
-      cta2:        "Teknik platform soruları — WEBEK LTD",
+      s4p1:        "Platform olduğu gibi sunulmaktadır.",
+      s4p2:        "Dolaylı zararlardan sorumluluk kabul edilmez.",
+      s4p3:        "Teknik sorunlar hızla çözülür.",
+      s5:          "5. Üçüncü Taraf Ödemeler",
+      s5p1:        "Stripe ve PayPal altyapısı kullanılmaktadır.",
+      s5items:     ["Kart bilgisi saklanmaz", "SSL/TLS şifreleme", "Destek ekibi hazır", "PCI DSS standartları"],
+      s6:          "6. Değişiklikler",
+      s6p1:        "Koşulları değiştirme hakkı saklıdır.",
+      s6p2:        "Kullanıma devam edilmesi kabul anlamına gelir.",
+      s7:          "7. Uygulanacak Hukuk",
+      s7p1:        "İlgili yargı bölgesi yasaları geçerlidir.",
+      s7p2:        "Diğer maddelerin geçerliliği korunur.",
+      s8:          "8. İletişim",
+      cta1:        "Genel sorular — 4Relief Vakfı",
+      cta2:        "Teknik sorular — WEBEK LTD",
     },
   }[l];
 
   return (
     <>
-      {/* Badge + intro */}
-      <div className="mb-10 p-6 rounded-2xl bg-gradient-to-br from-brand/5 to-brand/10 border border-brand/20">
-        <span className="inline-block text-xs font-bold text-brand uppercase tracking-[0.25em] mb-3 bg-brand/10 px-3 py-1 rounded-full">
+      <div className="mb-8 p-6 rounded-3xl bg-slate-50 border border-slate-100">
+        <span className="inline-block text-[11px] font-extrabold text-brand uppercase tracking-widest mb-3 bg-brand/10 px-3 py-1 rounded-full">
           {t.badge}
         </span>
-        <p className="text-[15px] leading-loose text-muted">{t.intro}</p>
-        <p className="mt-3 text-xs text-muted/60 font-semibold">{t.updated}: <span className="text-brand">12 / 07 / 2026</span></p>
+        <p className="text-sm leading-relaxed text-slate-600">{t.intro}</p>
+        <p className="mt-3 text-xs text-slate-400 font-semibold">{t.updated}: <span className="text-slate-700">12 / 07 / 2026</span></p>
       </div>
 
-      {/* WEBEK stats */}
-      <div className="mb-10">
-        <h2 className="font-display text-2xl font-bold text-ink mb-4 pb-2 border-b border-line">{t.s1}</h2>
-        <div className="space-y-3 text-muted leading-relaxed mb-6">
+      <div className="mb-8">
+        <Section title={t.s1}>
           <P>{t.s1p1}</P>
           <P>{t.s1p2}</P>
-        </div>
-        <p className="text-xs font-bold text-muted uppercase tracking-widest mb-4">{t.s1stats}</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          {stats.map((s, i) => (
-            <div key={i} className="bg-gradient-to-br from-brand/8 to-brand/5 border border-brand/20 rounded-2xl p-4 text-center">
-              <div className="font-display text-3xl font-extrabold text-brand mb-1">{s.n}</div>
-              <div className="text-xs text-muted font-semibold leading-tight">{s[l]}</div>
+          <div className="pt-2">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t.s1stats}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {stats.map((s, i) => (
+                <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
+                  <div className="font-display text-2xl sm:text-3xl font-black text-brand mb-1">{s.n}</div>
+                  <div className="text-xs text-slate-500 font-medium leading-tight">{s[l]}</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        </Section>
       </div>
 
-      {/* IP Rights */}
-      <div className="mb-10">
-        <h2 className="font-display text-2xl font-bold text-ink mb-4 pb-2 border-b border-line">{t.s2}</h2>
-        <div className="space-y-3 text-muted leading-relaxed mb-4">
-          <P>{t.s2p1}</P>
-          <P>{t.s2p2}</P>
-        </div>
+      <Section title={t.s2}>
+        <P>{t.s2p1}</P>
+        <P>{t.s2p2}</P>
         <UL items={t.s2items} />
+      </Section>
+
+      <div className="mb-8">
+        <Section title={t.s3}>
+          <P>{t.s3p1}</P>
+          <div className="mt-6 grid sm:grid-cols-2 gap-4">
+            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">{t.s3allowed}</span>
+              </div>
+              <ul className="space-y-2">
+                {t.s3a.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
+                    <span className="text-emerald-600 font-bold shrink-0">✓</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span className="text-xs font-bold text-rose-800 uppercase tracking-wider">{t.s3banned}</span>
+              </div>
+              <ul className="space-y-2">
+                {t.s3b.map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-slate-600">
+                    <span className="text-rose-600 font-bold shrink-0">✕</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Section>
       </div>
 
-      {/* License */}
-      <div className="mb-10">
-        <h2 className="font-display text-2xl font-bold text-ink mb-4 pb-2 border-b border-line">{t.s3}</h2>
-        <P>{t.s3p1}</P>
-        <div className="mt-6 grid sm:grid-cols-2 gap-4">
-          <div className="bg-success/5 border border-success/20 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-success inline-block" />
-              <span className="text-sm font-bold text-success">{t.s3allowed}</span>
-            </div>
-            <ul className="space-y-2">
-              {t.s3a.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-[13px] text-muted">
-                  <span className="text-success font-bold mt-0.5 shrink-0">✓</span> {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="bg-danger/5 border border-danger/20 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full bg-danger inline-block" />
-              <span className="text-sm font-bold text-danger">{t.s3banned}</span>
-            </div>
-            <ul className="space-y-2">
-              {t.s3b.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-[13px] text-muted">
-                  <span className="text-danger font-bold mt-0.5 shrink-0">✕</span> {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Disclaimer */}
       <Section title={t.s4}>
         <P>{t.s4p1}</P>
         <P>{t.s4p2}</P>
         <P>{t.s4p3}</P>
       </Section>
 
-      {/* Payments */}
-      <div className="mb-10">
-        <h2 className="font-display text-2xl font-bold text-ink mb-4 pb-2 border-b border-line">{t.s5}</h2>
+      <Section title={t.s5}>
         <P>{t.s5p1}</P>
-        <div className="mt-4 grid sm:grid-cols-2 gap-3">
-          {t.s5items.map((item, i) => (
-            <div key={i} className="flex items-start gap-3 bg-dashbg border border-line rounded-xl p-4">
-              <span className="w-5 h-5 rounded-full bg-brand/15 text-brand flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
-              <span className="text-[13px] text-muted leading-relaxed">{item}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+        <UL items={t.s5items} />
+      </Section>
 
       <Section title={t.s6}>
         <P>{t.s6p1}</P>
@@ -717,19 +711,18 @@ function LicenseContent({ locale }: { locale: string }) {
         <P>{t.s7p2}</P>
       </Section>
 
-      {/* CTA */}
-      <div className="mt-10 grid sm:grid-cols-2 gap-4">
-        <div className="rounded-2xl bg-brand/5 border border-brand/15 p-6 text-center">
-          <p className="font-semibold text-ink mb-1 text-sm">{t.cta1}</p>
-          <p className="text-muted text-xs mb-4">info@forrelief.org</p>
-          <a href="mailto:info@forrelief.org" className="inline-flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl px-5 py-2.5 text-sm transition">
+      <div className="mt-8 grid sm:grid-cols-2 gap-4">
+        <div className="rounded-2xl bg-slate-900 text-white p-6 text-center">
+          <p className="font-bold text-sm mb-1">{t.cta1}</p>
+          <p className="text-white/60 text-xs mb-4 font-mono">info@forrelief.org</p>
+          <a href="mailto:info@forrelief.org" className="inline-flex items-center gap-2 bg-brand hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-xs transition">
             {l === "ar" ? "تواصل معنا" : l === "fr" ? "Nous Contacter" : l === "tr" ? "İletişim" : "Contact Us"}
           </a>
         </div>
-        <div className="rounded-2xl bg-dashbg border border-line p-6 text-center">
-          <p className="font-semibold text-ink mb-1 text-sm">{t.cta2}</p>
-          <p className="text-muted text-xs mb-4">info@webek.org</p>
-          <a href="mailto:info@webek.org" className="inline-flex items-center gap-2 bg-ink hover:bg-ink/80 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition">
+        <div className="rounded-2xl bg-slate-100 border border-slate-200 text-slate-900 p-6 text-center">
+          <p className="font-bold text-sm mb-1">{t.cta2}</p>
+          <p className="text-slate-500 text-xs mb-4 font-mono">info@webek.org</p>
+          <a href="mailto:info@webek.org" className="inline-flex items-center gap-2 bg-slate-900 text-white font-bold rounded-xl px-5 py-2.5 text-xs transition hover:bg-slate-800">
             WEBEK LTD
           </a>
         </div>
@@ -737,7 +730,6 @@ function LicenseContent({ locale }: { locale: string }) {
     </>
   );
 }
-
 
 // ── How We Use Donations ──────────────────────────────────────
 function HowWeUseDonationsContent({ locale }: { locale: string }) {
@@ -815,8 +807,10 @@ export default function LegalPageContent({ slug, locale }: { slug: string; local
   const Component = COMPONENTS[slug];
   if (!Component) return null;
   return (
-    <div className="max-w-screen-xl mx-auto px-6 py-14">
-      <Component locale={locale} />
+    <div className="bg-slate-50/50 min-h-screen py-12 border-t border-slate-100">
+      <div className="max-w-screen-xl mx-auto px-6">
+        <Component locale={locale} />
+      </div>
     </div>
   );
 }
