@@ -10,7 +10,7 @@ interface Achievement {
   desc_ar: string; desc_en: string; desc_fr: string; desc_tr: string;
 }
 
-function useCountUp(target: number, duration = 2000, started: boolean) {
+function useCountUp(target: number, duration = 2200, started: boolean) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (!started) return;
@@ -27,11 +27,11 @@ function useCountUp(target: number, duration = 2000, started: boolean) {
   return count;
 }
 
-function StatCard({ item, locale, dict, started }: { item: Achievement; locale: string; dict: Record<string, string>; started: boolean }) {
+function StatCard({ item, locale, started }: { item: Achievement; locale: string; started: boolean }) {
   const count = useCountUp(item.value, 2200, started);
   const loc = (["ar","en","fr","tr"].includes(locale) ? locale : "en") as "ar"|"en"|"fr"|"tr";
-  const label = item[`label_${loc}`];
-  const desc = item[`desc_${loc}`];
+  const label = item[`label_${loc}`] || item.label_ar;
+  const desc = item[`desc_${loc}`] || item.desc_ar;
 
   const formatCount = (n: number) => {
     if (item.value >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -40,48 +40,54 @@ function StatCard({ item, locale, dict, started }: { item: Achievement; locale: 
   };
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-line p-8 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col items-center text-center">
-      {/* Background accent - 🌟 يأخذ لون الثيم bg-brand */}
-      <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl bg-brand transition-opacity" />
-      <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-brand opacity-5 group-hover:opacity-10 transition-opacity" />
-
-      {/* Icon - 🌟 لون الثيم مع خلفية مناسبة */}
-      <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 mx-auto bg-cream border border-line text-brand">
-        <Icon name={item.icon} size={26} />
+    <div className="group bg-white rounded-3xl border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center text-center relative overflow-hidden">
+      {/* Top Subtle Line accent */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-brand/20 group-hover:bg-brand transition-colors duration-300" />
+      
+      {/* Icon Badge */}
+      <div className="w-12 h-12 rounded-2xl bg-brand/5 group-hover:bg-brand group-hover:text-white text-brand flex items-center justify-center mb-5 transition-colors duration-300">
+        <Icon name={item.icon || "heart"} size={22} />
       </div>
 
-      {/* Number - 🌟 لون الثيم مع توسيط وترتيب ذكي للرموز */}
-      <div className="flex items-baseline justify-center gap-1 mb-2" dir="ltr">
+      {/* Giant Stat Counter */}
+      <div className="flex items-baseline justify-center gap-0.5 mb-2" dir="ltr">
         {(item.suffix === "%" || item.suffix === "+") && (
-          <span className="font-display text-3xl font-extrabold text-brand">{item.suffix}</span>
+          <span className="font-display text-2xl lg:text-3xl font-extrabold text-brand">{item.suffix}</span>
         )}
         
-        <span className="font-display text-4xl font-extrabold text-brand">
+        <span className="font-display text-4xl lg:text-5xl font-black tracking-tight text-slate-900 group-hover:text-brand transition-colors">
           {formatCount(count)}
         </span>
         
         {item.suffix !== "%" && item.suffix !== "+" && item.suffix !== "" && (
-          <span className="font-display text-3xl font-extrabold text-brand">{item.suffix}</span>
+          <span className="font-display text-2xl lg:text-3xl font-extrabold text-brand ms-0.5">{item.suffix}</span>
         )}
       </div>
 
-      <h3 className="font-display text-lg font-bold text-ink mb-1.5">{label}</h3>
-      <p className="text-muted text-sm leading-relaxed">{desc}</p>
+      {/* Label & Description */}
+      <h3 className="font-display font-extrabold text-slate-900 text-base mb-1">{label}</h3>
+      {desc && <p className="text-slate-500 text-xs leading-relaxed max-w-[200px]">{desc}</p>}
     </div>
   );
 }
 
-export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, data }: { locale: string; dict: Record<string, string>; totalRaised?: number; totalFamilies?: number; data?: any }) { 
+export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, data }: { 
+  locale: string; 
+  dict: Record<string, string>; 
+  totalRaised?: number; 
+  totalFamilies?: number; 
+  data?: any 
+}) { 
   const ref = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
   
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
   
-  const title = data?.headline || data?.title || t("achievements.title", "أثرنا بالأرقام", "Our Impact in Numbers", "Notre Impact en Chiffres", "Rakamlarla Etkimiz");
+  const title = data?.headline || data?.title || t("achievements.title", "أثرنا حتى الآن", "Our Impact So Far", "Notre Impact Jusqu'à Présent", "Bugüne Kadarki Etkimiz");
   const subtitle = data?.subheading || data?.subtitle || data?.description || t("achievements.subtitle", "بشفافية كاملة نشارككم أرقام ما أنجزناه معاً بفضل دعمكم المستمر", "With full transparency, we share the numbers of what we have achieved together thanks to your continued support", "Avec une transparence totale, nous partageons les chiffres de ce que nous avons accompli ensemble", "Tam şeffaflıkla, sürekli desteğiniz sayesinde birlikte başardıklarımızın rakamlarını paylaşıyoruz");
-  
-  // 🌟 القراءة بالكامل من الأدمن (مع التخليص من خاصية اللون الثابت)
+  const eyebrow = data?.eyebrow || t("achievements.eyebrow", "إنجازاتنا", "Our Impact", "Notre Impact", "Etkimiz");
+
   const achievements: Achievement[] = Array.isArray(data?.items) && data.items.length > 0
     ? data.items.map((item: any) => ({
         icon: item.icon || "heart",
@@ -100,12 +106,12 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
         {
           icon: "heart" as const, value: totalFamilies || 0, suffix: "+",
           label_ar: "أسرة مستفيدة", label_en: "Families Helped", label_fr: "Familles Aidées", label_tr: "Yardım Edilen Aile",
-          desc_ar: "أسرة تلقت مساعدات مباشرة", desc_en: "Families received direct aid", desc_fr: "Familles ont reçu une aide directe", desc_tr: "Aile doğrudan yardım aldı",
+          desc_ar: "تلقت مساعدات مباشرة", desc_en: "Received direct aid", desc_fr: "Reçu une aide directe", desc_tr: "Doğrudan yardım aldı",
         },
         {
           icon: "hand-heart" as const, value: totalRaised || 0, suffix: "$",
           label_ar: "إجمالي التبرعات", label_en: "Total Donations", label_fr: "Total des Dons", label_tr: "Toplam Bağış",
-          desc_ar: "دولار جُمعت ووُزِّعت بشفافية", desc_en: "Raised & distributed transparently", desc_fr: "Collectés et distribués en toute transparence", desc_tr: "Şeffaf şekilde toplanıp dağıtıldı",
+          desc_ar: "جُمعت ووُزِّعت بشفافية", desc_en: "Distributed transparently", desc_fr: "Distribués en toute transparence", desc_tr: "Şeffaf şekilde dağıtıldı",
         },
       ];
 
@@ -118,54 +124,48 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
   }, []);
 
   return (
-    <section ref={ref} className="py-20 bg-dashbg relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/20 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/20 to-transparent" />
-      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-brand/3 blur-3xl" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-accent/3 blur-3xl" />
-
+    <section ref={ref} className="py-24 bg-slate-50/60 border-t border-slate-100 relative overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-6 relative z-10">
-        {/* Heading */}
-        <div className="text-center mb-14">
-          <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-[0.3em] uppercase mb-4">
-            <span className="w-6 h-px bg-brand/40 inline-block" />
-            {t("achievements.eyebrow", "إنجازاتنا", "Our Impact", "Notre Impact", "Etkimiz")}
-            <span className="w-6 h-px bg-brand/40 inline-block" />
+        
+        {/* Section Heading */}
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-widest uppercase mb-3 px-3 py-1 bg-brand/5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+            {eyebrow}
           </span>
-          <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-ink mb-4 leading-tight">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
             {title}
           </h2>
-          <p className="text-muted text-lg max-w-2xl mx-auto">
+          <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
             {subtitle}
           </p>
         </div>
 
-        {/* Stats grid */}
+        {/* Stats Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {achievements.map((item, i) => (
-            <StatCard key={i} item={item} locale={locale} dict={dict} started={started} />
+            <StatCard key={i} item={item} locale={locale} started={started} />
           ))}
         </div>
 
-        {/* Bottom trust badges */}
-        <div className="mt-14 flex flex-wrap justify-center gap-8">
+        {/* Bottom Trust Badges Banner */}
+        <div className="mt-16 pt-8 border-t border-slate-200/60 flex flex-wrap justify-center gap-6 sm:gap-10">
           {[
             { icon: "shield-check" as const, ar: "مؤسسة معتمدة ومرخصة", en: "Certified & Licensed NGO", fr: "ONG Certifiée", tr: "Sertifikalı STK" },
             { icon: "globe" as const, ar: "شراكات دولية موثوقة", en: "Trusted Global Partners", fr: "Partenaires Mondiaux", tr: "Güvenilir Ortaklar" },
             { icon: "hand-heart" as const, ar: "شفافية مالية كاملة", en: "Full Financial Transparency", fr: "Transparence Financière", tr: "Finansal Şeffaflık" },
           ].map((b, i) => (
-            <div key={i} className="flex items-center gap-3 text-muted">
-              {/* 🌟 تعديل الأيقونات السفلية لتقرأ من لون الثيم بأمان */}
-              <div className="w-10 h-10 rounded-xl bg-cream border border-line flex items-center justify-center shrink-0">
-                <Icon name={b.icon} size={18} className="text-brand" />
+            <div key={i} className="flex items-center gap-2.5 text-slate-600">
+              <div className="w-8 h-8 rounded-full bg-white border border-slate-200/80 shadow-sm flex items-center justify-center text-brand shrink-0">
+                <Icon name={b.icon} size={15} />
               </div>
-              <span className="text-sm font-semibold">
+              <span className="text-xs font-semibold">
                 {locale === "ar" ? b.ar : locale === "fr" ? b.fr : locale === "tr" ? b.tr : b.en}
               </span>
             </div>
           ))}
         </div>
+
       </div>
     </section>
   );

@@ -93,7 +93,7 @@ export default async function HomePage({ params }: PageProps) {
             return posts.length > 0 ? <NewsSection key={section.id} posts={posts} locale={locale} dict={dict} data={sectionData} /> : null;
 
           case "donation_buttons":
-            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={accentColor} data={sectionData} />;
+            return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={accentColor} primaryColor={primaryColor} data={sectionData} />;
             
           case "stats":
             return (
@@ -111,7 +111,7 @@ export default async function HomePage({ params }: PageProps) {
             return <FaqSection key={section.id} locale={locale} dict={dict} data={sectionData} />;
 
           case "newsletter":
-            return <NewsletterSection key={section.id} locale={locale} dict={dict} accentColor={accentColor} data={sectionData} />;
+            return <NewsletterSection key={section.id} locale={locale} dict={dict} accentColor={accentColor} primaryColor={primaryColor} data={sectionData} />;
 
           default:
             return null;

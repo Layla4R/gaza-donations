@@ -1,9 +1,12 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { formatCurrency } from "@/lib/format";
 import { loadTranslations } from "@/lib/i18n";
 import { getCampaignDetails } from "@/lib/services/campaign.service";
 import CampaignCard from "@/components/blocks/CampaignCard";
+import Icon from "@/components/icons";
+import { categoryMeta } from "@/lib/categories";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
@@ -54,75 +57,163 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
   if (!campaign) notFound();
 
-  const pct = Math.min(100, Math.round((Number(campaign.raisedAmount) / (Number(campaign.goalAmount) || 1)) * 100));
+  const raised = Number(campaign.raisedAmount) || 0;
+  const goal = Number(campaign.goalAmount) || 1;
+  const pct = Math.min(100, Math.round((raised / goal) * 100));
+  const cat = categoryMeta(campaign.category);
+  const p = locale === "ar" ? "" : `/${locale}`;
+
+  const t = (key: string, fallback: string) => dict[key] || fallback;
 
   return (
-    <div className="max-w-screen-xl mx-auto px-6 py-16">
-      {/* Cover Image */}
-      {campaign.coverImage && (
-        <div className="relative h-64 sm:h-96 rounded-2xl overflow-hidden bg-cream mb-8 shadow-xl">
-          <Image src={campaign.coverImage} alt={campaign.displayTitle} fill className="object-cover" />
+    <div className="bg-slate-50/50 min-h-screen pb-24 border-t border-slate-100">
+      <div className="max-w-screen-xl mx-auto px-6 pt-10">
+        
+        {/* Breadcrumb Navigation */}
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-6">
+          <Link href={`${p}/`} className="hover:text-brand transition">{t("nav.home", "الرئيسية")}</Link>
+          <span>/</span>
+          <Link href={`${p}/campaigns`} className="hover:text-brand transition">{t("nav.campaigns", "الحملات")}</Link>
+          <span>/</span>
+          <span className="text-slate-700 truncate max-w-xs">{campaign.displayTitle}</span>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column (Content) */}
-        <div className="md:col-span-2">
-          <h1 className="font-display text-3xl font-extrabold text-ink mb-4">
-            {campaign.displayTitle}
-          </h1>
-          
-          <div className="w-full bg-line rounded-full h-3 mb-2 overflow-hidden">
-            <div className="bg-brand h-3 rounded-full transition-all duration-1000" style={{ width: `${pct}%` }} />
-          </div>
-          
-          <div className="flex justify-between text-sm mb-6">
-            <span className="font-bold text-brand text-lg">
-              {formatCurrency(Number(campaign.raisedAmount), "USD")}
-            </span>
-            <span className="text-muted">
-              {pct}% {dict["campaigns.of_goal"]} {formatCurrency(Number(campaign.goalAmount), "USD")}
+        {/* Hero Banner */}
+        {campaign.coverImage && (
+          <div className="relative h-72 sm:h-[450px] w-full rounded-3xl overflow-hidden bg-slate-100 mb-10 shadow-xl border border-slate-100">
+            <Image 
+              src={campaign.coverImage} 
+              alt={campaign.displayTitle} 
+              fill 
+              className="object-cover" 
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            
+            <span className="absolute top-5 right-5 inline-flex items-center gap-2 bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold rounded-full px-4 py-1.5 shadow-md">
+              <Icon name={cat.icon} size={14} />
+              {cat.label}
             </span>
           </div>
-          
-          <p className="text-ink/80 leading-loose whitespace-pre-line mb-8">
-            {campaign.displayDescription}
-          </p>
+        )}
 
-          {/* Updates Section */}
-          {campaign.updates && campaign.updates.length > 0 && (
-            <div className="space-y-4 mt-8">
-              <h2 className="font-display font-bold text-ink text-xl">
-                {dict["campaigns.updates"] || "التحديثات"}
-              </h2>
-              {campaign.updates.map((u: any) => (
-                <div key={u.id} className="border border-line rounded-xl p-4 bg-cream/50">
-                  <div className="flex justify-between mb-2">
-                    <h3 className="font-bold text-ink">{u.title}</h3>
-                    <span className="text-xs text-muted">{new Date(u.createdAt).toLocaleDateString(locale)}</span>
-                  </div>
-                  <p className="text-muted text-sm">{u.body}</p>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* Main Column */}
+          <div className="lg:col-span-8 space-y-10">
+            
+            {/* Title & Stats */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
+              <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+                {campaign.displayTitle}
+              </h1>
+
+              {/* Progress Overview Bar */}
+              <div className="space-y-3 pt-2">
+                <div className="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden">
+                  <div 
+                    className="bg-brand h-3.5 rounded-full transition-all duration-1000 shadow-sm" 
+                    style={{ width: `${pct}%` }} 
+                  />
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Right Column (Donation Widget / Card) */}
-        <div className="md:sticky md:top-28 md:self-start">
-          <CampaignCard
-            id={campaign.id}
-            slug={campaign.slug}
-            title={campaign.displayTitle}
-            summary={campaign.displaySummary}
-            coverImage={campaign.coverImage}
-            goalAmount={Number(campaign.goalAmount)}
-            raisedAmount={Number(campaign.raisedAmount)}
-            donorCount={campaign.donorCount}
-            category={campaign.category}
-            locale={locale}
-            dict={dict}
-          />
+                <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+                  <div>
+                    <span className="font-display font-black text-2xl sm:text-3xl text-slate-900">
+                      {formatCurrency(raised, "USD")}
+                    </span>
+                    <span className="text-slate-400 text-xs sm:text-sm ms-2">
+                      {t("campaigns.of_goal", "من الهدف")} {formatCurrency(goal, "USD")}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <span className="font-extrabold text-brand bg-brand/10 px-3 py-1 rounded-xl text-xs sm:text-sm">
+                      {pct}%
+                    </span>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-500 flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1 rounded-xl">
+                      <Icon name="heart" size={14} className="text-brand" />
+                      {campaign.donorCount || 0} {t("campaigns.donors", "متبرع")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-4">
+              <h2 className="font-display font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2 border-b border-slate-100 pb-4">
+                <Icon name="file-text" size={20} className="text-brand" />
+                {t("campaigns.about", "عن الحملة")}
+              </h2>
+              <div className="text-slate-700 leading-relaxed text-sm sm:text-base whitespace-pre-line pt-2">
+                {campaign.displayDescription}
+              </div>
+            </div>
+
+            {/* Updates Section */}
+            {campaign.updates && campaign.updates.length > 0 && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
+                <h2 className="font-display font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2 border-b border-slate-100 pb-4">
+                  <Icon name="layers" size={20} className="text-brand" />
+                  {dict["campaigns.updates"] || "تحديثات الميدان"}
+                </h2>
+                <div className="space-y-4">
+                  {campaign.updates.map((u: any) => (
+                    <div key={u.id} className="border border-slate-100 rounded-2xl p-5 bg-slate-50/60 relative">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-bold text-slate-900 text-sm sm:text-base">{u.title}</h3>
+                        <span className="text-xs text-slate-400 font-medium bg-white px-2.5 py-1 rounded-md border border-slate-100">
+                          {new Date(u.createdAt).toLocaleDateString(locale)}
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{u.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trust Badges Bar - Colored with Primary */}
+            <div className="bg-brand text-white rounded-3xl p-6 shadow-lg flex flex-wrap items-center justify-around gap-4 text-center">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Icon name="shield-check" size={18} />
+                <span>{t("donate.secure", "جميع المعاملات مشفرة وآمنة")}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Icon name="hand-heart" size={18} />
+                <span>{t("donate.direct", "أثر مباشر بدون وسيط")}</span>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Sticky Donation Box */}
+          <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
+              <div className="bg-brand p-4 text-white text-center">
+                <p className="text-xs font-bold text-white uppercase tracking-widest">{t("donate.widget_title", "ساهم في تغيير الحياة")}</p>
+              </div>
+              
+              <div className="p-2">
+                <CampaignCard
+                  id={campaign.id}
+                  slug={campaign.slug}
+                  title={campaign.displayTitle}
+                  summary={campaign.displaySummary}
+                  coverImage={campaign.coverImage} // 🌟 إرسال الصورة ليتم عرضها داخل الكارت بشكل ممتاز
+                  goalAmount={Number(campaign.goalAmount)}
+                  raisedAmount={Number(campaign.raisedAmount)}
+                  donorCount={campaign.donorCount}
+                  category={campaign.category}
+                  locale={locale}
+                  dict={dict}
+                />
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

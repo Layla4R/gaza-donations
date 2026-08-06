@@ -5,14 +5,16 @@ import Icon from "@/components/icons";
 interface NewsletterProps {
   locale: string;
   dict: Record<string, string>;
+  primaryColor?: string | null;
   accentColor?: string | null;
   data?: any; 
 }
 
-export default function NewsletterSection({ locale, dict, data }: NewsletterProps) {
+export default function NewsletterSection({ locale, dict, primaryColor, accentColor, data }: NewsletterProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle"|"loading"|"success"|"error">("idle");
 
+  const isRTL = locale === "ar";
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
@@ -23,6 +25,10 @@ export default function NewsletterSection({ locale, dict, data }: NewsletterProp
     "Soyez le premier informé de l'impact de vos dons et des dernières nouvelles de nos campagnes.", 
     "Bağışlarınızın etkisini ve insani kampanyalarımızın son haberlerini ilk öğrenen siz olun."
   );
+
+  // 🌟 الألوان الديناميكية
+  const primary = primaryColor || "var(--color-brand, #0069D2)";
+  const accent = accentColor || "var(--color-accent, #F00F5A)";
 
   async function subscribe(e: React.FormEvent) {
     e.preventDefault();
@@ -40,95 +46,106 @@ export default function NewsletterSection({ locale, dict, data }: NewsletterProp
   }
 
   return (
-    <section className="relative overflow-hidden">
-      {/* Background - 🌟 استخدام لون الثيم الأساسي الديناميكي */}
-      <div className="absolute inset-0 bg-brand" />
-      
-      {/* Decorative elements */}
-      <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-white/5" />
-      <div className="absolute -left-16 -bottom-16 w-72 h-72 rounded-full bg-white/5" />
-      <div className="absolute right-1/4 top-1/2 -translate-y-1/2 w-px h-32 bg-white/10 hidden lg:block" />
-      <div className="absolute left-1/4 top-1/2 -translate-y-1/2 w-px h-32 bg-white/10 hidden lg:block" />
+    <section className="py-20 bg-slate-50/50 border-t border-slate-100">
+      <div className="max-w-screen-xl mx-auto px-6">
+        
+        {/* 🌟 Floating Container Colored by Primary Color */}
+        <div 
+          className="relative overflow-hidden rounded-3xl p-8 sm:p-14 lg:p-16 shadow-2xl text-center transition-colors"
+          style={{ backgroundColor: primary }}
+        >
+          
+          {/* Decorative Subtle Light Effects */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 max-w-screen-xl mx-auto px-6 py-20 text-center">
-        {/* Icon */}
-        <div className="flex items-center justify-center mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center">
-            <Icon name="mail" size={28} className="text-white" />
-          </div>
-        </div>
-
-        {/* Eyebrow */}
-        <p className="text-white/55 font-semibold text-xs tracking-[0.35em] uppercase mb-4">
-          {t("newsletter.eyebrow", "ابقَ على تواصل", "Stay Connected", "Restez Connecté", "Bağlı Kalın")}
-        </p>
-
-        {/* Title */}
-        <h2 className="font-display text-4xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
-          {sectionTitle}
-        </h2>
-
-        {/* Subtitle */}
-        <p className="text-white/65 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-          {sectionSubtitle}
-        </p>
-
-        {/* Form */}
-        {status === "success" ? (
-          <div className="inline-flex items-center gap-3 bg-white/15 border border-white/25 text-white font-bold rounded-2xl px-8 py-4 text-lg backdrop-blur">
-            <div className="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center shrink-0">
-              <Icon name="check" size={18} className="text-white" />
+          <div className="relative z-10 max-w-2xl mx-auto">
+            {/* Icon Badge */}
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 border border-white/20 text-white mb-6 backdrop-blur-md shadow-sm">
+              <Icon name="mail" size={24} />
             </div>
-            {t("newsletter.success",
-              "شكراً! تم تسجيل بريدك بنجاح ✨",
-              "Thank you! You're now subscribed ✨",
-              "Merci ! Vous êtes maintenant abonné ✨",
-              "Teşekkürler! Başarıyla abone oldunuz ✨"
+
+            {/* Eyebrow */}
+            <p className="text-white/70 font-semibold text-xs tracking-widest uppercase mb-3">
+              {t("newsletter.eyebrow", "ابقَ على تواصل", "Stay Connected", "Restez Connecté", "Bağlı Kalın")}
+            </p>
+
+            {/* Title */}
+            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
+              {sectionTitle}
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-white/80 text-sm sm:text-base mb-10 leading-relaxed max-w-lg mx-auto">
+              {sectionSubtitle}
+            </p>
+
+            {/* Form Container */}
+            {status === "success" ? (
+              <div className="inline-flex items-center gap-3 bg-white/20 border border-white/30 text-white font-bold rounded-2xl px-6 py-3.5 text-sm backdrop-blur">
+                <div className="w-6 h-6 rounded-full bg-white text-slate-900 flex items-center justify-center shrink-0">
+                  <Icon name="check" size={14} />
+                </div>
+                {t("newsletter.success",
+                  "شكراً! تم تسجيل بريدك بنجاح ✨",
+                  "Thank you! You're now subscribed ✨",
+                  "Merci ! Vous êtes maintenant abonné ✨",
+                  "Teşekkürler! Başarıyla abone oldunuz ✨"
+                )}
+              </div>
+            ) : (
+              <form onSubmit={subscribe} className="max-w-md mx-auto">
+                <div className="flex flex-col sm:flex-row items-center bg-white rounded-2xl p-1.5 shadow-xl border border-white/20 gap-2">
+                  <div className="relative flex-1 w-full">
+                    <Icon name="mail" size={16} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${isRTL ? "right-4" : "left-4"}`} />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder={t("newsletter.placeholder", "بريدك الإلكتروني...", "Your email address...", "Votre adresse email...", "E-posta adresiniz...")}
+                      className={`w-full bg-transparent text-slate-900 placeholder-slate-400 py-3 text-xs sm:text-sm font-medium focus:outline-none ${isRTL ? "pr-11 pl-4" : "pl-11 pr-4"}`}
+                    />
+                  </div>
+
+                  {/* Submit Button Using Accent Color */}
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="w-full sm:w-auto shrink-0 hover:opacity-90 active:scale-98 disabled:opacity-60 text-white font-bold rounded-xl px-7 py-3 text-xs sm:text-sm shadow-md transition-all flex items-center gap-2 justify-center"
+                    style={{ backgroundColor: accent }}
+                  >
+                    {status === "loading" ? (
+                      "..."
+                    ) : (
+                      <>
+                        <span>{t("newsletter.btn", "اشترك الآن", "Subscribe", "S'abonner", "Abone Ol")}</span>
+                        <Icon name="send" size={14} className={isRTL ? "rotate-180" : ""} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             )}
-          </div>
-        ) : (
-          <form onSubmit={subscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-            <div className="flex-1 relative">
-              <Icon name="mail" size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder={t("newsletter.placeholder", "بريدك الإلكتروني", "Your email address", "Votre adresse email", "E-posta adresiniz")}
-                className="w-full bg-white/10 border-2 border-white/25 hover:border-white/40 focus:border-white/70 text-white placeholder-white/40 rounded-2xl px-5 py-4 pr-12 text-sm font-medium focus:outline-none transition backdrop-blur"
-              />
-            </div>
-            {/* 🌟 زر الاشتراك يستخدم اللون الثانوي الديناميكي */}
-            <button
-              type="submit"
-              disabled={status === "loading"}
-              className="shrink-0 bg-accent hover:opacity-90 disabled:opacity-60 text-white font-bold rounded-2xl px-8 py-4 text-sm shadow-lg transition-all hover:-translate-y-0.5 disabled:hover:translate-y-0 flex items-center gap-2 justify-center"
-            >
-              {status === "loading" ? (
-                <><Icon name="minus" size={16} className="animate-spin" /> ...</>
-              ) : (
-                <>{t("newsletter.btn", "اشترك الآن", "Subscribe Now", "S'abonner", "Abone Ol")}<Icon name="send" size={16} /></>
+
+            {status === "error" && (
+              <p className="mt-3 text-red-200 text-xs font-medium">
+                {t("newsletter.error", "حدث خطأ، حاول مجدداً.", "Something went wrong, please try again.", "Une erreur s'est produite.", "Bir hata oluştu.")}
+              </p>
+            )}
+
+            {/* Trust Note */}
+            <p className="mt-6 text-white/60 text-[11px] flex items-center justify-center gap-1.5">
+              <Icon name="shield-check" size={13} />
+              {t("newsletter.trust", "لن نشارك بريدك مع أي جهة. يمكنك إلغاء الاشتراك في أي وقت.",
+                "We'll never share your email. Unsubscribe anytime.",
+                "Nous ne partagerons jamais votre email. Désabonnez-vous à tout moment.",
+                "E-postanızı asla paylaşmayacağız. İstediğiniz zaman aboneliği iptal edebilirsiniz."
               )}
-            </button>
-          </form>
-        )}
+            </p>
+          </div>
 
-        {status === "error" && (
-          <p className="mt-3 text-red-300 text-sm">
-            {t("newsletter.error", "حدث خطأ، حاول مجدداً.", "Something went wrong, please try again.", "Une erreur s'est produite.", "Bir hata oluştu.")}
-          </p>
-        )}
-
-        {/* Trust note */}
-        <p className="mt-6 text-white/40 text-xs flex items-center justify-center gap-1.5">
-          <Icon name="shield-check" size={13} />
-          {t("newsletter.trust", "لن نشارك بريدك مع أي جهة. يمكنك إلغاء الاشتراك في أي وقت.",
-            "We'll never share your email. Unsubscribe anytime.",
-            "Nous ne partagerons jamais votre email. Désabonnez-vous à tout moment.",
-            "E-postanızı asla paylaşmayacağız. İstediğiniz zaman aboneliği iptal edebilirsiniz."
-          )}
-        </p>
+        </div>
       </div>
     </section>
   );
