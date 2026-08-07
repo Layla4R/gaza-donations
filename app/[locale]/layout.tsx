@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 import SocialSidebar from "@/components/site/SocialSidebar";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { LOCALES, LOCALE_DIR, loadTranslations, type Locale } from "@/lib/i18n";
+import CookieBanner from "@/components/site/CookieBanner";
 
 export const revalidate = 0;
 
@@ -13,12 +15,12 @@ export function generateStaticParams() {
 }
 
 const SLUG_TO_NAV_LABEL: Record<string, Record<string, string>> = {
-  "about":                  { ar:"من نحن",      en:"About Us",    fr:"À Propos",      tr:"Hakkımızda"   },
-  "about-us":               { ar:"من نحن",      en:"About Us",    fr:"À Propos",      tr:"Hakkımızda"   },
-  "contact":                { ar:"اتصل بنا",    en:"Contact",     fr:"Contact",        tr:"İletişim"     },
-  "transparency":           { ar:"الشفافية",    en:"Transparency", fr:"Transparence",  tr:"Şeffaflık"    },
-  "financial-transparency": { ar:"الشفافية",    en:"Transparency", fr:"Transparence",  tr:"Şeffaflık"    },
-  "how-we-work":            { ar:"كيف نعمل",   en:"How We Work",  fr:"Comment ça marche", tr:"Nasıl Çalışırız" },
+  "about":                 { ar:"من نحن",      en:"About Us",    fr:"À Propos",      tr:"Hakkımızda"   },
+  "about-us":              { ar:"من نحن",      en:"About Us",    fr:"À Propos",      tr:"Hakkımızda"   },
+  "contact":               { ar:"اتصل بنا",    en:"Contact",     fr:"Contact",        tr:"İletişim"     },
+  "transparency":          { ar:"الشفافية",    en:"Transparency", fr:"Transparence",  tr:"Şeffاكلية"    },
+  "financial-transparency": { ar:"الشفافية",    en:"Transparency", fr:"Transparence",  tr:"Şeffاكلية"    },
+  "how-we-work":           { ar:"كيف نعمل",   en:"How We Work",  fr:"Comment ça marche", tr:"Nasıl Çalışırız" },
 };
 
 async function getSiteData(locale: string) {
@@ -66,12 +68,55 @@ export default async function LocaleLayout({
   const { pages, settings, dict } = await getSiteData(locale);
   const dir = LOCALE_DIR[locale as Locale] || "rtl";
 
+  const pixelId = settings?.facebookPixelId;
+  const gaId = settings?.gaMeasurementId;
+
   return (
     <div dir={dir} lang={locale} className="flex flex-col min-h-screen">
+      {/* 🌟 Meta (Facebook) Pixel Script */}
+      {pixelId && (
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('consent', 'revoke');
+            fbq('init', '${pixelId}');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+      )}
+
+      {/* 🌟 Google Analytics 4 (GA4) Script - تتبع مباشر وفعال فوراً */}
+      {gaId && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaId}');
+            `}
+          </Script>
+        </>
+      )}
+
       {/* Header is fixed/transparent — always rendered */}
       <SiteHeader navItems={pages} settings={settings} locale={locale} dict={dict} transparent={true} />
+      <CookieBanner locale={locale} />
+      
       {/* pt-0 because header is fixed and hero handles top spacing */}
       <main className="flex-1 pt-20">{children}</main>
+      
       <SiteFooter navItems={pages} settings={settings} locale={locale} dict={dict} />
       <WhatsAppButton phone={settings?.whatsappNumber} />
       <SocialSidebar

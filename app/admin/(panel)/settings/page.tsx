@@ -9,6 +9,8 @@ interface Settings {
   contactEmail: string; contactPhone: string;
   whatsappNumber: string; facebookUrl: string; twitterUrl: string;
   instagramUrl: string; youtubeUrl: string; linkedinUrl: string; tiktokUrl: string;
+  facebookPixelId: string; 
+  gaMeasurementId: string; // 🌟 إضافة حقل تتبع غوغل
   primaryColor: string; accentColor: string;
   heroSlides: string; socialPosition: string;
   enableStripe: boolean; enablePaypal: boolean;
@@ -24,6 +26,8 @@ const DEFAULTS: Settings = {
   contactEmail: "", contactPhone: "",
   whatsappNumber: "", facebookUrl: "", twitterUrl: "",
   instagramUrl: "", youtubeUrl: "", linkedinUrl: "", tiktokUrl: "",
+  facebookPixelId: "", 
+  gaMeasurementId: "", // 🌟 القيمة الافتراضية لحقل غوغل
   primaryColor: "#0069D2", accentColor: "#F00F5A",
   heroSlides: "", socialPosition: "right",
   enableStripe: true, enablePaypal: true,
@@ -288,10 +292,11 @@ export default function AdminSettingsPage() {
           </div>
           <div><label className={lbl}>WhatsApp (international, e.g. 201234567890)</label>
             <input value={settings.whatsappNumber} onChange={e => upd("whatsappNumber", e.target.value)} className={inp} placeholder="201234567890" /></div>
+
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              { k: "facebookUrl",  label: "Facebook",  ph: "https://facebook.com/..." },
-              { k: "twitterUrl",   label: "Twitter / X", ph: "https://x.com/..." },
+              { k: "facebookUrl",   label: "Facebook",   ph: "https://facebook.com/..." },
+              { k: "twitterUrl",    label: "Twitter / X", ph: "https://x.com/..." },
               { k: "instagramUrl", label: "Instagram",  ph: "https://instagram.com/..." },
               { k: "youtubeUrl",   label: "YouTube",    ph: "https://youtube.com/@..." },
               { k: "linkedinUrl",  label: "LinkedIn",   ph: "https://linkedin.com/company/..." },
@@ -300,6 +305,37 @@ export default function AdminSettingsPage() {
               <div key={k}><label className={lbl}>{label}</label>
                 <input value={(settings as any)[k]} onChange={e => upd(k as keyof Settings, e.target.value)} className={inp} placeholder={ph} /></div>
             ))}
+          </div>
+        </section>
+
+        {/* ── Analytics & Tracking ── */}
+        <section className="bg-white rounded-2xl border border-line p-6 space-y-4">
+          <SectionHead icon="globe">Analytics & Tracking</SectionHead>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className={lbl}>Meta (Facebook) Pixel ID</label>
+              <input 
+                value={settings.facebookPixelId || ""} 
+                onChange={e => upd("facebookPixelId", e.target.value)} 
+                className={inp + " font-mono"} 
+                placeholder="123456789012345" 
+              />
+              <p className="text-[11px] text-muted mt-1">
+                Enter Meta Pixel ID for Facebook & Instagram ad tracking.
+              </p>
+            </div>
+            <div>
+              <label className={lbl}>Google Analytics 4 ID</label>
+              <input 
+                value={settings.gaMeasurementId || ""} 
+                onChange={e => upd("gaMeasurementId", e.target.value)} 
+                className={inp + " font-mono"} 
+                placeholder="G-XXXXXXXXXX" 
+              />
+              <p className="text-[11px] text-muted mt-1">
+                Enter GA4 Measurement ID (e.g. G-ABC123XYZ) for Google tracking.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -384,7 +420,7 @@ export default function AdminSettingsPage() {
             <div><label className={lbl}>Client ID</label>
               <input value={settings.paypalClientId} onChange={e => upd("paypalClientId", e.target.value)} className={inp} placeholder="AaBbCc..." /></div>
             <SecretInput label="Client Secret" value={settings.paypalClientSecret}
-              onChange={v => upd("paypalClientSecret", v)} placeholder="••••••" />
+              onChange={v => upd("paypalClientSecret", v)} placeholder="••••••••" />
           </div>
           <div>
             <label className={lbl}>Mode</label>
