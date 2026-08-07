@@ -27,11 +27,13 @@ function useCountUp(target: number, duration = 2200, started: boolean) {
   return count;
 }
 
-function StatCard({ item, locale, started }: { item: Achievement; locale: string; started: boolean }) {
+function StatCard({ item, locale, started, primaryColor }: { item: Achievement; locale: string; started: boolean; primaryColor: string }) {
   const count = useCountUp(item.value, 2200, started);
   const loc = (["ar","en","fr","tr"].includes(locale) ? locale : "en") as "ar"|"en"|"fr"|"tr";
   const label = item[`label_${loc}`] || item.label_ar;
   const desc = item[`desc_${loc}`] || item.desc_ar;
+
+  const [hovered, setHovered] = useState(false);
 
   const formatCount = (n: number) => {
     if (item.value >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -40,27 +42,43 @@ function StatCard({ item, locale, started }: { item: Achievement; locale: string
   };
 
   return (
-    <div className="group bg-white rounded-3xl border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center text-center relative overflow-hidden">
+    <div 
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="group bg-white rounded-3xl border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center text-center relative overflow-hidden"
+    >
       {/* Top Subtle Line accent */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-brand/20 group-hover:bg-brand transition-colors duration-300" />
+      <div 
+        className="absolute top-0 left-0 right-0 h-1 transition-colors duration-300" 
+        style={{ backgroundColor: primaryColor, opacity: hovered ? 1 : 0.2 }}
+      />
       
       {/* Icon Badge */}
-      <div className="w-12 h-12 rounded-2xl bg-brand/5 group-hover:bg-brand group-hover:text-white text-brand flex items-center justify-center mb-5 transition-colors duration-300">
+      <div 
+        className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-colors duration-300"
+        style={{ 
+          backgroundColor: hovered ? primaryColor : `${primaryColor}15`,
+          color: hovered ? "#ffffff" : primaryColor
+        }}
+      >
         <Icon name={item.icon || "heart"} size={22} />
       </div>
 
       {/* Giant Stat Counter */}
       <div className="flex items-baseline justify-center gap-0.5 mb-2" dir="ltr">
         {(item.suffix === "%" || item.suffix === "+") && (
-          <span className="font-display text-2xl lg:text-3xl font-extrabold text-brand">{item.suffix}</span>
+          <span className="font-display text-2xl lg:text-3xl font-extrabold" style={{ color: primaryColor }}>{item.suffix}</span>
         )}
         
-        <span className="font-display text-4xl lg:text-5xl font-black tracking-tight text-slate-900 group-hover:text-brand transition-colors">
+        <span 
+          className="font-display text-4xl lg:text-5xl font-black tracking-tight text-slate-900 transition-colors"
+          style={{ color: hovered ? primaryColor : undefined }}
+        >
           {formatCount(count)}
         </span>
         
         {item.suffix !== "%" && item.suffix !== "+" && item.suffix !== "" && (
-          <span className="font-display text-2xl lg:text-3xl font-extrabold text-brand ms-0.5">{item.suffix}</span>
+          <span className="font-display text-2xl lg:text-3xl font-extrabold ms-0.5" style={{ color: primaryColor }}>{item.suffix}</span>
         )}
       </div>
 
@@ -71,16 +89,20 @@ function StatCard({ item, locale, started }: { item: Achievement; locale: string
   );
 }
 
-export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, data }: { 
+export default function AchievementsSection({ locale, dict, totalRaised = 0, totalFamilies = 0, primaryColor, accentColor, data }: { 
   locale: string; 
   dict: Record<string, string>; 
   totalRaised?: number; 
   totalFamilies?: number; 
+  primaryColor?: string | null;
+  accentColor?: string | null;
   data?: any 
 }) { 
   const ref = useRef<HTMLDivElement>(null);
   const [started, setStarted] = useState(false);
   
+  const primary = primaryColor || "var(--color-brand, #0069D2)";
+
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
   
@@ -129,8 +151,11 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
         
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-widest uppercase mb-3 px-3 py-1 bg-brand/5 rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand" />
+          <span 
+            className="inline-flex items-center gap-2 font-semibold text-xs tracking-widest uppercase mb-3 px-3 py-1 rounded-full"
+            style={{ backgroundColor: `${primary}15`, color: primary }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primary }} />
             {eyebrow}
           </span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
@@ -144,7 +169,7 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
         {/* Stats Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {achievements.map((item, i) => (
-            <StatCard key={i} item={item} locale={locale} started={started} />
+            <StatCard key={i} item={item} locale={locale} started={started} primaryColor={primary} />
           ))}
         </div>
 
@@ -156,7 +181,10 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
             { icon: "hand-heart" as const, ar: "شفافية مالية كاملة", en: "Full Financial Transparency", fr: "Transparence Financière", tr: "Finansal Şeffaflık" },
           ].map((b, i) => (
             <div key={i} className="flex items-center gap-2.5 text-slate-600">
-              <div className="w-8 h-8 rounded-full bg-white border border-slate-200/80 shadow-sm flex items-center justify-center text-brand shrink-0">
+              <div 
+                className="w-8 h-8 rounded-full bg-white border border-slate-200/80 shadow-sm flex items-center justify-center shrink-0"
+                style={{ color: primary }}
+              >
                 <Icon name={b.icon} size={15} />
               </div>
               <span className="text-xs font-semibold">

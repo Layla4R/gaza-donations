@@ -104,6 +104,8 @@ export default async function HomePage({ params }: PageProps) {
                 totalRaised={stats?.total || 0}
                 totalFamilies={stats?.families || 0}
                 data={sectionData}
+                accentColor={accentColor} 
+                primaryColor={primaryColor} 
               />
             );
             
