@@ -224,7 +224,7 @@ export default function AdminSettingsPage() {
   if (!settings) return null;
 
   return (
-    <div className="p-6 sm:p-8 max-w-3xl pb-24">
+    <div className="p-6 sm:p-8 max-w-5xl mx-auto w-full pb-24">
       <div className="flex items-center justify-between mb-1">
         <h1 className="font-display text-2xl font-extrabold text-ink">Settings</h1>
         {isDirty && (
