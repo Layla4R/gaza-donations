@@ -275,7 +275,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       },
     ],
   },
-  {
+ {
     type: "stories",
     label: "Success Stories",
     description: "Testimonials and impact stories from beneficiaries",
@@ -288,11 +288,13 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
           title: "The Abu Yousef Family",
           body: "Thanks to your donations, the Abu Yousef family received a food basket and clean water supply for over two weeks.",
           image: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?q=80&w=600",
+          videoUrl: "",
         },
         {
           title: "Mobile Medical Clinic",
           body: "A mobile clinic was equipped with essential medical supplies to serve more than 500 families monthly.",
           image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=600",
+          videoUrl: "",
         },
       ],
     },
@@ -303,7 +305,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         itemFields: [
           { key: "title", label: "Name / Title", type: "text" },
           { key: "body", label: "Story Text", type: "textarea" },
-          { key: "image", label: "Photo", type: "image" },
+          { key: "image", label: "Cover Photo", type: "image" },
+          { key: "videoUrl", label: "Upload Video / Video URL", type: "image", hint: "Upload an MP4 video or paste URL" },
         ],
       },
     ],
