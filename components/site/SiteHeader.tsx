@@ -75,9 +75,6 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
           <Link href={`${p}/news`} className={navLinkCls}>
             {t("nav.news","الأخبار","News","Actualités","Haberler")}
           </Link>
-          <Link href={`${p}/contact`} className={navLinkCls}>
-            {t("nav.contact","اتصل بنا","Contact","Contact","İletişim")}
-          </Link>
         </nav>
 
         {/* Actions */}
