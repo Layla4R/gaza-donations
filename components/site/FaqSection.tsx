@@ -24,7 +24,7 @@ export default function FaqSection({
   if (!title && items.length === 0) return null;
 
   return (
-    <section className="py-24 bg-slate-50/50 border-t border-slate-100">
+    <section className="py-6 bg-slate-50/50 border-t border-slate-100">
       <div className="max-w-screen-xl mx-auto px-6">
         
         {/* Header */}

@@ -7,6 +7,7 @@ import DonateWidget from "@/components/site/DonateWidget";
 import FaqSection from "@/components/site/FaqSection";
 import AchievementsSection from "@/components/site/AchievementsSection";
 import NewsletterSection from "@/components/site/NewsletterSection";
+import AboutOverviewSection from "@/components/blocks/AboutOverviewSection"; // 🌟 استيراد مكون المكون
 import type { Metadata } from "next";
 
 export const revalidate = 0;
@@ -83,6 +84,15 @@ export default async function HomePage({ params }: PageProps) {
                 accentColor={accentColor}
                 primaryColor={primaryColor}
                 data={sectionData}
+              />
+            );
+
+          case "about_overview":
+            return (
+              <AboutOverviewSection 
+                key={section.id} 
+                data={sectionData} 
+                locale={locale} 
               />
             );
 

@@ -146,7 +146,7 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
   }, []);
 
   return (
-    <section ref={ref} className="py-24 bg-slate-50/60 border-t border-slate-100 relative overflow-hidden">
+    <section ref={ref} className="py-6 bg-slate-50/60 border-t border-slate-100 relative overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-6 relative z-10">
         
         {/* Section Heading */}

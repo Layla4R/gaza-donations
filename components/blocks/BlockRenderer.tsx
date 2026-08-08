@@ -9,7 +9,7 @@ import NewsletterForm from "@/components/blocks/NewsletterForm";
 import CampaignCard from "@/components/blocks/CampaignCard";
 import Icon from "@/components/icons";
 import CountUp from "@/components/blocks/CountUp";
-
+import AboutOverviewSection from "./AboutOverviewSection";
 import type { CampaignLite } from "@/lib/pageData";
 
 interface RendererContext {
@@ -111,6 +111,14 @@ export default function BlockRenderer({
             </div>
           </div>
         </section>
+      );
+
+    case "about_overview":
+      return (
+        <AboutOverviewSection 
+          data={p} 
+          locale={context?.locale || "ar"} 
+        />
       );
 
     case "stats":

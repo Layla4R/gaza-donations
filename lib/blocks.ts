@@ -64,7 +64,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       {
         key: "slides", 
         label: "Slider Images", 
-        type: "list", // هنا يكمن السحر: تحويله إلى مصفوفة قابلة للإضافة
+        type: "list",
         itemFields: [
           { key: "title", label: "Headline", type: "text", placeholder: "Main hero title" },
           { key: "subtitle", label: "Subheading", type: "textarea", placeholder: "Supporting description text" },
@@ -74,6 +74,71 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         ]
       }
     ],
+  },
+  {
+    type: "about_overview",
+    label: "About Overview",
+    description: "Foundation cards (Establishment, Vision, Mission, Leadership)",
+    icon: "globe",
+    category: "content",
+    defaultProps: {
+      heading_ar: "مؤسسة 4Relief الإنسانية",
+      heading_en: "4Relief Humanitarian Foundation",
+      quote_ar: "سيكون هدفنا ورسالتنا السعي جاهدين لجعل هذا العمل الإنساني قائماً على البُعد الإنساني المحض",
+      quote_en: "Our goal and mission is to strive towards making this relief work purely driven by human dignity",
+      cards: [
+        {
+          title_ar: "التأسيس",
+          title_en: "Establishment",
+          desc_ar: "تأسست المؤسسة لتكون جسراً إنسانياً موثوقاً يوصل المساعدات الإغاثية والمالية لمستحقيها ببالغ الشفافية والسرعة.",
+          desc_en: "Founded to serve as a trusted bridge delivering relief and financial aid with maximum transparency.",
+          image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=600",
+          icon: "globe"
+        },
+        {
+          title_ar: "رؤيتنا",
+          title_en: "Our Vision",
+          desc_ar: "أن نكون المنصة الإنسانية الأكثر أثرًا وشفافية في تقديم الإغاثة والتمكين المستدام للمجتمعات المتضررة حول العالم.",
+          desc_en: "To be the most impactful and transparent humanitarian platform providing sustainable empowerment worldwide.",
+          image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=600",
+          icon: "check"
+        },
+        {
+          title_ar: "رسالتنا",
+          title_en: "Our Mission",
+          desc_ar: "التنظيم والتمكين والإشراف المباشر على الحملات الإغاثية من خلال عمل مؤسسي متميز يتوافق مع أعلى المعايير الدولية.",
+          desc_en: "Directing, organizing, and supervising relief campaigns through excellent institutional work.",
+          image: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=600",
+          icon: "mail"
+        },
+        {
+          title_ar: "إدارة المؤسسة",
+          title_en: "Leadership",
+          desc_ar: "فريق عمل متخصص ونخبة من الاستشاريين والمشرفين الميدانيين لضمان وصول كل دولار لتغطية الاحتياجات الفعلية.",
+          desc_en: "A dedicated team of experts and field supervisors ensuring every donation covers actual needs directly.",
+          image: "https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?q=80&w=600",
+          icon: "settings"
+        }
+      ]
+    },
+    fields: [
+      { key: "heading_ar", label: "Main Heading (Arabic)", type: "text" },
+      { key: "heading_en", label: "Main Heading (English)", type: "text" },
+      { key: "quote_ar", label: "Quote Message (Arabic)", type: "textarea" },
+      { key: "quote_en", label: "Quote Message (English)", type: "textarea" },
+      {
+        key: "cards",
+        label: "Cards List",
+        type: "list",
+        itemFields: [
+          { key: "title_ar", label: "Card Title (Arabic)", type: "text" },
+          { key: "title_en", label: "Card Title (English)", type: "text" },
+          { key: "desc_ar", label: "Description (Arabic)", type: "textarea" },
+          { key: "desc_en", label: "Description (English)", type: "textarea" },
+          { key: "image", label: "Card Photo", type: "image" }
+        ]
+      }
+    ]
   },
   {
     type: "stats",
