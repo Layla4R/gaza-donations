@@ -255,23 +255,28 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   },
   {
     type: "gallery",
-    label: "Photo Gallery",
-    description: "Masonry or grid image gallery",
+    label: "Photo & Video Gallery",
+    description: "Display a collection of photos and videos",
     icon: "image",
     category: "media",
     defaultProps: {
-      title: "Snapshots from the Field",
-      images: [
-        { url: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800" },
-        { url: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?q=80&w=800" },
-        { url: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800" },
+      title: "معرض الصور والفيديوهات",
+      items: [
+        { url: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=800", type: "image" },
+        { url: "https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?q=80&w=800", type: "image" },
+        { url: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800", type: "image" },
       ],
     },
     fields: [
-      { key: "title", label: "Title", type: "text" },
+      { key: "title", label: "Section Title", type: "text" },
       {
-        key: "images", label: "Images", type: "list",
-        itemFields: [{ key: "url", label: "Image URL", type: "image" }],
+        key: "items",
+        label: "Media Items (Photos & Videos)",
+        type: "list",
+        itemFields: [
+          { key: "url", label: "Upload Image/Video or Paste Link", type: "image" },
+          { key: "caption", label: "Caption / Description (Optional)", type: "text" }
+        ],
       },
     ],
   },

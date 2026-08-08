@@ -287,25 +287,59 @@ export default function BlockRenderer({
         </div>
       );
 
-    case "gallery":
+case "gallery":
       return (
-        <section className="py-20 sm:py-24 bg-slate-50/50 border-t border-slate-100">
+        <section className="py-12 bg-slate-50/50 border-t border-slate-100">
           <div className="max-w-screen-xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <Eyebrow className="justify-center">لقطات من الميدان</Eyebrow>
-              {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{p.title}</h2>}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {(p.images || []).map((img: any, i: number) => (
-                <div key={i} className="relative h-44 sm:h-64 rounded-3xl overflow-hidden bg-slate-100 shadow-sm border border-slate-100 group">
-                  <Image
-                    src={typeof img === "string" ? img : img.url}
-                    alt=""
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-              ))}
+            {p.title && (
+              <div className="text-center max-w-2xl mx-auto mb-10">
+                <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-widest uppercase mb-2 px-3 py-1 bg-brand/5 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+                  معرض الإنجازات
+                </span>
+                <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                  {p.title}
+                </h2>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(p.items || p.images || []).map((item: any, i: number) => {
+                const url = typeof item === "string" ? item : item.url || item.src;
+                if (!url) return null;
+
+                const isVideo = url.endsWith(".mp4") || url.endsWith(".webm") || url.includes("youtube.com") || url.includes("youtu.be");
+
+                return (
+                  <div key={i} className="group relative h-64 rounded-3xl overflow-hidden bg-slate-900 shadow-md border border-slate-100 flex flex-col justify-end">
+                    {isVideo ? (
+                      url.includes("youtube.com") || url.includes("youtu.be") ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${url.includes("v=") ? url.split("v=")[1]?.split("&")[0] : url.split("/").pop()}`}
+                          title="Video"
+                          className="w-full h-full border-0"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <video src={url} controls className="w-full h-full object-cover" />
+                      )
+                    ) : (
+                      <Image
+                        src={url}
+                        alt={item.caption || ""}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    )}
+
+                    {item.caption && !isVideo && (
+                      <div className="relative z-10 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-xs font-medium">
+                        {item.caption}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
