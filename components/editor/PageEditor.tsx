@@ -198,11 +198,46 @@ export default function PageEditor({
           <span className="text-[#D1D5DB]">/</span>
           <input value={title} onChange={e => setTitle(e.target.value)}
             className="text-[#111] font-semibold text-sm bg-transparent focus:outline-none border-b border-transparent focus:border-[#6366F1] pb-0.5 min-w-[140px] max-w-[280px] transition-colors" />
-          {isTranslation && (
-            <span className="text-[11px] bg-amber-100 text-amber-700 border border-amber-200 rounded-full px-2.5 py-0.5 font-semibold shrink-0">
-              {locale.toUpperCase()} Translation
-            </span>
-          )}
+      {isTranslation && (
+  <div className="flex items-center gap-2">
+    <button
+      type="button"
+      onClick={async () => {
+        if (confirm("هل تريد نسخ جميع أقسام العربية وترجمتها تلقائياً عبر Google Translate؟")) {
+          try {
+            setSaving(true);
+            const res = await adminFetch(`/api/admin/pages/${page.id}`);
+            if (!res.ok) throw new Error("فشل جلب الصفحة الأصلية");
+            
+            const data = await res.json();
+            const originalSections = data.page?.sections || data.sections || [];
+            const transRes = await adminFetch("/api/admin/translate", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ sections: originalSections, targetLang: locale }),
+            });
+
+            if (!transRes.ok) throw new Error("فشلت عملية الترجمة");
+
+            const transData = await transRes.json();
+            if (transData.sections) {
+              setSections(transData.sections);
+              setIsDirty(true);
+              alert(`تمت الترجمة التلقائية إلى اللغة (${locale.toUpperCase()}) بنجاح!`);
+            }
+          } catch (err: any) {
+            alert(err.message || "حدث خطأ أثناء الترجمة التلقائية");
+          } finally {
+            setSaving(false);
+          }
+        }
+      }}
+      className="px-3 py-1.5 text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg transition flex items-center gap-1.5 shrink-0 shadow-sm"
+    >
+      <span>✨ ترجمة تلقائية (Google)</span>
+    </button>
+  </div>
+)}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
