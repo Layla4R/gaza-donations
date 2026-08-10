@@ -195,17 +195,17 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
                   {/* زر التبرع */}
 <div className="p-5 pt-0 mt-auto">
   <Link
-    href="/donate"
+    href={`${p}/donate`}
     className="w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm"
   >
     <Icon name="heart" size={14} />
     <span>
-      {t(
+      {item.buttonText || t(
         "news.contribute_now",
         "ساهم معنا الآن",
-        "Contribute Now",
-        "Contribuer المداخيل",
-        "شكل التبرع Şimdi Katılın"
+        "Donate Now",
+        "Faites un don",
+        "Şimdi Bağış Yapın"
       )}
     </span>
   </Link>
