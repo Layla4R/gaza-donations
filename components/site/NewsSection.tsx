@@ -193,15 +193,23 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
                   </div>
 
                   {/* زر التبرع */}
-                  <div className="p-5 pt-0 mt-auto">
-                    <Link
-                      href="/donate"
-                      className="w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm"
-                    >
-                      <Icon name="heart" size={14} />
-                      <span>ساهم معنا الآن</span>
-                    </Link>
-                  </div>
+<div className="p-5 pt-0 mt-auto">
+  <Link
+    href="/donate"
+    className="w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm"
+  >
+    <Icon name="heart" size={14} />
+    <span>
+      {t(
+        "news.contribute_now",
+        "ساهم معنا الآن",
+        "Contribute Now",
+        "Contribuer المداخيل",
+        "شكل التبرع Şimdi Katılın"
+      )}
+    </span>
+  </Link>
+</div>
                 </div>
               </div>
             );
