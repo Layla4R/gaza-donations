@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/icons";
@@ -22,7 +22,6 @@ function cleanMarkdown(text: string) {
 }
 
 function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: string; title: string }) {
-  // 1. إذا وُجد فيديو مرفوع أو رابط فيديو
   if (videoUrl) {
     if (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be")) {
       const embedId = videoUrl.includes("v=")
@@ -39,7 +38,6 @@ function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: stri
       );
     }
 
-    // فيديو مرفوع من جهازك (محتوى محلي)
     return (
       <video
         src={videoUrl}
@@ -47,12 +45,11 @@ function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: stri
         controls
         playsInline
         preload="metadata"
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover bg-black"
       />
     );
   }
 
-  // 2. إذا وُجدت صورة فقط
   if (image) {
     return (
       <Image
@@ -64,7 +61,6 @@ function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: stri
     );
   }
 
-  // 3. افتراضي
   return (
     <div className="w-full h-full flex items-center justify-center bg-slate-50 text-brand/20">
       <Icon name="file-text" size={32} />
@@ -85,30 +81,49 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
   const hasAdminStories = adminStories.length > 0;
   const displayItems = hasAdminStories ? adminStories : posts;
 
-  const [active, setActive] = useState(0);
-  const [visibleCount, setVisibleCount] = useState(3);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // تحديث حالة الأسهم عند التمرير
+  const checkScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    
+    // التعامل مع اتجاه RTL بالنسبة لـ Scroll
+    const absScroll = Math.abs(scrollLeft);
+    setCanScrollLeft(absScroll > 10);
+    setCanScrollRight(absScroll + clientWidth < scrollWidth - 10);
+  };
 
   useEffect(() => {
-    function handleResize() {
-      if (window.innerWidth < 640) setVisibleCount(1);
-      else if (window.innerWidth < 1024) setVisibleCount(2);
-      else setVisibleCount(3);
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.addEventListener("scroll", checkScroll);
+      checkScroll();
     }
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    return () => el?.removeEventListener("scroll", checkScroll);
+  }, [displayItems]);
+
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollContainerRef.current) return;
+    const { clientWidth } = scrollContainerRef.current;
+    
+    // مسافة التمرير (عرض الكرت + الفجوة)
+    const scrollAmount = clientWidth * 0.85;
+    const multiplier = direction === "right" ? (isRTL ? -1 : 1) : (isRTL ? 1 : -1);
+
+    scrollContainerRef.current.scrollBy({
+      left: scrollAmount * multiplier,
+      behavior: "smooth",
+    });
+  };
 
   if (displayItems.length === 0) return null;
 
-  const total = displayItems.length;
-  const maxIdx = Math.max(0, total - visibleCount);
-  const cardWidthPct = 100 / visibleCount;
-  const translateX = -1 * active * cardWidthPct;
-
   return (
-    <section className="py-12 bg-white border-t border-slate-100">
-      <div className="max-w-screen-xl mx-auto px-6">
+    <section className="py-12 bg-white border-t border-slate-100 overflow-hidden">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
         
         {/* Header */}
         <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
@@ -122,80 +137,75 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
             </h2>
           </div>
 
-          {total > visibleCount && (
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setActive(a => Math.max(0, a - 1))}
-                disabled={active === 0}
-                className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-brand hover:text-white hover:border-brand disabled:opacity-30 transition-all shadow-sm">
-                <Icon name={isRTL ? "arrow-up" : "arrow-down"} size={14} className={isRTL ? "-rotate-90" : "rotate-90"} />
-              </button>
-              <button
-                onClick={() => setActive(a => Math.min(maxIdx, a + 1))}
-                disabled={active >= maxIdx}
-                className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-brand hover:text-white hover:border-brand disabled:opacity-30 transition-all shadow-sm">
-                <Icon name={isRTL ? "arrow-down" : "arrow-up"} size={14} className={isRTL ? "-rotate-90" : "rotate-90"} />
-              </button>
-            </div>
-          )}
+          {/* أسهم التمرير للجميع (الموبايل والسطح المكتب) */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => scroll(isRTL ? "right" : "left")}
+              aria-label="Previous"
+              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm active:scale-95">
+              <Icon name={isRTL ? "arrow-left" : "arrow-up"} size={16} className={isRTL ? "" : "-rotate-90"} />
+            </button>
+            <button
+              onClick={() => scroll(isRTL ? "left" : "right")}
+              aria-label="Next"
+              className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-brand hover:text-white hover:border-brand transition-all shadow-sm active:scale-95">
+              <Icon name={isRTL ? "arrow-down" : "arrow-left"} size={16} className={isRTL ? "-rotate-90" : "rotate-180"} />
+            </button>
+          </div>
         </div>
 
-        {/* Carousel Container */}
-        <div className="overflow-hidden p-1 -m-1">
-          <div
-            className="flex transition-transform duration-500 ease-out items-stretch"
-            style={{ transform: `translateX(${translateX}%)`, gap: "20px" }}
-          >
-            {displayItems.map((item: any, i: number) => {
-              const key = item.id || i;
-              const title = item.title || item.name;
-              const rawDesc = hasAdminStories ? (item.body || item.text) : item.excerpt;
-              const description = cleanMarkdown(rawDesc);
-              const image = hasAdminStories ? (item.image || item.photo) : item.coverImage;
-              const videoUrl = item.videoUrl;
+        {/* Carousel Container (Native Smooth Horizontal Scroll) */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex gap-5 overflow-x-auto scrollbar-none snap-x snap-mandatory py-2 px-1 -mx-1 transition-all"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {displayItems.map((item: any, i: number) => {
+            const key = item.id || i;
+            const title = item.title || item.name;
+            const rawDesc = hasAdminStories ? (item.body || item.text) : item.excerpt;
+            const description = cleanMarkdown(rawDesc);
+            const image = hasAdminStories ? (item.image || item.photo) : item.coverImage;
+            const videoUrl = item.videoUrl;
 
-              return (
-                <div
-                  key={key}
-                  style={{
-                    width: `calc(${cardWidthPct}% - ${(visibleCount - 1) * 20 / visibleCount}px)`,
-                    flexShrink: 0,
-                  }}
-                >
-                  <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full justify-between">
-                    <div>
-                      {/* منطقة ميديا الفيديو أو الصورة */}
-                      <div className="relative h-52 w-full overflow-hidden bg-slate-900 shrink-0">
-                        <CardMedia videoUrl={videoUrl} image={image} title={title} />
-                      </div>
-
-                      {/* تفاصيل القصة */}
-                      <div className="p-5">
-                        <h3 className="font-display font-bold text-base text-slate-900 mb-3 leading-snug">
-                          {title}
-                        </h3>
-
-                        <div className="text-slate-600 text-xs leading-relaxed max-h-36 overflow-y-auto pr-1 space-y-2 text-justify">
-                          {description}
-                        </div>
-                      </div>
+            return (
+              <div
+                key={key}
+                className="snap-start shrink-0 w-[88%] sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] transition-all"
+              >
+                <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full justify-between">
+                  <div>
+                    {/* الميديا (فيديو أو صورة) */}
+                    <div className="relative h-52 w-full overflow-hidden bg-slate-900 shrink-0">
+                      <CardMedia videoUrl={videoUrl} image={image} title={title} />
                     </div>
 
-                    {/* زر التبرع */}
-                    <div className="p-5 pt-0 mt-auto">
-                      <Link
-                        href="/donate"
-                        className="w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm"
-                      >
-                        <Icon name="heart" size={14} />
-                        <span>ساهم معنا الآن</span>
-                      </Link>
+                    {/* المحتوى */}
+                    <div className="p-5">
+                      <h3 className="font-display font-bold text-base text-slate-900 mb-3 leading-snug">
+                        {title}
+                      </h3>
+
+                      <div className="text-slate-600 text-xs leading-relaxed max-h-36 overflow-y-auto pr-1 space-y-2 text-justify">
+                        {description}
+                      </div>
                     </div>
                   </div>
+
+                  {/* زر التبرع */}
+                  <div className="p-5 pt-0 mt-auto">
+                    <Link
+                      href="/donate"
+                      className="w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm"
+                    >
+                      <Icon name="heart" size={14} />
+                      <span>ساهم معنا الآن</span>
+                    </Link>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
 
       </div>
