@@ -1,4 +1,4 @@
-import { getSupabaseOrNull, getSupabase } from "./supabase";
+import { getSupabaseOrNull } from "./supabase";
 
 export interface PageData {
   id: string;
@@ -13,6 +13,7 @@ export interface CampaignLite {
   slug: string;
   title: string;
   summary: string;
+  description?: string;
   coverImage: string | null;
   goalAmount: number;
   raisedAmount: number;
@@ -67,14 +68,52 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
   };
 }
 
-export async function getCampaignsLite(): Promise<CampaignLite[]> {
+/**
+ * Get active campaigns with automatic translation fallback based on locale.
+ */
+export async function getCampaignsLite(locale = "ar"): Promise<CampaignLite[]> {
   const supabase = getSupabaseOrNull();
   if (!supabase) return [];
-  const { data } = await supabase
-    .from("Campaign")
-    .select("id, slug, title, summary, coverImage, goalAmount, raisedAmount, donorCount, category")
-    .eq("isActive", true)
-    .order("isFeatured", { ascending: false })
-    .limit(6);
-  return (data || []) as CampaignLite[];
+
+  try {
+    const { data: campaigns } = await supabase
+      .from("Campaign")
+      .select("id, slug, title, summary, description, coverImage, goalAmount, raisedAmount, donorCount, category, isFeatured")
+      .eq("isActive", true)
+      .order("isFeatured", { ascending: false })
+      .limit(6);
+
+    if (!campaigns || campaigns.length === 0) return [];
+
+    // إذا كانت اللغة عربية، إرجاع الحملات كما هي
+    if (locale === "ar") return campaigns as CampaignLite[];
+
+    // جلب الترجمات الخاصة باللغة المحددة
+    const campaignIds = campaigns.map((c) => c.id);
+    const { data: translations } = await supabase
+      .from("CampaignTranslation")
+      .select("campaignId, title, summary, description")
+      .in("campaignId", campaignIds)
+      .eq("locale", locale);
+
+    if (!translations || translations.length === 0) return campaigns as CampaignLite[];
+
+    const transMap = new Map(translations.map((t) => [t.campaignId, t]));
+
+    // دمج الترجمة إن وجدت
+    return campaigns.map((campaign) => {
+      const trans = transMap.get(campaign.id);
+      if (!trans) return campaign;
+
+      return {
+        ...campaign,
+        title: trans.title || campaign.title,
+        summary: trans.summary || campaign.summary,
+        description: trans.description || campaign.description,
+      };
+    }) as CampaignLite[];
+  } catch (error) {
+    console.error("Error loading campaigns with translations:", error);
+    return [];
+  }
 }
