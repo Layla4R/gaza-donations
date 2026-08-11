@@ -91,37 +91,47 @@ export default function SiteFooter({ navItems, settings, locale, dict }: {
           </Link>
         </div>
 
-        {/* Quick links */}
-        <div>
-          <div className="font-bold text-brand-light mb-5 text-sm tracking-[0.2em] uppercase">
-            {d("footer.quick_links", { ar: "روابط سريعة", en: "Quick Links", fr: "Liens Rapides", tr: "Hızlı Bağlantılar" })}
-          </div>
-          <ul className="space-y-2.5 text-sm text-white/65">
-            {navItems.map(item => (
-              <li key={item.slug}>
-                <Link href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
-                  className="flex items-center gap-2 hover:text-white transition group">
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover:bg-white transition" />
-                  {item.slug === "home"
-                    ? d("nav.home", { ar: "الرئيسية", en: "Home", fr: "Accueil", tr: "Ana Sayfa" })
-                    : item.title}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link href={`${p}/campaigns`} className="flex items-center gap-2 hover:text-white transition group">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover:bg-white transition" />
-                {d("nav.campaigns", { ar: "الحملات", en: "Campaigns", fr: "Campagnes", tr: "Kampanyalar" })}
-              </Link>
-            </li>
-            <li>
-              <Link href={`${p}/news`} className="flex items-center gap-2 hover:text-white transition group">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover:bg-white transition" />
-                {d("nav.news", { ar: "الأخبار", en: "News", fr: "Actualités", tr: "Haberler" })}
-              </Link>
-            </li>
-          </ul>
-        </div>
+       {/* Quick links */}
+<div>
+  <div className="font-bold text-brand-light mb-5 text-sm tracking-[0.2em] uppercase">
+    {d("footer.quick_links", { ar: "روابط سريعة", en: "Quick Links", fr: "Liens Rapides", tr: "Hızlı Bağlantılar" })}
+  </div>
+  <ul className="space-y-2.5 text-sm text-white/65">
+    {navItems.map(item => {
+      // ترجمة العنوان آلياً
+      const navKey = `nav.${item.slug}`;
+      const translatedTitle = dict[navKey] || (
+        item.slug === "home" ? d("nav.home", { ar: "الرئيسية", en: "Home", fr: "Accueil", tr: "Ana Sayfa" }) :
+        item.slug === "about" || item.slug === "about-us" ? d("nav.about", { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" }) :
+        item.slug === "transparency" ? d("nav.transparency", { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" }) :
+        item.slug === "contact" ? d("nav.contact", { ar: "اتصل بنا", en: "Contact", fr: "Contact", tr: "İletişim" }) :
+        item.title
+      );
+
+      return (
+        <li key={item.slug}>
+          <Link href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
+            className="flex items-center gap-2 hover:text-white transition group">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover:bg-white transition" />
+            {translatedTitle}
+          </Link>
+        </li>
+      );
+    })}
+    <li>
+      <Link href={`${p}/campaigns`} className="flex items-center gap-2 hover:text-white transition group">
+        <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover:bg-white transition" />
+        {d("nav.campaigns", { ar: "الحملات", en: "Campaigns", fr: "Campagnes", tr: "Kampanyalar" })}
+      </Link>
+    </li>
+    <li>
+      <Link href={`${p}/news`} className="flex items-center gap-2 hover:text-white transition group">
+        <span className="w-1.5 h-1.5 rounded-full bg-white/40 group-hover:bg-white transition" />
+        {d("nav.news", { ar: "الأخبار", en: "News", fr: "Actualités", tr: "Haberler" })}
+      </Link>
+    </li>
+  </ul>
+</div>
 
         {/* Legal */}
         <div>
