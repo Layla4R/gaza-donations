@@ -18,30 +18,76 @@ interface Props {
 
 export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseSummary, baseDescription }: Props) {
   const [activeLocale, setActiveLocale] = useState("en");
-  const [translations, setTranslations] = useState<Record<string, any>>({});
   const [form, setForm] = useState({ title: "", summary: "", description: "" });
   const [loading, setLoading] = useState(false);
   const [loadingLocale, setLoadingLocale] = useState(false);
+  const [translating, setTranslating] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [hasTranslation, setHasTranslation] = useState(false);
 
   async function loadTranslation(locale: string) {
     setLoadingLocale(true);
-    const res = await adminFetch(`/api/admin/campaigns/translations?campaignId=${campaignId}&locale=${locale}`);
-    const d = await res.json();
-    if (d.translation) {
-      setForm({ title: d.translation.title, summary: d.translation.summary, description: d.translation.description });
-      setHasTranslation(true);
-    } else {
-      // Pre-fill with base (Arabic) as starting point
+    try {
+      const res = await adminFetch(`/api/admin/campaigns/translations?campaignId=${campaignId}&locale=${locale}`);
+      const d = await res.json();
+      if (d.translation) {
+        setForm({ title: d.translation.title, summary: d.translation.summary, description: d.translation.description });
+        setHasTranslation(true);
+      } else {
+        // Pre-fill with base (Arabic) as starting point
+        setForm({ title: baseTitle, summary: baseSummary, description: baseDescription });
+        setHasTranslation(false);
+      }
+    } catch {
       setForm({ title: baseTitle, summary: baseSummary, description: baseDescription });
-      setHasTranslation(false);
+    } finally {
+      setLoadingLocale(false);
+      setIsDirty(false);
     }
-    setLoadingLocale(false); // Always reset loading
   }
 
   useEffect(() => { loadTranslation(activeLocale); }, [activeLocale, campaignId]);
+
+  // 🌟 دالة الترجمة التلقائية بضغطة زر عبر API الترجمة
+  // 🌟 دالة الترجمة التلقائية المعدلة للحملات
+  async function autoTranslate() {
+    setTranslating(true);
+    setStatus(null);
+    try {
+      const res = await adminFetch("/api/admin/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sections: [baseTitle, baseSummary, baseDescription],
+          targetLang: activeLocale,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Translation request failed");
+      }
+      
+      const d = await res.json();
+
+      if (d.sections && Array.isArray(d.sections)) {
+        setForm({
+          title: d.sections[0] || baseTitle,
+          summary: d.sections[1] || baseSummary,
+          description: d.sections[2] || baseDescription,
+        });
+        setIsDirty(true);
+        setStatus({ ok: true, msg: "✨ Translated automatically! Click 'Save Translation' to confirm." });
+      } else {
+        throw new Error("Failed to parse translated text");
+      }
+    } catch (err: any) {
+      setStatus({ ok: false, msg: err.message || "Auto-translation failed." });
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   async function save() {
     if (!form.title.trim()) return;
@@ -73,17 +119,32 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [isDirty]);
 
-  const inp = "w-full rounded-xl border border-line bg-dashbg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30";
+  const inp = "w-full rounded-xl border border-line bg-dashbg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 bg-white";
 
   return (
     <div className="bg-white rounded-xl2 border border-line p-6">
-      <h2 className="font-display font-bold text-ink mb-1 flex items-center gap-2">
-        <Icon name="globe" size={18} className="text-brand" /> Content Translations
-      </h2>
-      <p className="text-muted text-xs mb-5">Translate campaign title, summary, and description for each language.</p>
+      <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
+        <div>
+          <h2 className="font-display font-bold text-ink flex items-center gap-2">
+            <Icon name="globe" size={18} className="text-brand" /> Content Translations
+          </h2>
+          <p className="text-muted text-xs">Translate campaign title, summary, and description for each language.</p>
+        </div>
+
+        {/* 🌟 زر الترجمة التلقائية */}
+        <button
+          type="button"
+          onClick={autoTranslate}
+          disabled={translating}
+          className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition shadow-sm disabled:opacity-50"
+        >
+          <Icon name="tablet" size={14} />
+          {translating ? "Translating..." : "✨ Auto Translate"}
+        </button>
+      </div>
 
       {/* Locale tabs */}
-      <div className="flex gap-2 mb-5">
+      <div className="flex gap-2 my-5">
         {LOCALES.map(l => (
           <button key={l.code} onClick={() => setActiveLocale(l.code)}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold border transition ${activeLocale === l.code ? "bg-brand text-white border-brand" : "border-line text-muted hover:border-brand hover:text-brand"}`}>
@@ -93,6 +154,7 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
       </div>
 
       {loadingLocale && <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />}
+      
       {/* Status badge */}
       <div className={`inline-flex items-center gap-1.5 text-xs font-bold rounded-full px-3 py-1 mb-4 ${hasTranslation ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
         <Icon name={hasTranslation ? "check" : "help-circle"} size={12} />
@@ -107,11 +169,11 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
         </div>
         <div>
           <label className="block text-xs text-muted font-semibold uppercase tracking-wider mb-1.5">Short Summary</label>
-          <textarea value={form.summary} onChange={e => setForm(f => ({ ...f, summary: e.target.value }))} rows={2} className={`${inp} resize-none`} />
+          <textarea value={form.summary} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, summary: e.target.value })); }} rows={2} className={`${inp} resize-none`} />
         </div>
         <div>
           <label className="block text-xs text-muted font-semibold uppercase tracking-wider mb-1.5">Full Description</label>
-          <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={5} className={`${inp} resize-y`} />
+          <textarea value={form.description} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, description: e.target.value })); }} rows={5} className={`${inp} resize-y`} />
         </div>
       </div>
 

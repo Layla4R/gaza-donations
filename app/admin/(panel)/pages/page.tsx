@@ -3,7 +3,7 @@ import { adminFetch } from "@/lib/admin-fetch";
 import { useToast } from "@/components/admin/Toast";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Icon from "@/components/icons";
 
 interface Page {
@@ -23,10 +23,15 @@ const LEGAL_SLUGS = ["privacy","terms","refund-policy","cookie-policy","aml-poli
 
 export default function AdminPagesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // قراءة اللغة من الرابط إن وجدت، وإلا اعتماد اللغة العربية افتراضياً
+  const initialLang = searchParams.get("lang") || searchParams.get("locale") || "ar";
+
   const [pages, setPages] = useState<Page[]>([]);
   const [transMap, setTransMap] = useState<TransMap>({});
   const [loading, setLoading] = useState(true);
-  const [activeLocale, setActiveLocale] = useState("ar");
+  const [activeLocale, setActiveLocale] = useState(initialLang);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [showNewModal, setShowNewModal] = useState(false);
@@ -42,6 +47,13 @@ export default function AdminPagesPage() {
 
   const [loadError, setLoadError] = useState<string>("");
   const { toast } = useToast();
+
+  // تحديث الـ URL عند تغيير تبويب اللغة
+  const handleLocaleChange = (code: string) => {
+    setActiveLocale(code);
+    setSelected(new Set());
+    router.replace(`/admin/pages?lang=${code}`, { scroll: false });
+  };
 
   const load = useCallback(async () => {
     setLoading(true); setLoadError("");
@@ -68,7 +80,7 @@ export default function AdminPagesPage() {
 
   // ── Toggle ────────────────────────────────────────────────
   async function togglePublished(id: string, current: boolean) {
-    setPages(p => p.map(x => x.id === id ? { ...x, isPublished: !current } : x)); // optimistic
+    setPages(p => p.map(x => x.id === id ? { ...x, isPublished: !current } : x));
     try {
       const res = await adminFetch(`/api/admin/pages/${id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
@@ -76,11 +88,11 @@ export default function AdminPagesPage() {
       });
       if (!res.ok) throw new Error("Failed");
     } catch {
-      setPages(p => p.map(x => x.id === id ? { ...x, isPublished: current } : x)); // rollback
+      setPages(p => p.map(x => x.id === id ? { ...x, isPublished: current } : x));
     }
   }
   async function toggleMenu(id: string, current: boolean) {
-    setPages(p => p.map(x => x.id === id ? { ...x, showInMenu: !current } : x)); // optimistic
+    setPages(p => p.map(x => x.id === id ? { ...x, showInMenu: !current } : x));
     try {
       const res = await adminFetch(`/api/admin/pages/${id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" },
@@ -88,7 +100,7 @@ export default function AdminPagesPage() {
       });
       if (!res.ok) throw new Error("Failed");
     } catch {
-      setPages(p => p.map(x => x.id === id ? { ...x, showInMenu: current } : x)); // rollback
+      setPages(p => p.map(x => x.id === id ? { ...x, showInMenu: current } : x));
     }
   }
   async function deletePage(id: string, title: string) {
@@ -124,7 +136,6 @@ export default function AdminPagesPage() {
     if (!selected.size) return;
     setBulkLoading(true);
     const ids = [...selected];
-    // Optimistic update
     setPages(p => p.map(x => ids.includes(x.id) ? { ...x, isPublished: publish } : x));
     try {
       const results = await Promise.allSettled(ids.map(id =>
@@ -135,7 +146,6 @@ export default function AdminPagesPage() {
       ));
       const failed = ids.filter((_, i) => results[i].status === "rejected");
       if (failed.length) {
-        // Rollback failed ones
         setPages(p => p.map(x => failed.includes(x.id) ? { ...x, isPublished: !publish } : x));
         alert(`${failed.length} page(s) failed to update.`);
       }
@@ -166,7 +176,7 @@ export default function AdminPagesPage() {
     setSelected(new Set()); setBulkLoading(false);
   }
 
-  // ── Drag & drop reorder (single bulk request) ─────────────
+  // ── Drag & drop reorder ─────────────
   function onDragStart(page: Page) { setDragging(page.id); dragItem.current = page; }
   function onDragOver(e: React.DragEvent, targetId: string) {
     e.preventDefault(); if (targetId !== dragging) setDragOver(targetId);
@@ -175,9 +185,8 @@ export default function AdminPagesPage() {
     if (!dragItem.current || dragItem.current.id === targetId) {
       setDragging(null); setDragOver(null); return;
     }
-    // Always reorder the full pages array (not filtered) to preserve correct order
     const src = dragItem.current;
-    const allPages = [...pages]; // full list
+    const allPages = [...pages];
     const srcIdx = allPages.findIndex(p => p.id === src.id);
     const tgtIdx = allPages.findIndex(p => p.id === targetId);
     if (srcIdx === -1 || tgtIdx === -1) { setDragging(null); setDragOver(null); return; }
@@ -190,9 +199,7 @@ export default function AdminPagesPage() {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orders: reordered.map(p => ({ id: p.id, order: p.order })) }),
       });
-    } catch {
-      // Silently fail - order will resync on next load
-    }
+    } catch {}
   }
 
   // ── Create ────────────────────────────────────────────────
@@ -238,7 +245,7 @@ export default function AdminPagesPage() {
       {/* Locale tabs */}
       <div className="flex gap-2 mb-5 flex-wrap">
         {LOCALES.map(l => (
-          <button key={l.code} onClick={() => { setActiveLocale(l.code); setSelected(new Set()); }}
+          <button key={l.code} onClick={() => handleLocaleChange(l.code)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border transition ${activeLocale === l.code ? "bg-brand text-white border-brand shadow-sm" : "bg-white border-line text-muted hover:border-brand hover:text-brand"}`}>
             <span>{l.flag}</span>{l.label}
           </button>
@@ -489,7 +496,7 @@ export default function AdminPagesPage() {
                     setNewTitle(e.target.value);
                     const slug = e.target.value
                       .toLowerCase()
-                      .replace(/[\u0600-\u06FF\s]+/g, "-") // Arabic chars → dash
+                      .replace(/[\u0600-\u06FF\s]+/g, "-")
                       .replace(/[^a-z0-9-]/g, "")
                       .replace(/-+/g, "-")
                       .replace(/^-|-$/g, "");

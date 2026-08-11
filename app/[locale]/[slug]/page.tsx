@@ -23,7 +23,7 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
   const [{ data: appearance }, page, campaigns, dict] = await Promise.all([
     supabase?.from("SiteSettings").select("primaryColor, accentColor").eq("id", "default").maybeSingle() || { data: null },
     getPageBySlug(slug, locale),
-    getCampaignsLite(),
+    getCampaignsLite(locale),
     loadTranslations(locale),
   ]);
 
@@ -36,10 +36,9 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
   const LEGAL_SLUGS = ["privacy","terms","refund-policy","cookie-policy","aml-policy","complaints",
     "license","financial-transparency","how-we-use-donations"];
   const isLegalPage = LEGAL_SLUGS.includes(slug);
-  // Legal pages always use LegalPageContent (hardcoded) — they can't be overridden via DB sections
   const hasCustomSections = !isLegalPage && sections.length > 0;
 
-  // Legal page titles — multilingual, not from DB
+  // Legal page titles — multilingual
   const LEGAL_TITLES: Record<string, Record<string, string>> = {
     privacy:                 { ar: "سياسة الخصوصية", en: "Privacy Policy", fr: "Politique de Confidentialité", tr: "Gizlilik Politikası" },
     terms:                   { ar: "الشروط والأحكام", en: "Terms & Conditions", fr: "Conditions d'Utilisation", tr: "Kullanım Koşulları" },
@@ -47,7 +46,7 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
     "cookie-policy":         { ar: "سياسة ملفات تعريف الارتباط", en: "Cookie Policy", fr: "Politique des Cookies", tr: "Çerez Politikası" },
     "aml-policy":            { ar: "سياسة مكافحة غسيل الأموال", en: "Anti-Money Laundering Policy", fr: "Politique Anti-Blanchiment", tr: "Kara Para Aklamayla Mücadele" },
     complaints:              { ar: "الشكاوى", en: "Complaints Policy", fr: "Politique de Réclamations", tr: "Şikayet Politikası" },
-    "financial-transparency": { ar: "الشفافية المالية", en: "Financial Transparency", fr: "Transparence Financière", tr: "Mali Şeffاكلية" },
+    "financial-transparency": { ar: "الشفافية المالية", en: "Financial Transparency", fr: "Transparence Financière", tr: "Mali Şeffaflık" },
     "how-we-use-donations":  { ar: "كيف نستخدم التبرعات", en: "How We Use Donations", fr: "Comment Nous Utilisons les Dons", tr: "Bağışları Nasıl Kullanıyoruz" },
   };
   const LEGAL_SUBTITLES: Record<string, Record<string, string>> = {
@@ -55,16 +54,25 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
     terms:   { ar: "اتفاقية الاستخدام الملزمة", en: "Binding Usage Agreement", fr: "Accord d'Utilisation Contraignant", tr: "Bağlayıcı Kullanım Sözleşmesi" },
   };
 
-  const legalTitle = isLegalPage
+  // 🌟 قاموس ترجمة العناوين الشائعة للصفحات غير القانونية
+  const COMMON_PAGE_TITLES: Record<string, Record<string, string>> = {
+    about: { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
+    transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+    contact: { ar: "اتصل بنا", en: "Contact Us", fr: "Contactez-nous", tr: "İletişim" },
+  };
+
+  // تحديد العنوان بدقة بحسب اللغة النشطة
+  const displayTitle = isLegalPage
     ? (LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.["en"] || page.title)
-    : page.title;
-  const legalSubtitle = isLegalPage
+    : (dict[`nav.${slug}`] || COMMON_PAGE_TITLES[slug]?.[locale] || page.title);
+
+  const displaySubtitle = isLegalPage
     ? (LEGAL_SUBTITLES[slug]?.[locale] || LEGAL_SUBTITLES[slug]?.["en"] || page.description || null)
     : page.description;
 
   return (
     <div className="bg-white">
-      {/* 🌟 هيدر الصفحة الرئيسي باستخدام primaryColor */}
+      {/* 🌟 هيدر الصفحة الرئيسي */}
       <header 
         className="relative py-12 sm:py-20 text-center overflow-hidden transition-colors"
         style={{ backgroundColor: primaryColor }}
@@ -75,9 +83,9 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
             <span className="inline-block w-6 h-px bg-white/40" />
             4Relief Humanitarian Foundation
           </span>
-          <h1 className="font-display text-2xl sm:text-4xl md:text-5xl font-extrabold text-white">{legalTitle}</h1>
-          {legalSubtitle && (
-            <p className="mt-4 text-white/75 text-lg max-w-xl mx-auto leading-relaxed">{legalSubtitle}</p>
+          <h1 className="font-display text-2xl sm:text-4xl md:text-5xl font-extrabold text-white">{displayTitle}</h1>
+          {displaySubtitle && (
+            <p className="mt-4 text-white/75 text-lg max-w-xl mx-auto leading-relaxed">{displaySubtitle}</p>
           )}
         </div>
       </header>

@@ -36,7 +36,7 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
   };
 
   const pct = Math.min(100, Math.round((raisedAmount / (goalAmount || 1)) * 100));
-  const cat = categoryMeta(category);
+  const cat = categoryMeta(category, locale);
   const prefix = locale === "ar" ? "" : `/${locale}`;
 
   const [amount, setAmount] = useState(10);

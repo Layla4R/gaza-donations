@@ -24,15 +24,28 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
   if (!campaign) notFound();
 
   return (
-    <div className="p-6 sm:p-8 max-w-3xl space-y-8">
-      <div className="flex items-center gap-3 flex-wrap">
-        <Link href="/admin/campaigns" className="text-muted hover:text-ink"><Icon name="arrow-left" size={18} /></Link>
-        <h1 className="font-display text-2xl font-extrabold text-ink flex-1">Edit Campaign</h1>
-        <a href={`${process.env.NEXT_PUBLIC_SITE_URL || ""}/campaigns/${campaign.slug}`} target="_blank"
-          className="flex items-center gap-1.5 text-xs border border-line text-muted rounded-lg px-3 py-2 hover:border-brand hover:text-brand transition">
-          <Icon name="globe" size={13} /> View Live
+    <div className="p-6 sm:p-8 max-w-6xl mx-auto space-y-8">
+      {/* Top Header */}
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-white p-5 rounded-2xl border border-line shadow-sm">
+        <div className="flex items-center gap-3">
+          <Link href="/admin/campaigns" className="p-2 rounded-xl bg-dashbg hover:bg-line transition text-muted hover:text-ink">
+            <Icon name="arrow-left" size={18} />
+          </Link>
+          <div>
+            <h1 className="font-display text-2xl font-extrabold text-ink">Edit Campaign</h1>
+            <p className="text-xs text-muted">Manage campaign settings, translations, and updates</p>
+          </div>
+        </div>
+        <a 
+          href={`${process.env.NEXT_PUBLIC_SITE_URL || ""}/campaigns/${campaign.slug}`} 
+          target="_blank"
+          className="flex items-center gap-2 text-xs font-bold border border-line text-muted rounded-xl px-4 py-2.5 hover:border-brand hover:text-brand transition bg-white"
+        >
+          <Icon name="globe" size={14} /> View Live
         </a>
       </div>
+
+      {/* Main Campaign Edit Form */}
       <CampaignForm initial={{
         id: campaign.id, title: campaign.title, slug: campaign.slug,
         summary: campaign.summary, description: campaign.description,
@@ -41,21 +54,24 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
         country: campaign.country, isActive: campaign.isActive,
         isFeatured: campaign.isFeatured, isZakatable: campaign.isZakatable,
       }} />
-      {/* Content Translations */}
+
+      {/* Content Translations with Auto Translate Button */}
       <CampaignTranslationsPanel
         campaignId={campaign.id}
         baseTitle={campaign.title}
         baseSummary={campaign.summary}
         baseDescription={campaign.description}
       />
+
+      {/* Campaign Updates */}
       <CampaignUpdatesPanel campaignId={params.id} updates={updates || []} donorCount={campaign.donorCount || 0} />
 
-      {/* Top Donors */}
+      {/* Top Donors Table */}
       {topDonations && topDonations.length > 0 && (
-        <div className="bg-white rounded-xl2 border border-line overflow-hidden">
+        <div className="bg-white rounded-2xl border border-line overflow-hidden shadow-sm">
           <div className="flex items-center justify-between px-6 py-4 border-b border-line">
             <h2 className="font-display font-bold text-ink">Top Donors</h2>
-            <Link href={`/admin/donations?campaign=${campaign.id}`} className="text-brand text-sm hover:underline">View all →</Link>
+            <Link href={`/admin/donations?campaign=${campaign.id}`} className="text-brand text-xs font-bold hover:underline">View all →</Link>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-dashbg text-muted text-xs uppercase tracking-wider">
@@ -67,7 +83,7 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
             </thead>
             <tbody className="divide-y divide-line">
               {topDonations.map((d: any) => (
-                <tr key={d.id} className="hover:bg-dashbg/50">
+                <tr key={d.id} className="hover:bg-dashbg/50 transition">
                   <td className="py-3 px-4">
                     <div className="font-medium">{d.isAnonymous ? "Anonymous" : d.donorName}</div>
                     {!d.isAnonymous && <div className="text-xs text-muted">{d.donorEmail}</div>}

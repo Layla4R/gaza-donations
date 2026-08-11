@@ -223,11 +223,41 @@ export default function BlockRenderer({
       let campaigns = context?.campaigns || [];
       if (p.onlyFeatured) campaigns = campaigns.filter((c) => c.isFeatured);
       campaigns = campaigns.slice(0, p.limit || 6);
+
+      const locale = context?.locale || "ar";
+      const isEnglish = locale === "en";
+      const isTurkish = locale === "tr";
+      const isFrench = locale === "fr";
+
+      const eyebrowText = isEnglish
+        ? "Where Your Donation Goes"
+        : isTurkish
+        ? "Bağışınız Nereye Gidiyor"
+        : isFrench
+        ? "Où va votre don"
+        : "أين يذهب تبرعك";
+
+      const viewAllText = isEnglish
+        ? "View All Campaigns"
+        : isTurkish
+        ? "Tüm Kampanyaları Gör"
+        : isFrench
+        ? "Voir Toutes les Campagnes"
+        : "عرض كل الحملات";
+
+      const noCampaignsText = isEnglish
+        ? "No campaigns available."
+        : isTurkish
+        ? "Şu anda kampanya bulunmamaktadır."
+        : isFrench
+        ? "Aucune campagne disponible."
+        : "لا توجد حملات حالياً.";
+
       return (
         <section className="py-20 sm:py-24 bg-white">
           <div className="max-w-screen-xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <Eyebrow className="justify-center">أين يذهب تبرعك</Eyebrow>
+              <Eyebrow className="justify-center">{eyebrowText}</Eyebrow>
               {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">{p.title}</h2>}
               {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
             </div>
@@ -244,21 +274,21 @@ export default function BlockRenderer({
                   raisedAmount={c.raisedAmount}
                   donorCount={c.donorCount}
                   category={c.category}
-                  locale={context?.locale || "ar"}
+                  locale={locale}
                   dict={context?.dict || {}}
                 />
               ))}
               {campaigns.length === 0 && (
-                <p className="text-slate-400 col-span-full text-center py-10">لا توجد حملات حالياً.</p>
+                <p className="text-slate-400 col-span-full text-center py-10">{noCampaignsText}</p>
               )}
             </div>
             {campaigns.length > 0 && (
               <div className="text-center mt-12">
                 <Link
-                  href="/campaigns"
+                  href={locale === "ar" ? "/campaigns" : `/${locale}/campaigns`}
                   className="inline-flex items-center gap-2 border border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-bold rounded-2xl px-8 py-3.5 text-sm transition-all shadow-sm"
                 >
-                  عرض كل الحملات
+                  {viewAllText}
                   <Icon name={isRTL ? "arrow-left" : "arrow-down"} size={16} className={isRTL ? "" : "-rotate-90"} />
                 </Link>
               </div>
@@ -286,8 +316,7 @@ export default function BlockRenderer({
           )}
         </div>
       );
-
-case "gallery":
+      case "gallery":
       return (
         <section className="py-12 bg-slate-50/50 border-t border-slate-100">
           <div className="max-w-screen-xl mx-auto px-6">
@@ -295,7 +324,13 @@ case "gallery":
               <div className="text-center max-w-2xl mx-auto mb-10">
                 <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-widest uppercase mb-2 px-3 py-1 bg-brand/5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-                  معرض الإنجازات
+                  {context?.locale === "en"
+                    ? "Gallery & Impact"
+                    : context?.locale === "tr"
+                    ? "Başarı Galerisi"
+                    : context?.locale === "fr"
+                    ? "Galerie de Réalisations"
+                    : "معرض الإنجازات"}
                 </span>
                 <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
                   {p.title}
@@ -308,20 +343,38 @@ case "gallery":
                 const url = typeof item === "string" ? item : item.url || item.src;
                 if (!url) return null;
 
-                const isVideo = url.endsWith(".mp4") || url.endsWith(".webm") || url.includes("youtube.com") || url.includes("youtu.be");
+                const isVideo =
+                  url.endsWith(".mp4") ||
+                  url.endsWith(".webm") ||
+                  url.endsWith(".mov") ||
+                  url.includes("youtube.com") ||
+                  url.includes("youtu.be");
 
                 return (
-                  <div key={i} className="group relative h-64 rounded-3xl overflow-hidden bg-slate-900 shadow-md border border-slate-100 flex flex-col justify-end">
+                  <div
+                    key={i}
+                    className="group relative h-64 rounded-3xl overflow-hidden bg-slate-900 shadow-md border border-slate-100 flex flex-col justify-end"
+                  >
                     {isVideo ? (
                       url.includes("youtube.com") || url.includes("youtu.be") ? (
                         <iframe
-                          src={`https://www.youtube.com/embed/${url.includes("v=") ? url.split("v=")[1]?.split("&")[0] : url.split("/").pop()}`}
+                          src={`https://www.youtube.com/embed/${
+                            url.includes("v=")
+                              ? url.split("v=")[1]?.split("&")[0]
+                              : url.split("/").pop()
+                          }`}
                           title="Video"
                           className="w-full h-full border-0"
                           allowFullScreen
                         />
                       ) : (
-                        <video src={url} controls className="w-full h-full object-cover" />
+                        <video
+                          src={url}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                        />
                       )
                     ) : (
                       <Image

@@ -19,9 +19,12 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
   const url = `${siteUrl}/${params.locale}/campaigns/${campaign.slug}`;
   const image = campaign.coverImage || `${siteUrl}/brand/og-image.png`;
 
+  const title = campaign.displayTitle || campaign.title;
+  const description = campaign.displaySummary || campaign.summary;
+
   return {
-    title: campaign.displayTitle,
-    description: campaign.displaySummary,
+    title,
+    description,
     alternates: {
       canonical: url,
       languages: {
@@ -32,16 +35,16 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
       },
     },
     openGraph: {
-      title: campaign.displayTitle,
-      description: campaign.displaySummary,
+      title,
+      description,
       url,
       type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt: campaign.displayTitle }],
+      images: [{ url: image, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",
-      title: campaign.displayTitle,
-      description: campaign.displaySummary,
+      title,
+      description,
       images: [image],
     },
   };
@@ -57,6 +60,11 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
   if (!campaign) notFound();
 
+  // اعتماد العنوان والملخص والتفاصيل المترجمة
+  const title = campaign.displayTitle || campaign.title;
+  const summary = campaign.displaySummary || campaign.summary;
+  const description = campaign.displayDescription || campaign.description;
+
   const raised = Number(campaign.raisedAmount) || 0;
   const goal = Number(campaign.goalAmount) || 1;
   const pct = Math.min(100, Math.round((raised / goal) * 100));
@@ -64,6 +72,28 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
   const p = locale === "ar" ? "" : `/${locale}`;
 
   const t = (key: string, fallback: string) => dict[key] || fallback;
+
+  // 🌟 قاموس نصوص الواجهة الديناميكي
+  const isEn = locale === "en";
+  const isTr = locale === "tr";
+  const isFr = locale === "fr";
+
+  const txtAbout = isEn ? "About the Campaign" : isTr ? "Kampanya Hakkında" : isFr ? "À propos de la campagne" : t("campaigns.about", "عن الحملة");
+  const txtWidgetTitle = isEn ? "Make a Difference Today" : isTr ? "Hayat Değiştirmeye Katkıda Bulunun" : isFr ? "Faites une différence aujourd'hui" : t("donate.widget_title", "ساهم في تغيير الحياة");
+  const txtDirectImpact = isEn ? "Direct impact with no middleman" : isTr ? "Aracısız doğrudan etki" : isFr ? "Impact direct sans intermédiaire" : t("donate.direct", "أثر مباشر بدون وسيط");
+  const txtSecure = isEn ? "All transactions are encrypted and secure" : isTr ? "Tüm işlemler şifreli ve güvenlidir" : isFr ? "Toutes les transactions sont cryptées" : t("donate.secure", "جميع المعاملات مشفرة وآمنة");
+
+  // ترجمة التصنيفات
+  const categoryLabels: Record<string, Record<string, string>> = {
+    medical: { ar: "طبي", en: "Medical", tr: "Tıbbi", fr: "Médical" },
+    food: { ar: "غذاء", en: "Food", tr: "Gıda", fr: "Nourriture" },
+    shelter: { ar: "مأوى", en: "Shelter", tr: "Barınak", fr: "Abri" },
+    water: { ar: "مياه", en: "Water", tr: "Su", fr: "Eau" },
+    education: { ar: "تعليم", en: "Education", tr: "Eğitim", fr: "Éducation" },
+    general: { ar: "عام", en: "General", tr: "Genel", fr: "Général" },
+  };
+
+  const categoryLabel = categoryLabels[campaign.category]?.[locale] || cat.label;
 
   return (
     <div className="bg-slate-50/50 min-h-screen pb-24 border-t border-slate-100">
@@ -75,7 +105,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           <span>/</span>
           <Link href={`${p}/campaigns`} className="hover:text-brand transition">{t("nav.campaigns", "الحملات")}</Link>
           <span>/</span>
-          <span className="text-slate-700 truncate max-w-xs">{campaign.displayTitle}</span>
+          <span className="text-slate-700 truncate max-w-xs">{title}</span>
         </div>
 
         {/* Hero Banner */}
@@ -83,7 +113,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           <div className="relative h-72 sm:h-[450px] w-full rounded-3xl overflow-hidden bg-slate-100 mb-10 shadow-xl border border-slate-100">
             <Image 
               src={campaign.coverImage} 
-              alt={campaign.displayTitle} 
+              alt={title} 
               fill 
               className="object-cover" 
               priority
@@ -92,7 +122,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             
             <span className="absolute top-5 right-5 inline-flex items-center gap-2 bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold rounded-full px-4 py-1.5 shadow-md">
               <Icon name={cat.icon} size={14} />
-              {cat.label}
+              {categoryLabel}
             </span>
           </div>
         )}
@@ -106,7 +136,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             {/* Title & Stats */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
               <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
-                {campaign.displayTitle}
+                {title}
               </h1>
 
               {/* Progress Overview Bar */}
@@ -145,10 +175,10 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-4">
               <h2 className="font-display font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2 border-b border-slate-100 pb-4">
                 <Icon name="file-text" size={20} className="text-brand" />
-                {t("campaigns.about", "عن الحملة")}
+                {txtAbout}
               </h2>
               <div className="text-slate-700 leading-relaxed text-sm sm:text-base whitespace-pre-line pt-2">
-                {campaign.displayDescription}
+                {description}
               </div>
             </div>
 
@@ -157,7 +187,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
                 <h2 className="font-display font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2 border-b border-slate-100 pb-4">
                   <Icon name="layers" size={20} className="text-brand" />
-                  {dict["campaigns.updates"] || "تحديثات الميدان"}
+                  {dict["campaigns.updates"] || (isEn ? "Field Updates" : isTr ? "Saha Güncellemeleri" : "تحديثات الميدان")}
                 </h2>
                 <div className="space-y-4">
                   {campaign.updates.map((u: any) => (
@@ -175,15 +205,15 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               </div>
             )}
 
-            {/* Trust Badges Bar - Colored with Primary */}
+            {/* Trust Badges Bar */}
             <div className="bg-brand text-white rounded-3xl p-6 shadow-lg flex flex-wrap items-center justify-around gap-4 text-center">
               <div className="flex items-center gap-2 text-xs font-semibold">
                 <Icon name="shield-check" size={18} />
-                <span>{t("donate.secure", "جميع المعاملات مشفرة وآمنة")}</span>
+                <span>{txtSecure}</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-semibold">
                 <Icon name="hand-heart" size={18} />
-                <span>{t("donate.direct", "أثر مباشر بدون وسيط")}</span>
+                <span>{txtDirectImpact}</span>
               </div>
             </div>
 
@@ -193,16 +223,16 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
             <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
               <div className="bg-brand p-4 text-white text-center">
-                <p className="text-xs font-bold text-white uppercase tracking-widest">{t("donate.widget_title", "ساهم في تغيير الحياة")}</p>
+                <p className="text-xs font-bold text-white uppercase tracking-widest">{txtWidgetTitle}</p>
               </div>
               
               <div className="p-2">
                 <CampaignCard
                   id={campaign.id}
                   slug={campaign.slug}
-                  title={campaign.displayTitle}
-                  summary={campaign.displaySummary}
-                  coverImage={campaign.coverImage} // 🌟 إرسال الصورة ليتم عرضها داخل الكارت بشكل ممتاز
+                  title={title}
+                  summary={summary}
+                  coverImage={campaign.coverImage}
                   goalAmount={Number(campaign.goalAmount)}
                   raisedAmount={Number(campaign.raisedAmount)}
                   donorCount={campaign.donorCount}
