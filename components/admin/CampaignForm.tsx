@@ -40,7 +40,6 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
     description: initial?.description || "",
     coverImage: initial?.coverImage || "",
     goalAmount: initial?.goalAmount || 10000,
-    // null-safe: defaultAmount=0 stays 0, null/undefined → 25
     defaultAmount: initial?.defaultAmount != null ? initial.defaultAmount : 25,
     category: initial?.category || "general",
     country: initial?.country || "",
@@ -86,19 +85,19 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
     router.refresh();
   }
 
-  const inp = "w-full border border-line rounded-xl py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white";
-  const lbl = "block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5";
+  const inp = "w-full border border-line rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand bg-white";
+  const lbl = "block text-xs font-bold text-muted uppercase tracking-wider mb-2";
 
   return (
-    <div className="bg-white rounded-xl2 border border-line p-6 space-y-6">
+    <div className="w-full bg-white rounded-2xl border border-line p-6 sm:p-8 space-y-6 shadow-sm">
       {error && (
-        <div className="flex items-center gap-2 bg-danger/10 border border-danger/20 text-danger rounded-xl p-3 text-sm">
-          <Icon name="x" size={14} /> {error}
+        <div className="flex items-center gap-2 bg-danger/10 border border-danger/20 text-danger rounded-xl p-4 text-sm">
+          <Icon name="x" size={16} /> {error}
         </div>
       )}
 
       {/* Title + Slug */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className={lbl}>Campaign Title *</label>
           <input value={form.title} onChange={e => {
@@ -110,7 +109,7 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
           <label className={lbl}>URL Slug *</label>
           <input value={form.slug} onChange={e => upd("slug", e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))} className={inp} />
           {isEdit && (
-            <p className="text-[11px] text-warning mt-1">⚠ Changing the slug will break existing links and bookmarks.</p>
+            <p className="text-xs text-amber-600 mt-1.5 font-medium">⚠ Changing the slug will break existing links and bookmarks.</p>
           )}
         </div>
       </div>
@@ -124,17 +123,11 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
       {/* Description */}
       <div>
         <label className={lbl}>Full Description</label>
-        <textarea value={form.description} onChange={e => upd("description", e.target.value)} rows={5} placeholder="Detailed campaign description..." className={`${inp} resize-y`} />
+        <textarea value={form.description} onChange={e => upd("description", e.target.value)} rows={6} placeholder="Detailed campaign description..." className={`${inp} resize-y`} />
       </div>
 
-      {/* Cover Image */}
-      <div>
-        <label className={lbl}>Cover Image</label>
-        <ImageUpload value={form.coverImage} onChange={v => upd("coverImage", v)} />
-      </div>
-
-      {/* Category + Country */}
-      <div className="grid sm:grid-cols-2 gap-4">
+      {/* Category + Country + Goals (4 Column Responsive Grid) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div>
           <label className={lbl}>Category</label>
           <select value={form.category} onChange={e => upd("category", e.target.value)} className={inp}>
@@ -147,38 +140,39 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
             {COUNTRIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
-      </div>
-
-      {/* Goal + Default Amount */}
-      <div className="grid sm:grid-cols-2 gap-4">
         <div>
           <label className={lbl}>Fundraising Goal ($) *</label>
           <input type="number" min={1} value={form.goalAmount} onChange={e => upd("goalAmount", Number(e.target.value))} className={inp} />
         </div>
         <div>
-          <label className={lbl}>Default Donation Amount ($)</label>
+          <label className={lbl}>Default Amount ($)</label>
           <input type="number" min={0} value={form.defaultAmount} onChange={e => upd("defaultAmount", Number(e.target.value))} className={inp} />
-          <p className="text-xs text-muted mt-1">Pre-selected amount shown on campaign card</p>
         </div>
       </div>
 
+      {/* Cover Image */}
+      <div>
+        <label className={lbl}>Cover Image</label>
+        <ImageUpload value={form.coverImage} onChange={v => upd("coverImage", v)} />
+      </div>
+
       {/* Toggles */}
-      <div className="grid sm:grid-cols-3 gap-4 pt-2 border-t border-line">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-line">
         {[
           { key: "isActive", label: "Active", desc: "Visible to the public" },
           { key: "isFeatured", label: "Featured", desc: "Shown in carousel" },
           { key: "isZakatable", label: "Zakatable (يقبل الزكاة)", desc: "Shows Zakat badge on card" },
         ].map(item => (
-          <label key={item.key} className="flex items-start gap-3 cursor-pointer p-3 rounded-xl border border-line hover:border-brand/40 hover:bg-brand/3 transition">
+          <label key={item.key} className="flex items-start gap-3 cursor-pointer p-4 rounded-xl border border-line hover:border-brand/40 hover:bg-brand/5 transition">
             <div className="relative mt-0.5">
               <input type="checkbox" className="sr-only" checked={form[item.key as keyof typeof form] as boolean}
                 onChange={e => upd(item.key, e.target.checked)} />
-              <div className={`w-10 h-6 rounded-full transition-colors ${form[item.key as keyof typeof form] ? "bg-brand" : "bg-line"}`}>
+              <div className={`w-10 h-6 rounded-full transition-colors ${form[item.key as keyof typeof form] ? "bg-brand" : "bg-slate-200"}`}>
                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${form[item.key as keyof typeof form] ? "left-5" : "left-1"}`} />
               </div>
             </div>
             <div>
-              <div className="text-sm font-semibold text-ink">{item.label}</div>
+              <div className="text-sm font-bold text-ink">{item.label}</div>
               <div className="text-xs text-muted">{item.desc}</div>
             </div>
           </label>
@@ -186,13 +180,13 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-3 pt-4 border-t border-line">
         <button onClick={save} disabled={saving}
-          className="flex items-center gap-2 bg-brand hover:bg-brand-dark disabled:opacity-60 text-white font-bold rounded-xl px-6 py-2.5 text-sm transition">
-          <Icon name={saving ? "minus" : "check"} size={15} />
+          className="flex items-center gap-2 bg-brand hover:bg-brand-dark disabled:opacity-60 text-white font-bold rounded-xl px-8 py-3 text-sm transition shadow-sm">
+          <Icon name={saving ? "minus" : "check"} size={16} />
           {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Campaign"}
         </button>
-        <button onClick={() => router.back()} className="px-5 py-2.5 border border-line text-muted hover:text-ink rounded-xl text-sm transition">
+        <button onClick={() => router.back()} className="px-6 py-3 border border-line text-muted hover:text-ink rounded-xl text-sm font-semibold transition">
           Cancel
         </button>
       </div>
