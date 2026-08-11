@@ -13,7 +13,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
   const { data: post } = await supabase.from("NewsPost").select("*").eq("id", params.id).maybeSingle();
   if (!post) notFound();
   return (
-    <div className="p-6 sm:p-8 max-w-3xl space-y-8">
+    <div className="p-6 sm:p-8 w-full space-y-8">
       <PostForm initial={post} />
       <div>
         <NewsPostTranslationsPanel
