@@ -60,22 +60,33 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
           <Image src={logoImage} alt={logoText} width={175} height={70} className="h-11 w-auto object-contain" priority />
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-7">
-          {navItems.map(item => (
-            <Link key={item.slug}
-              href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
-              className={navLinkCls}>
-              {item.slug === "home" ? t("nav.home","الرئيسية","Home","Accueil","Ana Sayfa") : item.title}
-            </Link>
-          ))}
-          <Link href={`${p}/campaigns`} className={navLinkCls}>
-            {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
-          </Link>
-          <Link href={`${p}/news`} className={navLinkCls}>
-            {t("nav.news","الأخبار","News","Actualités","Haberler")}
-          </Link>
-        </nav>
+       {/* Desktop Nav */}
+<nav className="hidden md:flex items-center gap-7">
+  {navItems.map(item => {
+    const navKey = `nav.${item.slug}`;
+    const translatedTitle = dict[navKey] || (
+      item.slug === "home" ? t("nav.home","الرئيسية","Home","Accueil","Ana Sayfa") :
+      item.slug === "about" || item.slug === "about-us" ? t("nav.about","من نحن","About Us","À Propos","Hakkımızda") :
+      item.slug === "transparency" ? t("nav.transparency","الشفافية","Transparency","Transparence","Şeffaflık") :
+      item.slug === "contact" ? t("nav.contact","اتصل بنا","Contact","Contact","İletişim") :
+      item.title
+    );
+
+    return (
+      <Link key={item.slug}
+        href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
+        className={navLinkCls}>
+        {translatedTitle}
+      </Link>
+    );
+  })}
+  <Link href={`${p}/campaigns`} className={navLinkCls}>
+    {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
+  </Link>
+  <Link href={`${p}/news`} className={navLinkCls}>
+    {t("nav.news","الأخبار","News","Actualités","Haberler")}
+  </Link>
+</nav>
 
         {/* Actions */}
         <div className="flex items-center gap-2 shrink-0">
@@ -118,28 +129,39 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
         </div>
       </div>
 
-      {/* Mobile menu — always white */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-line shadow-xl px-6 py-4 space-y-1">
-          {navItems.map(item => (
-            <Link key={item.slug}
-              href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
-              onClick={() => setMobileOpen(false)}
-              className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 last:border-0 transition">
-              {item.slug === "home" ? t("nav.home","الرئيسية","Home","Accueil","Ana Sayfa") : item.title}
-            </Link>
-          ))}
-          <Link href={`${p}/campaigns`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
-            {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
-          </Link>
-          <Link href={`${p}/news`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
-            {t("nav.news","الأخبار","News","Actualités","Haberler")}
-          </Link>
-          <Link href={`${p}/contact`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand transition">
-            {t("nav.contact","اتصل بنا","Contact","Contact","İletişim")}
-          </Link>
-        </div>
-      )}
+     {/* Mobile menu */}
+{mobileOpen && (
+  <div className="md:hidden bg-white border-t border-line shadow-xl px-6 py-4 space-y-1">
+    {navItems.map(item => {
+      const navKey = `nav.${item.slug}`;
+      const translatedTitle = dict[navKey] || (
+        item.slug === "home" ? t("nav.home","الرئيسية","Home","Accueil","Ana Sayfa") :
+        item.slug === "about" || item.slug === "about-us" ? t("nav.about","من نحن","About Us","À Propos","Hakkımızda") :
+        item.slug === "transparency" ? t("nav.transparency","الشفافية","Transparency","Transparence","Şeffaflık") :
+        item.slug === "contact" ? t("nav.contact","اتصل بنا","Contact","Contact","İletişim") :
+        item.title
+      );
+
+      return (
+        <Link key={item.slug}
+          href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
+          onClick={() => setMobileOpen(false)}
+          className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 last:border-0 transition">
+          {translatedTitle}
+        </Link>
+      );
+    })}
+    <Link href={`${p}/campaigns`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
+      {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
+    </Link>
+    <Link href={`${p}/news`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
+      {t("nav.news","الأخبار","News","Actualités","Haberler")}
+    </Link>
+    <Link href={`${p}/contact`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand transition">
+      {t("nav.contact","اتصل بنا","Contact","Contact","İletişim")}
+    </Link>
+  </div>
+)}
     </header>
   );
 }
