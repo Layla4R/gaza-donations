@@ -623,7 +623,7 @@ export default function AppearancePage() {
                       <div className={`opacity-80 mt-1 ${device === "mobile" ? "text-xs" : "text-sm"}`}>Humanitarian Foundation</div>
                     </div>
                     {!settings.heroImage && (
-                      <div className="absolute bottom-2 right-2 text-[10px] text-white/50 bg-black/30 rounded px-2 py-0.5">Default gradient</div>
+                      <div className="absolute bottom-2 right-2 text-[10px] text-white/80 bg-black/30 rounded px-2 py-0.5">Default gradient</div>
                     )}
                   </div>
                 </Section>
@@ -647,10 +647,10 @@ export default function AppearancePage() {
                             className="block text-white/80 text-sm font-bold mb-2" tag="p" placeholder="Tagline…" />
                         ) : (
                           <span onClick={e => { e.stopPropagation(); setActiveSection("footer-brand"); }}
-                            className="block text-white/25 text-xs italic mb-2 cursor-pointer hover:text-white/50 transition">+ Add tagline</span>
+                            className="block text-white/25 text-xs italic mb-2 cursor-pointer hover:text-white/80 transition">+ Add tagline</span>
                         )}
                         <Editable value={settings.footerDescription} onChange={v => upd("footerDescription", v)}
-                          className="block text-white/50 text-xs leading-relaxed mb-1" tag="p" placeholder="Click to add organization description…" multiline />
+                          className="block text-white/80 text-xs leading-relaxed mb-1" tag="p" placeholder="Click to add organization description…" multiline />
                         {!settings.footerDescription && activeSection !== "footer-brand" && (
                           <p className="text-[9px] text-white/20 italic mb-3">↑ Click text to edit inline</p>
                         )}
@@ -703,7 +703,7 @@ export default function AppearancePage() {
                       <Section id="footer-contact" active={activeSection} onActivate={setActiveSection} primaryColor={settings?.primaryColor} label="Contact">
                         <div>
                           <div className="font-bold text-[#5B9BD5] mb-3 text-[10px] tracking-[0.2em] uppercase">Contact Us</div>
-                          <div className="space-y-1.5 text-xs text-white/60">
+                          <div className="space-y-1.5 text-xs text-white/80">
                             {settings.contactEmail ? (
                               <Editable value={settings.contactEmail} onChange={v => upd("contactEmail", v)} className="flex items-center gap-1.5" placeholder="email@domain.com" />
                             ) : (
@@ -721,7 +721,7 @@ export default function AppearancePage() {
                               </span>
                             )}
                             {settings.whatsappNumber ? (
-                              <div className="flex items-center gap-1.5 text-white/60 text-xs">
+                              <div className="flex items-center gap-1.5 text-white/80 text-xs">
                                 <Icon name="message-circle" size={11} className="shrink-0" />
                                 <Editable value={settings.whatsappNumber} onChange={v => upd("whatsappNumber", v)} placeholder="201234567890" />
                               </div>

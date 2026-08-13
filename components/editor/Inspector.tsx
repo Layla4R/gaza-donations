@@ -54,6 +54,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
     <div className="flex items-center justify-between py-0.5">
       <span className="text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider">{field.label}</span>
       <button type="button" onClick={() => onChange(!value)}
+        aria-label={`Toggle ${field.label}`}
         className={`relative w-11 h-6 rounded-full transition-all shadow-inner ${value ? "bg-[#6366F1]" : "bg-[#E5E7EB]"}`}>
         <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${value ? "left-6" : "left-1"}`} />
       </button>
@@ -66,6 +67,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
       <div className="flex flex-wrap gap-2">
         {field.options?.map(opt => (
           <button key={opt.value} onClick={() => onChange(opt.value)}
+            aria-label={`Select ${opt.label}`}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
               value === opt.value
                 ? "bg-[#6366F1] text-white border-[#6366F1] shadow-sm"
@@ -87,6 +89,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
       {label}
       <div className="flex items-center gap-2">
         <input type="color" value={value || "#6366F1"} onChange={e => onChange(e.target.value)}
+          aria-label="Color Picker"
           className="w-10 h-10 rounded-xl border border-[#E5E7EB] cursor-pointer p-1 bg-white" />
         <input value={value || ""} onChange={e => onChange(e.target.value)} placeholder="#6366F1" className={`${inp} flex-1`} />
       </div>
@@ -126,10 +129,11 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
       {label && <label className="block text-[11px] font-semibold text-[#6B7280] uppercase tracking-wider mb-2">{label}</label>}
 
       {value && (
-        <div className="relative mb-3 rounded-xl overflow-hidden border border-[#E5E7EB] bg-[#F9FAFB] group">
-          <img src={value} alt="" className="w-full h-36 object-cover" />
+        <div className="relative mb-3 aspect-video w-full rounded-xl overflow-hidden border border-[#E5E7EB] bg-[#F9FAFB] group">
+          <img src={value} alt="Preview" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-center justify-center">
             <button onClick={() => onChange("")}
+              aria-label="Remove image"
               className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 bg-red-500 text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition">
               <Icon name="trash" size={12} />Remove
             </button>
@@ -141,6 +145,7 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
         <div className="flex border-b border-[#E5E7EB]">
           {(["upload","url"] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
+              aria-label={`Switch to ${t}`}
               className={`flex-1 py-2 text-[11px] font-semibold transition ${tab === t ? "bg-[#F5F3FF] text-[#6366F1]" : "text-[#9CA3AF] hover:text-[#374151]"}`}>
               {t === "upload" ? "⬆ Upload" : "🔗 URL"}
             </button>
@@ -149,6 +154,7 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
         <div className="p-3">
           {tab === "upload" ? (
             <button onClick={() => inputRef.current?.click()} disabled={uploading}
+              aria-label="Upload Image File"
               className="w-full border-2 border-dashed border-[#C4B5FD] hover:border-[#6366F1] hover:bg-[#F5F3FF] rounded-xl py-6 flex flex-col items-center gap-2 text-[#6366F1] transition cursor-pointer disabled:opacity-60">
               {uploading
                 ? <><Icon name="minus" size={24} className="animate-spin" /><span className="text-xs font-semibold">Uploading…</span></>
@@ -157,6 +163,7 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
             </button>
           ) : (
             <input value={value} onChange={e => onChange(e.target.value)} placeholder="https://example.com/image.jpg"
+              aria-label="Image URL Input"
               className="w-full border border-[#E5E7EB] focus:border-[#6366F1] rounded-lg py-2 px-3 text-xs text-[#111] focus:outline-none focus:ring-2 focus:ring-[#6366F1]/10 transition" />
           )}
         </div>
@@ -207,6 +214,7 @@ function ListEditor({ field, value, onChange }: { field: FieldDef; value: any[];
           {field.label} <span className="text-[#D1D5DB] font-normal">({value.length})</span>
         </label>
         <button onClick={addItem}
+          aria-label="Add item to list"
           className="flex items-center gap-1 text-[#6366F1] text-xs font-semibold hover:underline">
           <Icon name="plus" size={12} />Add
         </button>
@@ -223,11 +231,11 @@ function ListEditor({ field, value, onChange }: { field: FieldDef; value: any[];
                 {item.title || item.name || item.url?.split("/").pop() || `Item ${i + 1}`}
               </span>
               <div className="flex gap-0.5">
-                <button onClick={e => { e.stopPropagation(); moveItem(i, "up"); }} disabled={i === 0}
+                <button onClick={e => { e.stopPropagation(); moveItem(i, "up"); }} disabled={i === 0} aria-label="Move item up"
                   className="p-0.5 rounded text-[#9CA3AF] hover:text-[#6366F1] disabled:opacity-20"><Icon name="arrow-up" size={11} /></button>
-                <button onClick={e => { e.stopPropagation(); moveItem(i, "down"); }} disabled={i === value.length - 1}
+                <button onClick={e => { e.stopPropagation(); moveItem(i, "down"); }} disabled={i === value.length - 1} aria-label="Move item down"
                   className="p-0.5 rounded text-[#9CA3AF] hover:text-[#6366F1] disabled:opacity-20"><Icon name="arrow-down" size={11} /></button>
-                <button onClick={e => { e.stopPropagation(); removeItem(i); }}
+                <button onClick={e => { e.stopPropagation(); removeItem(i); }} aria-label="Delete item"
                   className="p-0.5 rounded text-[#9CA3AF] hover:text-red-500"><Icon name="trash" size={11} /></button>
               </div>
               <Icon name={expanded === i ? "chevron-up" : "chevron-down"} size={13} className="text-[#9CA3AF] shrink-0" />
@@ -251,7 +259,7 @@ function ListEditor({ field, value, onChange }: { field: FieldDef; value: any[];
           </div>
         ))}
         {value.length === 0 && (
-          <button onClick={addItem} className="w-full border-2 border-dashed border-[#E5E7EB] hover:border-[#C4B5FD] rounded-xl py-4 text-xs text-[#9CA3AF] hover:text-[#6366F1] transition">
+          <button onClick={addItem} aria-label="Add first item" className="w-full border-2 border-dashed border-[#E5E7EB] hover:border-[#C4B5FD] rounded-xl py-4 text-xs text-[#9CA3AF] hover:text-[#6366F1] transition">
             + Add first item
           </button>
         )}

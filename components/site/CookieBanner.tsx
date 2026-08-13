@@ -70,7 +70,7 @@ export default function CookieBanner({ locale = "ar" }: { locale?: string }) {
     <div className="fixed bottom-6 left-6 right-6 sm:left-auto sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-2xl border border-slate-800">
         <h3 className="font-display font-extrabold text-base mb-2 text-white">{text.title}</h3>
-        <p className="text-xs text-slate-300 leading-relaxed mb-5">
+        <p className="text-xs text-white/80 leading-relaxed mb-5">
           {text.desc}{" "}
           <Link href={`/${locale}/cookie-policy`} className="text-brand-light font-bold underline">
             {text.policy}
@@ -86,7 +86,7 @@ export default function CookieBanner({ locale = "ar" }: { locale?: string }) {
           </button>
           <button
             onClick={handleReject}
-            className="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 font-bold text-xs py-2.5 px-4 rounded-xl transition-all"
+            className="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-white/80 font-bold text-xs py-2.5 px-4 rounded-xl transition-all"
           >
             {text.reject}
           </button>

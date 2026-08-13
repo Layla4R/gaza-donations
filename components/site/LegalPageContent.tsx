@@ -39,7 +39,7 @@ function ContactCTA({ locale, email, label }: { locale: string; email: string; l
     <div className="mt-12 rounded-3xl bg-slate-900 p-8 text-center text-white shadow-xl relative overflow-hidden">
       <div className="relative z-10 max-w-lg mx-auto">
         <p className="font-extrabold text-base sm:text-lg mb-1 text-white">{label}</p>
-        <p className="text-white/60 text-xs sm:text-sm mb-6 font-mono">{email}</p>
+        <p className="text-white/80 text-xs sm:text-sm mb-6 font-mono">{email}</p>
         <a href={`mailto:${email}`} className="inline-flex items-center gap-2 bg-brand hover:opacity-90 active:scale-95 text-white font-bold rounded-xl px-7 py-3 text-xs sm:text-sm transition-all shadow-md">
           <Icon name="mail" size={16} />
           {text[locale] || text.en}
@@ -387,7 +387,7 @@ function ComplaintsContent({ locale }: { locale: string }) {
                 <Icon name="mail" size={16} />
               </div>
               <div className="overflow-hidden">
-                <p className="text-[11px] text-slate-400 font-semibold">{e.label[l as keyof typeof e.label]}</p>
+                <p className="text-[11px] text-slate-500 font-semibold">{e.label[l as keyof typeof e.label]}</p>
                 <a href={`mailto:${e.email}`} className="text-xs font-bold text-slate-900 hover:text-brand transition truncate block">{e.email}</a>
               </div>
             </div>
@@ -629,7 +629,7 @@ function LicenseContent({ locale }: { locale: string }) {
           {t.badge}
         </span>
         <p className="text-sm leading-relaxed text-slate-600">{t.intro}</p>
-        <p className="mt-3 text-xs text-slate-400 font-semibold">{t.updated}: <span className="text-slate-700">12 / 07 / 2026</span></p>
+        <p className="mt-3 text-xs text-slate-500 font-semibold">{t.updated}: <span className="text-slate-700">12 / 07 / 2026</span></p>
       </div>
 
       <div className="mb-8">
@@ -637,7 +637,7 @@ function LicenseContent({ locale }: { locale: string }) {
           <P>{t.s1p1}</P>
           <P>{t.s1p2}</P>
           <div className="pt-2">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">{t.s1stats}</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">{t.s1stats}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {stats.map((s, i) => (
                 <div key={i} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-center">
@@ -714,7 +714,7 @@ function LicenseContent({ locale }: { locale: string }) {
       <div className="mt-8 grid sm:grid-cols-2 gap-4">
         <div className="rounded-2xl bg-slate-900 text-white p-6 text-center">
           <p className="font-bold text-sm mb-1">{t.cta1}</p>
-          <p className="text-white/60 text-xs mb-4 font-mono">info@forrelief.org</p>
+          <p className="text-white/80 text-xs mb-4 font-mono">info@forrelief.org</p>
           <a href="mailto:info@forrelief.org" className="inline-flex items-center gap-2 bg-brand hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-xs transition">
             {l === "ar" ? "تواصل معنا" : l === "fr" ? "Nous Contacter" : l === "tr" ? "İletişim" : "Contact Us"}
           </a>

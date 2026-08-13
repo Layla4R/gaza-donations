@@ -39,7 +39,6 @@ export default function BlockRenderer({
 }) {
   const p = section.props || {};
 
-  // 🌟 استخدام كلاسات Tailwind الديناميكية وقراءة المتغيرات مباشرة
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
   const isRTL = context?.locale === "ar";
@@ -53,12 +52,18 @@ export default function BlockRenderer({
         >
           <div className="absolute inset-0">
             {p.backgroundImage && (
-              <Image src={p.backgroundImage} alt="" fill priority className="object-cover" />
+              <Image 
+                src={p.backgroundImage} 
+                alt="Hero background" 
+                fill 
+                priority 
+                sizes="100vw"
+                className="object-cover" 
+              />
             )}
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" />
           </div>
 
-          {/* Light Ambient Glow */}
           <div className="absolute -left-20 -bottom-20 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
           <div className="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
 
@@ -175,8 +180,16 @@ export default function BlockRenderer({
 
       const imageBlock = (
         <div className="relative">
-          <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden bg-slate-100 shadow-xl border border-slate-100">
-            {p.image && <Image src={p.image} alt={p.title || ""} fill className="object-cover" />}
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-slate-100 shadow-xl border border-slate-100">
+            {p.image && (
+              <Image 
+                src={p.image} 
+                alt={p.title || "Section Image"} 
+                fill 
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover" 
+              />
+            )}
           </div>
         </div>
       );
@@ -279,7 +292,7 @@ export default function BlockRenderer({
                 />
               ))}
               {campaigns.length === 0 && (
-                <p className="text-slate-400 col-span-full text-center py-10">{noCampaignsText}</p>
+                <p className="text-slate-500 col-span-full text-center py-10">{noCampaignsText}</p>
               )}
             </div>
             {campaigns.length > 0 && (
@@ -303,12 +316,15 @@ export default function BlockRenderer({
         <div className="w-full bg-white py-8">
           {p.src && (
             <div className="max-w-screen-xl mx-auto px-6">
-              <img
-                src={p.src}
-                alt={p.alt || ""}
-                className="w-full rounded-3xl object-cover block shadow-md border border-slate-100"
-                style={{ maxHeight: p.maxHeight ? `${p.maxHeight}px` : "none" }}
-              />
+              <div className="relative aspect-[16/9] w-full rounded-3xl overflow-hidden shadow-md border border-slate-100">
+                <Image
+                  src={p.src}
+                  alt={p.alt || "Full width image"}
+                  fill
+                  sizes="100vw"
+                  className="object-cover"
+                />
+              </div>
             </div>
           )}
           {p.caption && (
@@ -316,7 +332,8 @@ export default function BlockRenderer({
           )}
         </div>
       );
-      case "gallery":
+
+    case "gallery":
       return (
         <section className="py-12 bg-slate-50/50 border-t border-slate-100">
           <div className="max-w-screen-xl mx-auto px-6">
@@ -353,7 +370,7 @@ export default function BlockRenderer({
                 return (
                   <div
                     key={i}
-                    className="group relative h-64 rounded-3xl overflow-hidden bg-slate-900 shadow-md border border-slate-100 flex flex-col justify-end"
+                    className="group relative aspect-[4/3] rounded-3xl overflow-hidden bg-slate-900 shadow-md border border-slate-100 flex flex-col justify-end"
                   >
                     {isVideo ? (
                       url.includes("youtube.com") || url.includes("youtu.be") ? (
@@ -379,8 +396,9 @@ export default function BlockRenderer({
                     ) : (
                       <Image
                         src={url}
-                        alt={item.caption || ""}
+                        alt={item.caption || "Gallery Image"}
                         fill
+                        sizes="(max-width: 640px) 100vw, 33vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     )}
@@ -408,12 +426,13 @@ export default function BlockRenderer({
             </div>
             <div className="grid sm:grid-cols-2 gap-8">
               {(p.items || []).map((item: any, i: number) => (
-                <div key={i} className="relative h-80 rounded-3xl overflow-hidden shadow-lg group border border-slate-100">
+                <div key={i} className="relative aspect-[16/10] rounded-3xl overflow-hidden shadow-lg group border border-slate-100">
                   {item.image && (
                     <Image
                       src={item.image}
-                      alt={item.title || ""}
+                      alt={item.title || "Story image"}
                       fill
+                      sizes="(max-width: 640px) 100vw, 50vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   )}
@@ -516,7 +535,7 @@ export default function BlockRenderer({
 
     default:
       return (
-        <div className="py-10 text-center text-slate-400 bg-slate-50 text-xs">
+        <div className="py-10 text-center text-slate-500 bg-slate-50 text-xs">
           عنصر غير معروف: {section.type}
         </div>
       );

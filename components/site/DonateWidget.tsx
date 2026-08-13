@@ -105,7 +105,7 @@ export default function DonateWidget({ locale, dict, primaryColor, accentColor, 
                     <h3 className="text-white font-display font-bold text-lg">
                       {t("donate.title","مربع التبرع السريع","Quick Donation","Don Rapide","Hızlı Bağış")}
                     </h3>
-                    <p className="text-white/60 text-xs mt-0.5">
+                    <p className="text-white/80 text-xs mt-0.5">
                       {t("donate.secure","معاملات شفافة وآمنة","Secure & Transparent","Sécurisé & Transparent","Güvenli ve Şeffaf")}
                     </p>
                   </div>
@@ -146,7 +146,7 @@ export default function DonateWidget({ locale, dict, primaryColor, accentColor, 
 
                     {/* Custom Amount */}
                     <div className="relative">
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 text-xs font-bold">$</span>
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/80 text-xs font-bold">$</span>
                       <input type="number" min={1} value={custom} onChange={e => setCustom(e.target.value)}
                         placeholder={t("donate.custom","مبلغ آخر...","Custom amount...","Autre montant...","Özel miktar...")}
                         className="w-full bg-white/10 border border-white/15 focus:border-white/40 rounded-xl py-2.5 pr-8 pl-3.5 text-white placeholder-white/40 text-xs focus:outline-none transition" />
@@ -161,7 +161,7 @@ export default function DonateWidget({ locale, dict, primaryColor, accentColor, 
                       {freq === "MONTHLY" && <span className="text-white/70 text-xs font-normal">/{t("donate.monthly","شهر","month","mois","ay")}</span>}
                     </button>
 
-                    <p className="text-white/50 text-[11px] text-center flex items-center justify-center gap-1 pt-1">
+                    <p className="text-white/80 text-[11px] text-center flex items-center justify-center gap-1 pt-1">
                       <Icon name="shield-check" size={12} />
                       {t("donate.secure","دفع آمن ومشفر 100%","100% Secure encrypted payment","Paiement 100% sécurisé","100% Güvenli ödeme")}
                     </p>

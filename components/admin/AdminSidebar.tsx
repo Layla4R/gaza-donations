@@ -47,7 +47,7 @@ export default function AdminSidebar() {
       {/* Logo */}
       <div className="p-5 border-b border-white/10">
         <Image src="/brand/logo-horizontal-transparent.png" alt="4Relief" width={140} height={56} className="h-9 w-auto object-contain mb-1.5" />
-        <div className="text-white/40 text-xs font-semibold tracking-widest uppercase">Admin Panel</div>
+        <div className="text-white/80 text-xs font-semibold tracking-widest uppercase">Admin Panel</div>
       </div>
 
       {/* Nav */}
@@ -75,7 +75,7 @@ export default function AdminSidebar() {
                       className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition border-l-2 ${
                         active
                           ? "bg-white/12 font-semibold text-white border-brand-light"
-                          : "text-white/60 hover:bg-white/6 hover:text-white border-transparent"
+                          : "text-white/80 hover:bg-white/6 hover:text-white border-transparent"
                       }`}
                     >
                       <Icon name={item.icon} size={16} className={active ? "text-brand-light" : ""} />

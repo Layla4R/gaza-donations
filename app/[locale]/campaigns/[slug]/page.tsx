@@ -100,7 +100,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
       <div className="max-w-screen-xl mx-auto px-6 pt-10">
         
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-6">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
           <Link href={`${p}/`} className="hover:text-brand transition">{t("nav.home", "الرئيسية")}</Link>
           <span>/</span>
           <Link href={`${p}/campaigns`} className="hover:text-brand transition">{t("nav.campaigns", "الحملات")}</Link>
@@ -153,7 +153,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
                     <span className="font-display font-black text-2xl sm:text-3xl text-slate-900">
                       {formatCurrency(raised, "USD")}
                     </span>
-                    <span className="text-slate-400 text-xs sm:text-sm ms-2">
+                    <span className="text-slate-500 text-xs sm:text-sm ms-2">
                       {t("campaigns.of_goal", "من الهدف")} {formatCurrency(goal, "USD")}
                     </span>
                   </div>
@@ -194,7 +194,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
                     <div key={u.id} className="border border-slate-100 rounded-2xl p-5 bg-slate-50/60 relative">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-bold text-slate-900 text-sm sm:text-base">{u.title}</h3>
-                        <span className="text-xs text-slate-400 font-medium bg-white px-2.5 py-1 rounded-md border border-slate-100">
+                        <span className="text-xs text-slate-500 font-medium bg-white px-2.5 py-1 rounded-md border border-slate-100">
                           {new Date(u.createdAt).toLocaleDateString(locale)}
                         </span>
                       </div>

@@ -86,7 +86,7 @@ export default function DonationWidget({
 
       {/* Custom Amount */}
       <div className="mb-6 relative">
-        <span className="absolute inset-y-0 right-4 flex items-center text-white/50 font-bold">$</span>
+        <span className="absolute inset-y-0 right-4 flex items-center text-white/80 font-bold">$</span>
         <input
           type="number"
           min={1}
@@ -109,7 +109,7 @@ export default function DonationWidget({
       </button>
 
       {/* Footer Text */}
-      <div className="mt-5 flex items-center justify-center gap-1.5 text-white/60 text-xs">
+      <div className="mt-5 flex items-center justify-center gap-1.5 text-white/80 text-xs">
         <Icon name="shield-check" size={14} />
         <span>جميع المعاملات مشفرة وآمنة</span>
       </div>

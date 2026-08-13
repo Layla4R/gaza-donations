@@ -97,7 +97,7 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
               <form onSubmit={subscribe} className="max-w-md mx-auto">
                 <div className="flex flex-col sm:flex-row items-center bg-white rounded-2xl p-1.5 shadow-xl border border-white/20 gap-2">
                   <div className="relative flex-1 w-full">
-                    <Icon name="mail" size={16} className={`absolute top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none ${isRTL ? "right-4" : "left-4"}`} />
+                    <Icon name="mail" size={16} className={`absolute top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none ${isRTL ? "right-4" : "left-4"}`} />
                     <input
                       type="email"
                       required
@@ -135,7 +135,7 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
             )}
 
             {/* Trust Note */}
-            <p className="mt-6 text-white/60 text-[11px] flex items-center justify-center gap-1.5">
+            <p className="mt-6 text-white/80 text-[11px] flex items-center justify-center gap-1.5">
               <Icon name="shield-check" size={13} />
               {t("newsletter.trust", "لن نشارك بريدك مع أي جهة. يمكنك إلغاء الاشتراك في أي وقت.",
                 "We'll never share your email. Unsubscribe anytime.",

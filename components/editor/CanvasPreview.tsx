@@ -14,7 +14,7 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
           </>
         )}
         <div className="relative z-10 px-12 py-16 text-white" style={{ maxWidth: 640 }}>
-          <p className="text-white/60 text-xs font-semibold tracking-widest uppercase mb-3">4Relief Humanitarian Foundation</p>
+          <p className="text-white/80 text-xs font-semibold tracking-widest uppercase mb-3">4Relief Humanitarian Foundation</p>
           <h1 className="font-bold text-4xl leading-tight mb-4" style={{ fontFamily: "serif" }}>{p.title || "Hero Title"}</h1>
           <p className="text-white/75 text-sm leading-relaxed mb-8">{p.subtitle}</p>
           {p.buttonText && (

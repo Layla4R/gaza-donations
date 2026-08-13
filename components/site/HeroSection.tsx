@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Icon from "@/components/icons";
 
 interface Slide {
@@ -96,7 +97,6 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
   }, [animating]);
 
   const next = useCallback(() => goTo((current + 1) % slides.length), [current, slides.length, goTo]);
-  const prev = useCallback(() => goTo((current - 1 + slides.length) % slides.length), [current, slides.length, goTo]);
 
   const [hovered, setHovered] = useState(false);
   
@@ -132,17 +132,19 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
   }
 
   return (
-    <section onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} className="relative flex flex-col justify-between overflow-hidden bg-slate-900 -mt-20 pt-20" style={{ minHeight: "90vh" }}>
-      {/* ── Slider Background ── */}
+    <section onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} className="relative flex flex-col justify-between overflow-hidden bg-slate-900 -mt-20 pt-20 min-h-[85vh] lg:min-h-[90vh]">
+      {/* ── Slider Background Optimized ── */}
       {slides.map((sl: any, i: number) => (
         <div key={i} className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
           style={{ opacity: i === current && !animating ? 1 : 0, zIndex: 0 }}>
-          <img
+          <Image
             src={sl.image}
-            alt=""
-            aria-hidden
-            className="w-full h-full object-cover object-center transform scale-105 transition-transform duration-10000"
-            loading={i === 0 ? "eager" : "lazy"}
+            alt={sl.title_ar || "Hero Slide"}
+            fill
+            priority={i === 0}
+            sizes="(max-width: 768px) 100vw, 100vw"
+            quality={75}
+            className="object-cover object-center transform scale-105 transition-transform duration-10000"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90" />
         </div>
@@ -152,7 +154,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
       <div className="absolute top-1/4 -right-20 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none z-[1]" />
 
       {/* ── Main Hero Content ── */}
-      <div className="relative z-10 flex-1 flex items-center py-16">
+      <div className="relative z-10 flex-1 flex items-center py-12 lg:py-16">
         <div className="max-w-screen-xl mx-auto px-6 w-full">
           <div className="max-w-2xl">
             {/* Eyebrow */}
@@ -165,12 +167,12 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
 
             {/* Title */}
             <h1 className="font-display font-extrabold leading-[1.1] text-white mb-6 tracking-tight drop-shadow-md"
-              style={{ fontSize: "clamp(2.5rem, 5.5vw, 4.5rem)" }}>
+              style={{ fontSize: "clamp(2.2rem, 5vw, 4.2rem)" }}>
               {(slide as any)[`title_${locKey}`] || slide.title_ar}
             </h1>
 
             {/* Subtitle */}
-            <p className="text-white/85 font-normal leading-relaxed mb-8 max-w-xl" style={{ fontSize: "clamp(1rem, 1.5vw, 1.15rem)" }}>
+            <p className="text-white/85 font-normal leading-relaxed mb-8 max-w-xl" style={{ fontSize: "clamp(0.95rem, 1.4vw, 1.1rem)" }}>
               {(slide as any)[`subtitle_${locKey}`] || slide.subtitle_ar}
             </p>
 
@@ -192,7 +194,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
             {/* Trust Badges */}
             <div className="flex flex-wrap items-center gap-6 pt-2 border-t border-white/10">
               {[
-                { icon: "shield-check" as const, ar: "دفع 100% آمن",         en: "100% Secure",      fr: "100% Sécurisé",   tr: "100% Güvenli" },
+                { icon: "shield-check" as const, ar: "دفع 100% آمن",        en: "100% Secure",      fr: "100% Sécurisé",   tr: "100% Güvenli" },
                 { icon: "hand-heart"   as const, ar: "أثر مباشر وشفاف",      en: "Direct Impact",    fr: "Impact Direct",   tr: "Doğrudan Etki" },
                 { icon: "globe"        as const, ar: "دعم موثوق حول العالم", en: "Verified Global",  fr: "Mondial Vérifié", tr: "Küresel Destek" },
               ].map((item, i) => (
@@ -210,13 +212,13 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
       {slides.length > 1 && (
         <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 hidden md:flex flex-col gap-2">
           {slides.map((_: any, i: number) => (
-            <button key={i} onClick={() => goTo(i)} aria-label={`Slide ${i + 1}`}
+            <button key={i} onClick={() => goTo(i)} aria-label={`Go to slide ${i + 1}`}
               className={`transition-all rounded-full ${i === current ? "h-6 w-2 bg-white" : "h-2 w-2 bg-white/40 hover:bg-white/70"}`} />
           ))}
         </div>
       )}
 
-      {/* ── Quick Donate Glass Bar (Primary Colored) ── */}
+      {/* ── Quick Donate Glass Bar ── */}
       <div 
         className="relative z-20 w-full backdrop-blur-xl border-t border-white/15 shadow-2xl transition-colors"
         style={{ backgroundColor: primary }}
@@ -227,13 +229,14 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
             {/* Label */}
             <div className="shrink-0 hidden lg:block">
               <div className="text-white font-bold text-sm">{t("donate.title", "تبرع السريع", "Quick Donate", "Don Rapide", "Hızlı Bağış")}</div>
-              <div className="text-white/60 text-xs">{t("donate.secure", "معاملات مشفرة وآمنة", "100% Secure & Encrypted", "Sécurisé & Chiffré", "Güvenli ve Şifreli")}</div>
+              <div className="text-white/80 text-xs">{t("donate.secure", "معاملات مشفرة وآمنة", "100% Secure & Encrypted", "Sécurisé & Chiffré", "Güvenli ve Şifreli")}</div>
             </div>
 
             {/* Frequency Toggle */}
             <div className="flex bg-white/15 p-1 rounded-xl border border-white/15 shrink-0">
               {(["ONE_TIME", "MONTHLY"] as const).map(f => (
                 <button key={f} onClick={() => setFreq(f)}
+                  aria-label={f === "ONE_TIME" ? "One time donation" : "Monthly donation"}
                   className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     freq === f ? "bg-white shadow-sm" : "text-white/80 hover:text-white"
                   }`}
@@ -249,6 +252,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
               {QUICK_AMOUNTS.map(a => (
                 <button key={a} onClick={() => { setAmount(a); setCustom(""); }}
+                  aria-label={`Donate ${a} dollars`}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                     final === a && !custom
                       ? "bg-white shadow-md"
@@ -262,10 +266,11 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
 
             {/* Custom Amount Input */}
             <div className="relative shrink-0">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60 text-xs font-bold">$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/80 text-xs font-bold">$</span>
               <input
                 type="number" min={1} value={custom}
                 onChange={e => setCustom(e.target.value)}
+                aria-label="Custom Donation Amount"
                 placeholder={t("donate.custom", "مبلغ آخر", "Other", "Autre", "Diğer")}
                 className="w-24 rounded-xl py-1.5 pl-6 pr-3 text-xs text-white bg-white/15 border border-white/20 focus:outline-none focus:border-white/50 transition placeholder-white/50"
               />
@@ -275,6 +280,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
             <button
               onClick={() => { setShowDetails(v => !v); setPayError(""); }}
               disabled={!final || final <= 0}
+              aria-label="Proceed to payment details"
               className="flex items-center gap-2 font-bold rounded-xl px-6 py-2 text-xs text-white transition-all hover:opacity-90 disabled:opacity-50 shrink-0 ms-auto shadow-md"
               style={{ background: accent }}>
               <Icon name="heart" size={14} />
@@ -288,28 +294,30 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
             <div className="mt-4 pt-4 border-t border-white/15 animate-fadeIn">
               <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-end">
                 <div className="flex-1 min-w-48">
-                  <label className="block text-white/80 text-xs font-medium mb-1">
+                  <label htmlFor="donor-full-name" className="block text-white/80 text-xs font-medium mb-1">
                     {t("donate.name", "الاسم الكامل", "Full Name", "Nom Complet", "Ad Soyad")}
                   </label>
-                  <input value={name} onChange={e => setName(e.target.value)}
+                  <input id="donor-full-name" value={name} onChange={e => setName(e.target.value)}
                     placeholder={t("donate.name", "الاسم الكامل", "Full Name", "Nom Complet", "Ad Soyad")}
                     className="w-full rounded-xl py-2 px-3 text-xs text-white bg-white/15 border border-white/20 focus:outline-none focus:border-white/50" />
                 </div>
                 <div className="flex-1 min-w-48">
-                  <label className="block text-white/80 text-xs font-medium mb-1">
+                  <label htmlFor="donor-email" className="block text-white/80 text-xs font-medium mb-1">
                     {t("donate.email", "البريد الإلكتروني", "Email", "Email", "E-posta")}
                   </label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  <input id="donor-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
                     placeholder="email@example.com"
                     className="w-full rounded-xl py-2 px-3 text-xs text-white bg-white/15 border border-white/20 focus:outline-none focus:border-white/50" />
                 </div>
                 <div className="flex gap-2 shrink-0 flex-wrap">
                   <button onClick={() => pay("stripe")} disabled={!!loading}
+                    aria-label="Pay with Card"
                     className="flex items-center gap-1.5 font-bold rounded-xl px-4 py-2 text-xs bg-white transition hover:bg-slate-100 disabled:opacity-60 shadow-sm"
                     style={{ color: primary }}>
                     {loading === "stripe" ? "..." : <><Icon name="wallet" size={14} /> {t("donate.pay_card", "بطاقة", "Card", "Carte", "Kart")}</>}
                   </button>
                   <button onClick={() => pay("paypal")} disabled={!!loading}
+                    aria-label="Pay with PayPal"
                     className="flex items-center gap-1.5 font-bold rounded-xl px-4 py-2 text-xs bg-[#FFC439] text-[#003087] transition hover:bg-[#ffcd54] disabled:opacity-60">
                     {loading === "paypal" ? "..." : "PayPal"}
                   </button>
@@ -324,6 +332,7 @@ export default function HeroSection({ locale, dict, heroImage, heroSlides, accen
                       setCartAdded(true);
                       setTimeout(() => setCartAdded(false), 2000);
                     }}
+                    aria-label="Add to cart"
                     className="flex items-center gap-1.5 font-bold rounded-xl px-4 py-2 text-xs bg-white/15 hover:bg-white/25 text-white border border-white/20 transition">
                     <Icon name="layers" size={14} /> {t("add_to_cart", "السلة", "Cart", "Panier", "Sepet")}
                   </button>

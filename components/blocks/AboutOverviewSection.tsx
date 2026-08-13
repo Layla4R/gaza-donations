@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Icon from "@/components/icons";
 
 interface Props {
@@ -42,12 +43,15 @@ export default function AboutOverviewSection({ data, locale = "ar" }: Props) {
                 key={idx}
                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 flex flex-col group"
               >
-                <div className="relative h-48 w-full overflow-hidden bg-slate-100">
+                {/* 🌟 تثبيت أبعاد الحاوية باستخدام aspect-ratio لمنع CLS */}
+                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {card.image && (
-                    <img
+                    <Image
                       src={card.image}
-                      alt={title || ""}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      alt={title || "About card image"}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   )}
                   <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100 text-brand z-10">

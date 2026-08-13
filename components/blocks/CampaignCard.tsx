@@ -19,7 +19,7 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
     const FALLBACKS: Record<string, string> = {
       donate_now:     locale === "fr" ? "Faire un Don"     : locale === "tr" ? "Bağış Yap"    : locale === "en" ? "Donate Now"        : "تبرع الآن",
       add_to_cart:    locale === "fr" ? "Ajouter au Panier": locale === "tr" ? "Sepete Ekle"  : locale === "en" ? "Add to Cart"       : "أضف إلى السلة",
-      added:          locale === "fr" ? "Ajouté ✓"         : locale === "tr" ? "Eklendi ✓"   : locale === "en" ? "Added ✓"           : "أُضيف ✓",
+      added:          locale === "fr" ? "Ajouté ✓"         : locale === "tr" ? "Eklendi ✓"   : locale === "en" ? "Added ✓"            : "أُضيف ✓",
       monthly:        locale === "fr" ? "Mensuel"          : locale === "tr" ? "Aylık"        : locale === "en" ? "Monthly"           : "شهري",
       one_time:       locale === "fr" ? "Unique"           : locale === "tr" ? "Tek Seferlik" : locale === "en" ? "One-time"          : "مرة واحدة",
       of_goal:        locale === "fr" ? "de l'objectif"    : locale === "tr" ? "hedefin"      : locale === "en" ? "of goal"           : "من الهدف",
@@ -96,13 +96,14 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full">
-      {/* Cover Image Header */}
-      <Link href={`${prefix}/campaigns/${slug}`} className="relative h-48 w-full bg-slate-100 overflow-hidden block shrink-0">
+      {/* Cover Image Header — 🌟 نسبة ثابتة لمنع CLS */}
+      <Link href={`${prefix}/campaigns/${slug}`} className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden block shrink-0" aria-label={title}>
         {coverImage && !imgError ? (
           <Image
             src={coverImage}
             alt={title}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             onError={() => setImgError(true)}
           />
@@ -133,7 +134,7 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
             <div className="flex items-center justify-between text-xs pt-1">
               <div>
                 <span className="font-extrabold text-slate-900 text-sm">{formatCurrency(raisedAmount, "USD")}</span>
-                <span className="text-slate-400 text-[11px] ms-1">{t("of_goal")} {formatCurrency(goalAmount, "USD")}</span>
+                <span className="text-slate-500 text-[11px] ms-1">{t("of_goal")} {formatCurrency(goalAmount, "USD")}</span>
               </div>
               <span className="font-bold text-brand bg-brand/10 px-2 py-0.5 rounded-md text-[11px]">{pct}%</span>
             </div>
@@ -146,40 +147,41 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
             <div className="space-y-2.5">
               {/* Frequency Selection */}
               <div className="flex bg-white rounded-lg p-0.5 border border-slate-200 text-xs font-semibold">
-                <button onClick={() => setFrequency("one_time")} className={`flex-1 py-1.5 rounded-md transition-all ${frequency === "one_time" ? "bg-brand text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}>{t("one_time")}</button>
-                <button onClick={() => setFrequency("monthly")} className={`flex-1 py-1.5 rounded-md transition-all ${frequency === "monthly" ? "bg-brand text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}>{t("monthly")}</button>
+                <button onClick={() => setFrequency("one_time")} aria-label="One time donation" className={`flex-1 py-1.5 rounded-md transition-all ${frequency === "one_time" ? "bg-brand text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}>{t("one_time")}</button>
+                <button onClick={() => setFrequency("monthly")} aria-label="Monthly donation" className={`flex-1 py-1.5 rounded-md transition-all ${frequency === "monthly" ? "bg-brand text-white shadow-sm" : "text-slate-600 hover:text-slate-900"}`}>{t("monthly")}</button>
               </div>
 
               {/* Quick Amounts */}
               <div className="grid grid-cols-4 gap-1.5">
                 {QUICK_AMOUNTS.map(a => (
-                  <button key={a} onClick={() => { setAmount(a); setCustom(""); }} className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${finalAmount === a && !custom ? "bg-brand border-brand text-white shadow-sm" : "border-slate-200 bg-white text-slate-700 hover:border-brand hover:text-brand"}`}>${a}</button>
+                  <button key={a} onClick={() => { setAmount(a); setCustom(""); }} aria-label={`Select $${a}`} className={`py-1.5 rounded-lg text-xs font-bold border transition-all ${finalAmount === a && !custom ? "bg-brand border-brand text-white shadow-sm" : "border-slate-200 bg-white text-slate-700 hover:border-brand hover:text-brand"}`}>${a}</button>
                 ))}
               </div>
 
               {/* Custom Input Counter */}
               <div className="flex items-center gap-1.5">
-                <button onClick={() => { const v = Math.max(1, finalAmount - 5); setAmount(v); setCustom(String(v)); }} className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-brand flex items-center justify-center text-base font-medium transition-colors">−</button>
+                <button onClick={() => { const v = Math.max(1, finalAmount - 5); setAmount(v); setCustom(String(v)); }} aria-label="Decrease amount" className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-brand flex items-center justify-center text-base font-medium transition-colors">−</button>
                 <div className="flex-1 relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-semibold">$</span>
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs font-semibold">$</span>
                   <input
                     type="number" min={1}
+                    aria-label="Custom Amount"
                     value={custom !== "" ? custom : String(finalAmount)}
                     onChange={e => setCustom(e.target.value)}
                     onBlur={() => { if (custom === "" || Number(custom) < 1) setCustom(""); }}
                     className="w-full border border-slate-200 rounded-lg py-1.5 pl-6 pr-2 text-xs text-center focus:outline-none focus:border-brand bg-white font-semibold"
                   />
                 </div>
-                <button onClick={() => { const v = finalAmount + 5; setAmount(v); setCustom(String(v)); }} className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-brand flex items-center justify-center text-base font-medium transition-colors">+</button>
+                <button onClick={() => { const v = finalAmount + 5; setAmount(v); setCustom(String(v)); }} aria-label="Increase amount" className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-700 hover:border-brand flex items-center justify-center text-base font-medium transition-colors">+</button>
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-2 pt-0.5">
-                <button onClick={handleAddToCart} className={`flex items-center justify-center gap-1 border rounded-xl px-3 py-2 text-xs font-bold transition-all shrink-0 ${added ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-slate-200 bg-white text-slate-700 hover:border-brand hover:text-brand"}`}>
+                <button onClick={handleAddToCart} aria-label="Add campaign to cart" className={`flex items-center justify-center gap-1 border rounded-xl px-3 py-2 text-xs font-bold transition-all shrink-0 ${added ? "border-emerald-500 text-emerald-600 bg-emerald-50" : "border-slate-200 bg-white text-slate-700 hover:border-brand hover:text-brand"}`}>
                   <Icon name={added ? "check" : "layers"} size={14} />
                   <span>{added ? (cartUpdated ? "✓" : t("added")) : t("add_to_cart")}</span>
                 </button>
-                <button onClick={() => { setStep("details"); setName(""); setEmail(""); setError(""); }} disabled={!finalAmount || finalAmount <= 0} className="flex-1 bg-accent hover:opacity-90 active:scale-98 text-white font-bold rounded-xl py-2 text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm">
+                <button onClick={() => { setStep("details"); setName(""); setEmail(""); setError(""); }} disabled={!finalAmount || finalAmount <= 0} aria-label="Proceed to donate" className="flex-1 bg-accent hover:opacity-90 active:scale-98 text-white font-bold rounded-xl py-2 text-xs transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm">
                   <Icon name="heart" size={14} />{t("donate_now")}
                 </button>
               </div>
@@ -188,22 +190,22 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-brand">{frequency === "monthly" ? t("monthly") : t("one_time")} — ${finalAmount}</span>
-                <button onClick={() => { setStep("widget"); setError(""); }} className="text-[11px] text-slate-400 hover:text-slate-800 underline">{t("edit")}</button>
+                <button onClick={() => { setStep("widget"); setError(""); }} className="text-[11px] text-slate-500 hover:text-slate-800 underline">{t("edit")}</button>
               </div>
-              <input type="text" placeholder={t("full_name")} value={name} onChange={e => setName(e.target.value)} className={inp} />
-              <input type="email" placeholder={t("email")} value={email} onChange={e => setEmail(e.target.value)} className={inp} />
+              <input type="text" placeholder={t("full_name")} aria-label="Full Name" value={name} onChange={e => setName(e.target.value)} className={inp} />
+              <input type="email" placeholder={t("email")} aria-label="Email" value={email} onChange={e => setEmail(e.target.value)} className={inp} />
               {error && <p className="text-[11px] text-red-500 flex items-center gap-1"><Icon name="x" size={11} />{error}</p>}
               
-              <button onClick={() => pay("stripe")} disabled={!!loading} className="w-full bg-brand hover:opacity-90 text-white font-bold rounded-xl py-2 text-xs transition-all disabled:opacity-60 flex items-center justify-center gap-1.5 shadow-sm">
+              <button onClick={() => pay("stripe")} disabled={!!loading} aria-label="Pay with Card" className="w-full bg-brand hover:opacity-90 text-white font-bold rounded-xl py-2 text-xs transition-all disabled:opacity-60 flex items-center justify-center gap-1.5 shadow-sm">
                 <Icon name="wallet" size={14} />
                 {loading === "stripe" ? "..." : t("pay_card")}
               </button>
               
-              <button onClick={() => pay("paypal")} disabled={!!loading} className="w-full bg-[#FFC439] hover:bg-[#f0b429] text-[#003087] font-bold rounded-xl py-2 text-xs transition-all disabled:opacity-60 flex items-center justify-center gap-1.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="#003087"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
+              <button onClick={() => pay("paypal")} disabled={!!loading} aria-label="Pay with PayPal" className="w-full bg-[#FFC439] hover:bg-[#f0b429] text-[#003087] font-bold rounded-xl py-2 text-xs transition-all disabled:opacity-60 flex items-center justify-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#003087" aria-hidden="true"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
                 {loading === "paypal" ? "..." : "PayPal"}
               </button>
-              <p className="text-[10px] text-slate-400 text-center flex items-center justify-center gap-1 pt-0.5"><Icon name="shield-check" size={10} />{t("secure_payment")}</p>
+              <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1 pt-0.5"><Icon name="shield-check" size={10} />{t("secure_payment")}</p>
             </div>
           )}
         </div>

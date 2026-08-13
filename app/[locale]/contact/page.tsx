@@ -64,7 +64,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                       <Icon name="mail" size={20} />
                     </div>
                     <div className="overflow-hidden">
-                      <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">{t("البريد الإلكتروني","Email","Email","E-posta")}</div>
+                      <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-0.5">{t("البريد الإلكتروني","Email","Email","E-posta")}</div>
                       <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition truncate">{settings.contactEmail}</div>
                     </div>
                   </a>
@@ -76,7 +76,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                       <Icon name="phone" size={20} />
                     </div>
                     <div>
-                      <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">{t("الهاتف","Phone","Téléphone","Telefon")}</div>
+                      <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-0.5">{t("الهاتف","Phone","Téléphone","Telefon")}</div>
                       <div className="text-slate-800 font-bold text-xs sm:text-sm">{settings.contactPhone}</div>
                     </div>
                   </a>
@@ -88,7 +88,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                       <Icon name="message-circle" size={20} />
                     </div>
                     <div>
-                      <div className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider mb-0.5">WhatsApp</div>
+                      <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-0.5">WhatsApp</div>
                       <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-emerald-600 transition">{t("راسلنا على واتساب","Message us on WhatsApp","Écrivez-nous sur WhatsApp","WhatsApp'tan yazın")}</div>
                     </div>
                   </a>

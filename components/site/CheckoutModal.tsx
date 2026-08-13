@@ -107,7 +107,7 @@ export default function CheckoutModal({ amount: initialAmount, frequency: initia
 
               {/* Custom */}
               <div className="relative">
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 font-bold text-sm">$</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 font-bold text-sm">$</span>
                 <input type="number" min={1} value={custom} onChange={e => setCustom(e.target.value)}
                   placeholder={t("donate.custom","مبلغ آخر...","Custom amount...","Autre montant...","Özel miktar...")}
                   className={inp + " pr-10"} />
@@ -130,8 +130,8 @@ export default function CheckoutModal({ amount: initialAmount, frequency: initia
             <>
               {/* Summary */}
               <div className="flex items-center justify-between bg-white/10 rounded-xl px-4 py-3">
-                <span className="text-white text-sm font-bold">${final} {freq === "MONTHLY" && <span className="text-white/50 font-normal text-xs">/{t("donate.monthly","شهر","mo","mois","ay")}</span>}</span>
-                <button onClick={() => { setStep("amount"); setError(""); }} className="text-white/50 hover:text-white text-xs underline">
+                <span className="text-white text-sm font-bold">${final} {freq === "MONTHLY" && <span className="text-white/80 font-normal text-xs">/{t("donate.monthly","شهر","mo","mois","ay")}</span>}</span>
+                <button onClick={() => { setStep("amount"); setError(""); }} className="text-white/80 hover:text-white text-xs underline">
                   {t("campaigns.edit","تعديل","Change","Modifier","Değiştir")}
                 </button>
               </div>
