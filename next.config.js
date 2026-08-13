@@ -1,12 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 🌟 إخفاء رأس Next.js للأمان وتقليل الحجم
   poweredByHeader: false,
 
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
     remotePatterns: [{ protocol: "https", hostname: "**" }],
+  },
+
+  async rewrites() {
+    return [
+      {
+        source: "/.well-known/appspecific/com.chrome.devtools.json",
+        destination: "/api/revalidate",
+      },
+    ];
   },
 
   async headers() {
