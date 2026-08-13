@@ -1,17 +1,37 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-// 1. استيراد دالة جلب قاعدة البيانات
 import { getSupabaseOrNull } from "@/lib/supabase"; 
+// 🌟 استيراد خط Alexandria بدلاً من Cairo
+import { Alexandria, Tajawal } from "next/font/google";
 
-// ... (أكواد الـ Metadata تبقى كما هي بدون تغيير) ...
+// 🌟 إعداد خط العناوين الجديد
+const alexandria = Alexandria({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-display",
+});
 
-// 2. تحويل RootLayout إلى دالة غير متزامنة (async) لجلب الإعدادات
+// إعداد خط النصوص (можно تركه تجوال أو تغييره أيضاً)
+const tajawal = Tajawal({
+  weight: ['400', '500', '700', '800'],
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
+
+export const metadata: Metadata = {
+  title: {
+    template: "%s | 4Relief",
+    default: "4Relief Humanitarian Foundation",
+  },
+  description: "An independent humanitarian donation platform with full transparency.",
+};
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const gaId  = process.env.NEXT_PUBLIC_GA_ID;
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
-  // 3. جلب الألوان من قاعدة البيانات عند تحميل الموقع
   const supabase = getSupabaseOrNull();
   const settings = supabase
     ? (await supabase.from("SiteSettings").select("primaryColor, accentColor").eq("id", "default").maybeSingle()).data
@@ -21,11 +41,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const accentColor = settings?.accentColor || "#F00F5A";
 
   return (
-    <html suppressHydrationWarning>
+    // 🌟 تمرير متغيرات الخطوط الجديدة للـ HTML
+    <html suppressHydrationWarning className={`${alexandria.variable} ${tajawal.variable}`}>
       <head>
-        {/* ... (روابط الـ head والـ scripts تبقى كما هي) ... */}
+        {gtmId && (
+          <Script id="gtm-init" strategy="beforeInteractive">{`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','${gtmId}');
+          `}</Script>
+        )}
         
-        {/* 🌟 4. حقن الألوان كمتغيرات CSS على مستوى الـ HTML بالكامل */}
         <style dangerouslySetInnerHTML={{
           __html: `
             :root {
@@ -36,8 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         }} />
       </head>
       
-      <body className="font-sans min-h-screen">
-        {/* ... (باقي محتوى الـ body يبقى كما هو) ... */}
+      <body className="font-sans min-h-screen antialiased">
         {gtmId && (
           <noscript>
             <iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} />

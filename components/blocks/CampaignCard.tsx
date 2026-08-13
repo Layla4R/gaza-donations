@@ -99,14 +99,15 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
       {/* Cover Image Header — 🌟 نسبة ثابتة لمنع CLS */}
       <Link href={`${prefix}/campaigns/${slug}`} className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden block shrink-0" aria-label={title}>
         {coverImage && !imgError ? (
-          <Image
-            src={coverImage}
-            alt={title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-            onError={() => setImgError(true)}
-          />
+    <Image
+  src={coverImage}
+  alt={title}
+  fill
+  quality={60}
+  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" /* 🌟 إخبار المتصفح بالحجم الحقيقي للموبايل */
+  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+  onError={() => setImgError(true)}
+/>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-brand/30">
             <Icon name="hand-heart" size={48} />
