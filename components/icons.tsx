@@ -50,6 +50,7 @@ export type IconName =
   | "instagram"
   | "youtube"
   | "linkedin"
+  | "map-pin"
   | "tiktok";
 
 const PATHS: Record<IconName, React.ReactNode> = {
@@ -309,6 +310,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
       <rect x="2" y="9" width="4" height="12" />
       <circle cx="4" cy="4" r="2" />
+    </>
+  ),
+  "map-pin": (
+    <>
+      <path d="M21 10c0 6-9 13-9 13s-9-7-9-13a9 9 0 1 1 18 0z" />
+      <circle cx="12" cy="10" r="2.5" />
     </>
   ),
   tiktok: (

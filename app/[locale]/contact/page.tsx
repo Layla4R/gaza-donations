@@ -20,8 +20,13 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
   const t = (ar: string, en: string, fr: string, tr: string) =>
     locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
 
+  // العنوان المسجل
+  const officeAddress = "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, United Kingdom";
+  // رابط التضمين لخريطة جوجل (بدون الحاجة لـ API Key)
+  const mapEmbedUrl = `https://maps.google.com/maps?q=71-75%20Shelton%20Street,%20Covent%20Garden,%20London,%20WC2H%209JQ,%20UK&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
   return (
-    <div className="bg-slate-50/50 min-h-screen pb-20 border-t border-slate-100">
+    <div className="bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100">
       {/* 🌟 Header Banner Colored by Primary Color */}
       <div 
         className="py-14 sm:py-20 text-center text-white relative overflow-hidden transition-colors shadow-sm"
@@ -47,6 +52,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
         </div>
       </div>
 
+      {/* 🌟 Main Contact Content (Info + Form) */}
       <div className="max-w-screen-xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
 
@@ -58,6 +64,21 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
               </h2>
               
               <div className="space-y-4">
+                {/* Office Address */}
+                <div className="flex items-start gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
+                  <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition mt-1">
+                    <Icon name="map-pin" size={20} />
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-1">{t("العنوان المسجل", "Registered Address", "Adresse Enregistrée", "Kayıtlı Adres")}</div>
+                    <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition whitespace-normal leading-relaxed">
+                      71-75 Shelton Street<br />
+                      Covent Garden, London<br />
+                      WC2H 9JQ, United Kingdom
+                    </div>
+                  </div>
+                </div>
+
                 {settings?.contactEmail && (
                   <a href={`mailto:${settings.contactEmail}`} className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
                     <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition">
@@ -77,7 +98,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                     </div>
                     <div>
                       <div className="text-[11px] text-slate-500 font-semibold uppercase tracking-wider mb-0.5">{t("الهاتف","Phone","Téléphone","Telefon")}</div>
-                      <div className="text-slate-800 font-bold text-xs sm:text-sm">{settings.contactPhone}</div>
+                      <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition">{settings.contactPhone}</div>
                     </div>
                   </a>
                 )}
@@ -102,7 +123,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">{t("وقت الاستجابة","Response Time","Délai de Réponse","Yanıt Süresi")}</span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                 {t("نرد على جميع الاستفسارات خلال 24-48 ساعة في أيام العمل.","We respond to all inquiries within 24-48 hours on business days.","Nous répondons à toutes les demandes sous 24-48 heures les jours ouvrés.","İş günlerinde 24-48 saat içinde tüm sorulara yanıt veriyoruz.")}
               </p>
             </div>
@@ -120,6 +141,23 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
 
         </div>
       </div>
+
+      {/* 🌟 Google Maps Section (Full Width Standard) */}
+      <div className="max-w-screen-xl mx-auto px-6 pb-10">
+        <div className="bg-white p-2 sm:p-3 rounded-[2rem] border border-slate-100 shadow-sm">
+          <iframe
+            src={mapEmbedUrl}
+            width="100%"
+            height="400"
+            className="border-0 rounded-3xl w-full grayscale-[20%] contrast-125 transition-all hover:grayscale-0"
+            allowFullScreen={true}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            title="4Relief Foundation Location in London"
+          ></iframe>
+        </div>
+      </div>
+
     </div>
   );
 }
