@@ -40,7 +40,7 @@ function ContactCTA({ locale, email, label }: { locale: string; email: string; l
       <div className="relative z-10 max-w-lg mx-auto">
         <p className="font-extrabold text-base sm:text-lg mb-1 text-white">{label}</p>
         <p className="text-white/80 text-xs sm:text-sm mb-6 font-mono">{email}</p>
-        <a href={`mailto:${email}`} className="inline-flex items-center gap-2 bg-brand hover:opacity-90 active:scale-95 text-white font-bold rounded-xl px-7 py-3 text-xs sm:text-sm transition-all shadow-md">
+        <a aria-label={`Send email to ${email}`} href={`mailto:${email}`} className="inline-flex items-center gap-2 bg-brand hover:opacity-90 active:scale-95 text-white font-bold rounded-xl px-7 py-3 text-xs sm:text-sm transition-all shadow-md">
           <Icon name="mail" size={16} />
           {text[locale] || text.en}
         </a>
@@ -162,7 +162,7 @@ function TermsContent({ locale }: { locale: string }) {
           {sec.items.length === 1 ? <P>{sec.items[0]}</P> : <UL items={sec.items} />}
         </Section>
       ))}
-      <ContactCTA locale={locale} email="info@forrelief.org"
+      <ContactCTA aria-label={`Send email to ${"info@forrelief.org"}`} locale={locale} email="info@forrelief.org"
         label={locale === "ar" ? "لديك سؤال قانوني؟ فريقنا يرد خلال 48 ساعة." : locale === "fr" ? "Une question juridique ? Notre équipe répond sous 48 heures." : locale === "tr" ? "Hukuki sorularınız mı var? Ekibimiz 48 saat içinde yanıtlar." : "Legal questions? Our team responds within 48 hours."} />
     </>
   );
@@ -215,7 +215,7 @@ function RefundContent({ locale }: { locale: string }) {
       <Section title={d.s1t}><UL items={d.s1} /></Section>
       <Section title={d.s2t}><UL items={d.s2} /></Section>
       <Section title={d.s3t}><P>{d.s3}</P></Section>
-      <ContactCTA locale={locale} email="refunds@forrelief.org" label={d.cta} />
+      <ContactCTA aria-label={`Send email to ${"refunds@forrelief.org"}`} locale={locale} email="refunds@forrelief.org" label={d.cta}  />
     </>
   );
 }
@@ -267,7 +267,7 @@ function CookieContent({ locale }: { locale: string }) {
       <Section title={d.s1t}><P>{d.s1}</P></Section>
       <Section title={d.s2t}><UL items={d.s2} /></Section>
       <Section title={d.s3t}><P>{d.s3}</P></Section>
-      <ContactCTA locale={locale} email="privacy@forrelief.org" label={d.cta} />
+      <ContactCTA aria-label={`Send email to ${"privacy@forrelief.org"}`} locale={locale} email="privacy@forrelief.org" label={d.cta} />
     </>
   );
 }
@@ -326,7 +326,7 @@ function AMLContent({ locale }: { locale: string }) {
       <Section title={d.s1t}><UL items={d.s1} /></Section>
       <Section title={d.s2t}><UL items={d.s2} /></Section>
       <Section title={d.s3t}><UL items={d.s3} /></Section>
-      <ContactCTA locale={locale} email="fraud@forrelief.org" label={d.cta} />
+      <ContactCTA aria-label={`Send email to ${"fraud@forrelief.org"}`} locale={locale} email="fraud@forrelief.org" label={d.cta} />
     </>
   );
 }
@@ -463,7 +463,7 @@ function FinancialTransparencyContent({ locale }: { locale: string }) {
       </Section>
       <Section title={t.s1_title}><UL items={t.s1} /></Section>
       <Section title={t.s2_title}><UL items={t.s2} /></Section>
-      <ContactCTA locale={locale} email="finance@forrelief.org" label={t.cta} />
+      <ContactCTA locale={locale} aria-label="Send email to finance@forrelief.org" email="finance@forrelief.org" label={t.cta} />
     </>
   );
 }

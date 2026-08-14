@@ -80,7 +80,7 @@ export default async function ContactPage({ params: { locale } }: { params: { lo
                 </div>
 
                 {settings?.contactEmail && (
-                  <a href={`mailto:${settings.contactEmail}`} className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
+                  <a href={`mailto:${settings.contactEmail}`} aria-label={settings.contactEmail} className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
                     <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition">
                       <Icon name="mail" size={20} />
                     </div>

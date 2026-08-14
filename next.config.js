@@ -39,7 +39,13 @@ const nextConfig = {
         ],
       },
       {
-        // 🌟 كاش دائم ثابت للأصول الثابتة والصور والخطوط (Immutable Cache لمدة سنة)
+        // 🌟 كاش دائم ثابت للصور والأصول (Immutable Cache)
+        source: "/_next/image(.*)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
         source: "/_next/static/:path*",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },

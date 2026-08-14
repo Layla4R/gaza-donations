@@ -39,7 +39,7 @@ export default function DonationsClient({ locale, dict: D }: { locale: string; d
   return (
     <div className="max-w-screen-xl mx-auto px-6 py-16">
       <div className="flex items-center gap-4 mb-8">
-        <Link href={`${p}/account`} className="text-muted hover:text-ink"><Icon name="arrow-left" size={20} /></Link>
+        <Link href={`${p}/account`} aria-label={D["account.back_to_account"]} className="text-muted hover:text-ink"><Icon name="arrow-left" size={20} /></Link>
         <h1 className="font-display text-2xl font-extrabold text-ink">{D["account.my_donations"]}</h1>
       </div>
       {donations.length === 0 ? (

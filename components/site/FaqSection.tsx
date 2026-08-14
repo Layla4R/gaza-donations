@@ -144,6 +144,7 @@ export default function FaqSection({
 
           <a
             href="mailto:info@forrelief.org"
+            aria-label="Send email to info@forrelief.org"
             className="inline-flex items-center gap-2 bg-brand hover:opacity-90 active:scale-98 text-white font-bold rounded-xl px-6 py-3 text-xs sm:text-sm transition-all shadow-sm shrink-0"
           >
             <Icon name="send" size={15} />

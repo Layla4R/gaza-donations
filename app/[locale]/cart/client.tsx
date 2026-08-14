@@ -139,7 +139,7 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
                 <span className="font-bold text-brand min-w-[48px] text-center text-sm">${item.amount}</span>
                 <button onClick={() => updateAmount(item.slug, item.amount + 5)} className="w-7 h-7 rounded-lg border border-line text-muted hover:border-brand hover:text-brand flex items-center justify-center text-sm">+</button>
               </div>
-              <button onClick={() => remove(item.slug)} className="text-danger hover:text-danger/70"><Icon name="trash" size={16} /></button>
+              <button onClick={() => remove(item.slug)} aria-label={D["cart.remove_item"]} className="text-danger hover:text-danger/70"><Icon name="trash" size={16} /></button>
             </div>
           ))}
 

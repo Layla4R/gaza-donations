@@ -153,7 +153,7 @@ export default function StaffPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-line">
               <h2 className="font-display font-extrabold text-ink text-lg">Invite Staff Member</h2>
-              <button onClick={() => setShowInvite(false)} className="text-muted hover:text-ink"><Icon name="x" size={20} /></button>
+              <button onClick={() => setShowInvite(false)} aria-label="Close Invite Modal" className="text-muted hover:text-ink"><Icon name="x" size={20} /></button>
             </div>
             <form onSubmit={sendInvite} className="p-6 space-y-6">
               {/* Basic info */}
@@ -299,7 +299,7 @@ export default function StaffPage() {
                   className="text-xs border border-brand text-brand font-semibold rounded-lg px-2.5 py-1.5 hover:bg-brand hover:text-white transition shrink-0">
                   Resend
                 </button>
-                <button onClick={() => revokeInvite(inv.id)} className="text-danger hover:text-danger/70 transition shrink-0">
+                <button onClick={() => revokeInvite(inv.id)} aria-label="اسم الزر" className="text-danger hover:text-danger/70 transition shrink-0">
                   <Icon name="trash" size={15} />
                 </button>
               </div>
@@ -332,7 +332,7 @@ function EditPermissionsModal({ user, onClose, onSave }: {
             <h2 className="font-display font-extrabold text-ink">Edit Permissions</h2>
             <p className="text-muted text-sm">{user.name} — {user.email}</p>
           </div>
-          <button onClick={onClose} className="text-muted hover:text-ink"><Icon name="x" size={20} /></button>
+          <button onClick={onClose} aria-label="اسم الزر" className="text-muted hover:text-ink"><Icon name="x" size={20} /></button>
         </div>
         <div className="p-6 space-y-5">
           <div>

@@ -17,20 +17,20 @@ const QUICK_AMOUNTS = [5, 10, 25, 50];
 export default function CampaignCard({ id, slug, title, summary, coverImage, goalAmount, raisedAmount, donorCount, category, locale = "ar", dict = {} }: Props) {
   const t = (k: string) => {
     const FALLBACKS: Record<string, string> = {
-      donate_now:     locale === "fr" ? "Faire un Don"     : locale === "tr" ? "Bağış Yap"    : locale === "en" ? "Donate Now"        : "تبرع الآن",
-      add_to_cart:    locale === "fr" ? "Ajouter au Panier": locale === "tr" ? "Sepete Ekle"  : locale === "en" ? "Add to Cart"       : "أضف إلى السلة",
-      added:          locale === "fr" ? "Ajouté ✓"         : locale === "tr" ? "Eklendi ✓"   : locale === "en" ? "Added ✓"            : "أُضيف ✓",
-      monthly:        locale === "fr" ? "Mensuel"          : locale === "tr" ? "Aylık"        : locale === "en" ? "Monthly"           : "شهري",
-      one_time:       locale === "fr" ? "Unique"           : locale === "tr" ? "Tek Seferlik" : locale === "en" ? "One-time"          : "مرة واحدة",
-      of_goal:        locale === "fr" ? "de l'objectif"    : locale === "tr" ? "hedefin"      : locale === "en" ? "of goal"           : "من الهدف",
-      full_name:      locale === "fr" ? "Nom Complet"      : locale === "tr" ? "Ad Soyad"     : locale === "en" ? "Full Name"         : "الاسم الكامل",
-      email:          locale === "fr" ? "Email"            : locale === "tr" ? "E-posta"      : locale === "en" ? "Email"             : "البريد الإلكتروني",
-      pay_card:       locale === "fr" ? "Payer par Carte"  : locale === "tr" ? "Kart ile Öde" : locale === "en" ? "Pay with Card"     : "الدفع بالبطاقة",
+      donate_now:      locale === "fr" ? "Faire un Don"      : locale === "tr" ? "Bağış Yap"    : locale === "en" ? "Donate Now"        : "تبرع الآن",
+      add_to_cart:     locale === "fr" ? "Ajouter au Panier": locale === "tr" ? "Sepete Ekle"  : locale === "en" ? "Add to Cart"       : "أضف إلى السلة",
+      added:           locale === "fr" ? "Ajouté ✓"          : locale === "tr" ? "Eklendi ✓"   : locale === "en" ? "Added ✓"             : "أُضيف ✓",
+      monthly:         locale === "fr" ? "Mensuel"           : locale === "tr" ? "Aylık"        : locale === "en" ? "Monthly"           : "شهري",
+      one_time:        locale === "fr" ? "Unique"            : locale === "tr" ? "Tek Seferlik" : locale === "en" ? "One-time"          : "مرة واحدة",
+      of_goal:         locale === "fr" ? "de l'objectif"     : locale === "tr" ? "hedefin"      : locale === "en" ? "of goal"           : "من الهدف",
+      full_name:       locale === "fr" ? "Nom Complet"       : locale === "tr" ? "Ad Soyad"     : locale === "en" ? "Full Name"         : "الاسم الكامل",
+      email:           locale === "fr" ? "Email"             : locale === "tr" ? "E-posta"      : locale === "en" ? "Email"             : "البريد الإلكتروني",
+      pay_card:        locale === "fr" ? "Payer par Carte"   : locale === "tr" ? "Kart ile Öde" : locale === "en" ? "Pay with Card"     : "الدفع بالبطاقة",
       secure_payment: locale === "fr" ? "Paiement sécurisé": locale === "tr" ? "Güvenli ödeme": locale === "en" ? "Secure payment"    : "دفع آمن ومشفر",
-      edit:           locale === "fr" ? "Modifier"         : locale === "tr" ? "Değiştir"     : locale === "en" ? "Change"            : "تعديل",
+      edit:            locale === "fr" ? "Modifier"          : locale === "tr" ? "Değiştir"     : locale === "en" ? "Change"            : "تعديل",
       invalid_email:  locale === "fr" ? "Email invalide"   : locale === "tr" ? "Geçersiz e-posta": locale === "en" ? "Invalid email" : "بريد إلكتروني غير صحيح",
       name_required:  locale === "fr" ? "Nom et email requis": locale === "tr" ? "Ad ve e-posta gerekli": locale === "en" ? "Name and email required": "الاسم والبريد مطلوبان",
-      donors:         locale === "fr" ? "donateurs"        : locale === "tr" ? "bağışçı"      : locale === "en" ? "donors"            : "متبرع",
+      donors:          locale === "fr" ? "donateurs"         : locale === "tr" ? "bağışçı"      : locale === "en" ? "donors"            : "متبرع",
     };
     return dict[`campaigns.${k}`] || FALLBACKS[k] || k;
   };
@@ -96,18 +96,17 @@ export default function CampaignCard({ id, slug, title, summary, coverImage, goa
 
   return (
     <div className="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full">
-      {/* Cover Image Header — 🌟 نسبة ثابتة لمنع CLS */}
       <Link href={`${prefix}/campaigns/${slug}`} className="relative aspect-[16/10] w-full bg-slate-100 overflow-hidden block shrink-0" aria-label={title}>
         {coverImage && !imgError ? (
-    <Image
-  src={coverImage}
-  alt={title}
-  fill
-  quality={60}
-  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" /* 🌟 إخبار المتصفح بالحجم الحقيقي للموبايل */
-  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-  onError={() => setImgError(true)}
-/>
+          <Image
+            src={coverImage}
+            alt={title}
+            fill
+            quality={60}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            onError={() => setImgError(true)}
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-brand/30">
             <Icon name="hand-heart" size={48} />

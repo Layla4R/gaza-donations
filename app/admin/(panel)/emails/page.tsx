@@ -570,7 +570,7 @@ export default function EmailEditorPage() {
               <>
                 <div className="px-3 py-2.5 border-b border-gray-100 flex items-center justify-between">
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email Settings</span>
-                  <button onClick={() => setGsOpen(false)} className="text-gray-400 hover:text-gray-600 p-0.5"><Icon name="x" size={12}/></button>
+                  <button onClick={() => setGsOpen(false)} aria-label="Close Settings" className="text-gray-400 hover:text-gray-600 p-0.5"><Icon name="x" size={12}/></button>
                 </div>
                 <GlobalSettings gs={gs} onChange={g => { setGs(g); setIsDirty(true); }} />
                 <div className="px-3 pb-3 border-t border-gray-100 pt-3">
@@ -685,7 +685,7 @@ export default function EmailEditorPage() {
                         className="w-5 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-gray-400 hover:text-blue-500 disabled:opacity-20 transition text-[10px]">↓</button>
                       <button title="Duplicate" onClick={e => { e.stopPropagation(); const nb={...block,id:uid(),props:{...block.props}}; const arr=[...blocks]; arr.splice(idx+1,0,nb); setBlocks(arr); setSelectedId(nb.id); setIsDirty(true); }}
                         className="w-5 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-gray-400 hover:text-green-500 transition text-[10px]">⧉</button>
-                      <button onClick={e => { e.stopPropagation(); delBlock(block.id); }}
+                      <button onClick={e => { e.stopPropagation(); delBlock(block.id); }} aria-label="اسم الزر"
                         className="w-5 h-5 bg-white border border-gray-200 rounded flex items-center justify-center text-red-400 hover:bg-red-500 hover:text-white transition"><Icon name="x" size={9}/></button>
                     </div>
                   )}
@@ -743,7 +743,7 @@ export default function EmailEditorPage() {
                 <>
                   <div className="px-3 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                     <span className="text-[10px] font-bold text-blue-500 uppercase">{selectedBlock.type}</span>
-                    <button onClick={() => setSelectedId(null)} className="text-gray-400 hover:text-gray-600 p-0.5"><Icon name="x" size={11}/></button>
+                    <button onClick={() => setSelectedId(null)} aria-label="اسم الزر" className="text-gray-400 hover:text-gray-600 p-0.5"><Icon name="x" size={11}/></button>
                   </div>
                   <BlockProps block={selectedBlock} onChange={p => updBlock(selectedBlock.id, p)} />
                 </>

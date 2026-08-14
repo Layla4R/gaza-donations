@@ -367,6 +367,7 @@ export default function PageEditor({
             onClick={undo}
             disabled={historyIdx === 0}
             title="Undo (⌘Z)"
+            aria-label="Undo Action"
             className="p-2 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] disabled:opacity-30 transition"
           >
             <Icon name="undo" size={16} />
@@ -375,6 +376,7 @@ export default function PageEditor({
             onClick={redo}
             disabled={historyIdx >= history.length - 1}
             title="Redo (⌘⇧Z)"
+            aria-label="Redo Action"
             className="p-2 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] disabled:opacity-30 transition"
           >
             <svg
@@ -397,6 +399,7 @@ export default function PageEditor({
               key={v}
               onClick={() => setViewport(v)}
               title={v}
+              aria-label={`Switch to ${v} view`}
               className={`p-2 rounded-lg transition ${viewport === v ? "bg-[#6366F1] text-white shadow-sm" : "text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6]"}`}
             >
               <Icon
@@ -624,6 +627,7 @@ export default function PageEditor({
                                 moveSection(s.id, "up");
                               }}
                               disabled={idx === 0}
+                              aria-label="اسم الزر"
                               className="p-0.5 rounded hover:bg-[#E0E7FF] text-[#6366F1] disabled:opacity-20"
                             >
                               <Icon name="arrow-up" size={11} />
@@ -634,6 +638,7 @@ export default function PageEditor({
                                 moveSection(s.id, "down");
                               }}
                               disabled={idx === sections.length - 1}
+                              aria-label="اسم الزر"
                               className="p-0.5 rounded hover:bg-[#E0E7FF] text-[#6366F1] disabled:opacity-20"
                             >
                               <Icon name="arrow-down" size={11} />
@@ -722,6 +727,7 @@ export default function PageEditor({
               )}
               <button
                 onClick={() => setRightCollapsed(true)}
+                aria-label="Collapse Inspector"
                 className="text-[#D1D5DB] hover:text-[#6B7280] transition p-1 rounded"
               >
                 <Icon name="x" size={14} />
@@ -788,6 +794,7 @@ export default function PageEditor({
         {rightCollapsed && (
           <button
             onClick={() => setRightCollapsed(false)}
+            aria-label="Expand Inspector"
             className="fixed right-0 top-1/2 -translate-y-1/2 bg-white border border-[#E2E5ED] border-r-0 rounded-l-xl p-2 shadow-md text-[#6B7280] hover:text-[#6366F1] transition z-40"
           >
             <Icon name="settings" size={16} />
