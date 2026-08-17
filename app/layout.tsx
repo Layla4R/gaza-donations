@@ -2,22 +2,25 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import { getSupabaseOrNull } from "@/lib/supabase"; 
-// 🌟 استيراد خط Alexandria بدلاً من Cairo
-import { Alexandria, Tajawal } from "next/font/google";
+import { Alexandria, Tajawal, Cairo } from "next/font/google";
 
-// 🌟 إعداد خط العناوين الجديد
 const alexandria = Alexandria({
   subsets: ["arabic", "latin"],
   display: "swap",
   variable: "--font-display",
 });
 
-// إعداد خط النصوص (можно تركه تجوال أو تغييره أيضاً)
 const tajawal = Tajawal({
   weight: ['400', '500', '700', '800'],
   subsets: ["arabic", "latin"],
   display: "swap",
   variable: "--font-sans",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-cairo",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +31,16 @@ export const metadata: Metadata = {
   description: "An independent humanitarian donation platform with full transparency.",
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params?: { locale?: string };
+}) {
+  const locale = params?.locale || "ar";
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   const gaId  = process.env.NEXT_PUBLIC_GA_ID;
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
@@ -41,8 +53,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const accentColor = settings?.accentColor || "#F00F5A";
 
   return (
-    // 🌟 تمرير متغيرات الخطوط الجديدة للـ HTML
-    <html suppressHydrationWarning className={`${alexandria.variable} ${tajawal.variable}`}>
+    <html 
+      lang={locale} 
+      dir={dir} 
+      suppressHydrationWarning 
+      className={`${alexandria.variable} ${tajawal.variable} ${cairo.variable}`}
+    >
       <head>
         {gtmId && (
           <Script id="gtm-init" strategy="beforeInteractive">{`
@@ -64,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         }} />
       </head>
       
-      <body className="font-sans min-h-screen antialiased">
+      <body className="font-sans min-h-screen antialiased bg-cream text-ink">
         {gtmId && (
           <noscript>
             <iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} />

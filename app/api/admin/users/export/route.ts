@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   const rows = (data || []).map((u: any) => [
     u.name, u.email, u.role,
     u.totalDonated, u.donationCount,
-    u.emailVerified ? "Yes" : "No",
+    u.emailVerified,
     new Date(u.createdAt).toISOString(),
   ]);
   const csv = [headers, ...rows].map(r => r.map(csvEscape).join(",")).join("\n");
