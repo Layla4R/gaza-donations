@@ -55,9 +55,9 @@ export default function SiteFooter({ navItems, settings, locale, dict }: {
             <p className="text-white/80 text-sm font-semibold mb-2">{settings.footerTagline}</p>
           )}
           <p className="text-white/80 text-sm leading-relaxed mb-6">
-            {settings?.footerDescription
+           {settings?.footerDescription
               || d("footer.description", {
-                  ar: "منصة تبرعات إنسانية مستقلة بشفافية كاملة مع شركاء محليين موثوقين.",
+                  ar: "مؤسسة إنسانية عالمية، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها المحلية.",
                   en: "An independent humanitarian donation platform with full transparency.",
                   fr: "Une plateforme de dons humanitaires indépendante avec transparence totale.",
                   tr: "Güvenilir ortaklarla tam şeffaflıkla bağımsız insani yardım platformu.",
