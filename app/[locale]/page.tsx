@@ -7,7 +7,8 @@ import DonateWidget from "@/components/site/DonateWidget";
 import FaqSection from "@/components/site/FaqSection";
 import AchievementsSection from "@/components/site/AchievementsSection";
 import NewsletterSection from "@/components/site/NewsletterSection";
-import AboutOverviewSection from "@/components/blocks/AboutOverviewSection"; // 🌟 استيراد مكون المكون
+import AboutOverviewSection from "@/components/blocks/AboutOverviewSection";
+import ChatWidget from "@/components/site/ChatWidget"; // 🌟 استيراد مباشر وقياسي
 import type { Metadata } from "next";
 
 export const revalidate = 0;
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const dict = await loadTranslations(locale);
   const data = await getHomeData(locale);
   const settings: any = data?.settings || {};
-  
+
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
   const description = settings?.footerDescription || dict["footer.description"] || "منصة تبرعات إنسانية شفافة";
   return { title: siteName, description, openGraph: { title: siteName, description, type: "website" } };
@@ -30,14 +31,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function HomePage({ params }: PageProps) {
   const { locale } = params;
   const dict = await loadTranslations(locale);
-  
+
   const data: any = (await getHomeData(locale)) || {};
   const settings: any = data.settings || {};
   const campaigns = data.campaigns || [];
   const posts = data.posts || [];
   const stats = data.stats || { total: 0, families: 0 };
   const pageSections = data.pageSections || [];
-  
+
   const sections = Array.isArray(pageSections) ? pageSections : [];
   const heroImage = settings?.heroImage || null;
 
@@ -54,11 +55,11 @@ export default async function HomePage({ params }: PageProps) {
   }
 
   return (
-    <main>
+    <main className="relative">
       {sections.map((section: any) => {
         const sectionData = section.props || {};
 
-        switch (section.type) {
+        switch (section.type?.toLowerCase()) {
           case "hero":
             const sliderSlides = rawSlides.map((slide: any, index: number) => {
               if (index === 0 && section.props) {
@@ -104,7 +105,7 @@ export default async function HomePage({ params }: PageProps) {
 
           case "donation_buttons":
             return <DonateWidget key={section.id} locale={locale} dict={dict} accentColor={accentColor} primaryColor={primaryColor} data={sectionData} />;
-            
+
           case "stats":
             return (
               <AchievementsSection
@@ -118,12 +119,15 @@ export default async function HomePage({ params }: PageProps) {
                 primaryColor={primaryColor} 
               />
             );
-            
+
           case "faq":
             return <FaqSection key={section.id} locale={locale} dict={dict} data={sectionData} />;
 
           case "newsletter":
             return <NewsletterSection key={section.id} locale={locale} dict={dict} accentColor={accentColor} primaryColor={primaryColor} data={sectionData} />;
+
+          case "chat_widget":
+            return <ChatWidget key={section.id} locale={locale} />;
 
           default:
             return null;

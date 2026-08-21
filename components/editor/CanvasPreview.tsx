@@ -120,7 +120,27 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
         </div>
       </div>
     );
-
+case "chat_widget":
+  return (
+    <div className="p-5 bg-[#0F172A] text-white rounded-xl flex items-center justify-between border border-slate-700 my-2 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-[#6366F1] text-white flex items-center justify-center font-bold">
+          🤖
+        </div>
+        <div>
+          <div className="font-bold text-xs">
+            {section.props?.title || "المساعد الذكي (AI Chatbot)"}
+          </div>
+          <div className="text-[11px] text-slate-400 mt-0.5">
+            عنصر عائم يظهر بأسفل الصفحة في الموقع الحي
+          </div>
+        </div>
+      </div>
+      <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+        مفعّل
+      </span>
+    </div>
+  );
     case "gallery": return (
       <div className="bg-white px-10 py-10">
         {p.title && <h2 className="font-bold text-xl mb-5" style={{ color: "#111" }}>{p.title}</h2>}

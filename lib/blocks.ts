@@ -429,6 +429,19 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     defaultProps: { height: "48" },
     fields: [{ key: "height", label: "Height (px)", type: "number" }],
   },
+  {
+    type: "chat_widget",
+    label: "المساعد الذكي (AI Chatbot)",
+    description: "نافذة محادثة عائمة تجيب على استفسارات المتبرعين ذكائياً",
+    icon: "message-square",
+    category: "social",
+    defaultProps: {
+      title: "المساعد الذكي — 4Relief",
+    },
+    fields: [
+      { key: "title", label: "عنوان النافذة", type: "text" },
+    ],
+  },
 ];
 
 export const BLOCK_CATEGORIES = [
