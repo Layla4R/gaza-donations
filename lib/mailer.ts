@@ -1,11 +1,7 @@
 /**
- * MAILBUX SMTP Mailer
+ * MAILBUX / Gmail SMTP Mailer
  * Uses settings stored in SiteSettings (smtpHost, smtpPort, smtpUser, smtpPassword, ...)
- * Falls back to env vars SMTP_HOST / SMTP_USER / SMTP_PASSWORD for local dev.
- *
- * MAILBUX endpoints:
- *   SMTP / STARTTLS: my.mailbux.com:587
- *   SMTPS / SSL:     my.mailbux.com:465
+ * Falls back to env vars SMTP_HOST / SMTP_USER / SMTP_PASS for local dev.
  */
 
 import nodemailer from "nodemailer";
@@ -25,7 +21,7 @@ export interface SmtpConfig {
   secure: boolean;     // true = SSL (465) | false = STARTTLS (587)
   user: string;
   password: string;
-  from: string;        // e.g. "no-reply@forrelief.org"
+  from: string;        // e.g. "info@forrelief.org"
   fromName: string;    // e.g. "4Relief Humanitarian Foundation"
 }
 
@@ -43,16 +39,23 @@ async function loadSmtpConfig(): Promise<SmtpConfig | null> {
     row = data;
   }
 
-  // Resolve values: DB → env var → MAILBUX defaults
-  const host     = row?.smtpHost     || process.env.SMTP_HOST     || "my.mailbux.com";
-  const port     = Number(row?.smtpPort     || process.env.SMTP_PORT     || 587);
+  // Resolve values: DB → env var → Gmail defaults
+  const host     = row?.smtpHost     || process.env.SMTP_HOST     || "smtp.gmail.com";
+  const port     = Number(row?.smtpPort || process.env.SMTP_PORT || 465);
   const user     = row?.smtpUser     || process.env.SMTP_USER     || "";
-  const password = row?.smtpPassword || process.env.SMTP_PASSWORD || "";
+  // قراءة SMTP_PASS أو SMTP_PASSWORD للتوافق الكامل
+  const password = row?.smtpPassword || process.env.SMTP_PASS || process.env.SMTP_PASSWORD || "";
   const from     = row?.smtpFrom     || process.env.SMTP_FROM     || row?.contactEmail || user;
   const fromName = row?.smtpFromName || process.env.SMTP_FROM_NAME|| "4Relief Humanitarian Foundation";
-  const secure   = row?.smtpSecure   ?? (process.env.SMTP_SECURE === "true");
+  // تفعيل SSL إجبارياً لمنفذ 465 الخاص بـ Gmail
+  const secure   = row?.smtpSecure   ?? (port === 465 || process.env.SMTP_SECURE === "true");
 
-  if (!user || !password) return null;  // Not configured yet
+  if (!user || !password) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[mailer] Missing SMTP user or password in env/settings.");
+    }
+    return null;  // Not configured yet
+  }
 
   return { host, port, secure, user, password, from, fromName };
 }
@@ -251,7 +254,6 @@ export async function sendDonationReceipt(opts: {
   const amountStr = `$${Number(opts.amount).toFixed(2)} ${currencyDisplay}`;
   const typeLabel = isMonthly ? "Monthly" : "One-time";
 
-  // Load brand colors from settings
   const { data: brandSettings } = await (getSupabaseOrNull()?.from("SiteSettings")
     .select("primaryColor, accentColor, siteName")
     .eq("id", "default")
@@ -259,7 +261,6 @@ export async function sendDonationReceipt(opts: {
   const primaryColor = (brandSettings as any)?.primaryColor || "#0069D2";
   const accentColor = (brandSettings as any)?.accentColor || "#F00F5A";
 
-  // Try DB template first
   const vars = {
     donorName: opts.donorName,
     amount: amountStr,
@@ -278,7 +279,6 @@ export async function sendDonationReceipt(opts: {
     });
   }
 
-  // Fallback hardcoded HTML
   const html = emailWrapper(`
     <h2 style="color:${primaryColor};margin-top:0;">Thank you for your donation! 💙</h2>
     <p style="font-size:16px;line-height:1.8;color:#5C6880;">
@@ -307,7 +307,6 @@ export async function sendDonationReceipt(opts: {
   });
 }
 
-
 /** New donation notification to admin */
 export async function sendAdminDonationNotification(opts: {
   adminEmail: string;
@@ -323,7 +322,6 @@ export async function sendAdminDonationNotification(opts: {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
   const amountStr = `$${Number(opts.amount).toFixed(2)}`;
 
-  // Try DB template first
   const vars = {
     donorName: opts.donorName,
     donorEmail: opts.donorEmail,
@@ -342,7 +340,6 @@ export async function sendAdminDonationNotification(opts: {
     });
   }
 
-  // Fallback hardcoded HTML
   const freqLabel = opts.frequency === "MONTHLY" ? "Monthly" : "One-time";
   const html = emailWrapper(`
     <h2 style="color:#0069D2;margin-top:0;">💰 New Donation Received!</h2>
@@ -367,7 +364,6 @@ export async function sendAdminDonationNotification(opts: {
     html,
   });
 }
-
 
 /** Contact form notification to admin */
 export async function sendContactNotification(opts: {
@@ -418,7 +414,7 @@ export async function sendNewsletterWelcome(to: string): Promise<boolean> {
       <a href="${siteUrl}/campaigns" style="${btnStyle}">استكشف الحملات الحالية</a>
     </div>
     <p style="font-size:12px;color:#aaa;text-align:center;">
-      لإلغاء الاشتراك في أي وقت، اضغط <a href="${siteUrl}/unsubscribe?email=${to}" style="color:#0069D2;">هنا</a>
+      إلغاء الاشتراك في أي وقت، اضغط <a href="${siteUrl}/unsubscribe?email=${to}" style="color:#0069D2;">هنا</a>
     </p>
   `, siteUrl);
 

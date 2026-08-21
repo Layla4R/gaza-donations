@@ -1,30 +1,98 @@
-
 "use client";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Icon from "@/components/icons";
 
-export default function VerifyEmailPage({ params: { locale } }: { params: { locale: string } }) {
-  const params = useSearchParams();
-  const token = params.get("token");
-  const p = locale === "ar" ? "" : `/${locale}`;
-  const [status, setStatus] = useState<"loading"|"ok"|"error">("loading");
-  const [msg, setMsg] = useState("");
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+
+function VerifyEmailContent() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const router = useRouter();
+
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    if (!token) { setStatus("error"); setMsg("Invalid link"); return; }
-    fetch("/api/donor/verify-email", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ token }) })
-      .then(r => r.json()).then(d => { if (d.ok) setStatus("ok"); else { setStatus("error"); setMsg(d.error||"Error"); } });
-  }, [token]);
+    if (!token) {
+      setStatus("error");
+      setErrorMsg("رابط التفعيل غير صالح أو مفقود.");
+      return;
+    }
+
+    async function handleVerify() {
+      try {
+        const res = await fetch("/api/donor/verify-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        setStatus("success");
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
+      } catch (err: any) {
+        setStatus("error");
+        setErrorMsg(err.message || "حدث خطأ أثناء تفعيل الحساب.");
+      }
+    }
+
+    handleVerify();
+  }, [token, router]);
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center bg-section-gradient px-6">
-      <div className="bg-white rounded-2xl shadow-xl border border-line p-10 max-w-md text-center">
-        {status === "loading" && <><Icon name="minus" size={36} className="text-brand mx-auto mb-4 animate-spin" /><p className="text-muted">...</p></>}
-        {status === "ok" && <><div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4"><Icon name="shield-check" size={32} className="text-success" /></div><h1 className="font-display text-2xl font-extrabold text-ink mb-4">✓</h1><Link href={`${p}/login`} className="bg-brand hover:bg-brand-dark text-white font-bold rounded-xl px-6 py-3 transition inline-block">Sign In</Link></>}
-        {status === "error" && <><div className="w-16 h-16 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4"><Icon name="x" size={32} className="text-danger" /></div><p className="text-muted mb-4">{msg}</p><Link href={`${p}/login`} className="text-brand hover:underline text-sm">Back</Link></>}
-      </div>
+    <div className="max-w-md w-full bg-white p-8 rounded-2xl border border-line shadow-xl text-center font-sans">
+      {status === "loading" && (
+        <div>
+          <div className="w-12 h-12 border-4 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <h2 className="text-lg font-bold text-ink">جاري التحقق وتفعيل حسابك...</h2>
+        </div>
+      )}
+
+      {status === "success" && (
+        <div>
+          <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+            ✓
+          </div>
+          <h2 className="text-xl font-bold text-emerald-600 mb-2">تم تفعيل حسابك بنجاح!</h2>
+          <p className="text-xs text-muted mb-6">سيتم تحويلك لصفحة تسجيل الدخول خلال ثوانٍ...</p>
+          <Link
+            href="/login"
+            className="inline-block bg-brand text-white text-xs font-bold px-6 py-3 rounded-xl hover:opacity-90 transition"
+          >
+            تسجيل الدخول الآن
+          </Link>
+        </div>
+      )}
+
+      {status === "error" && (
+        <div>
+          <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
+            ✕
+          </div>
+          <h2 className="text-xl font-bold text-red-600 mb-2">تعذر تفعيل الحساب</h2>
+          <p className="text-xs text-muted mb-6">{errorMsg}</p>
+          <Link
+            href="/login"
+            className="inline-block bg-brand text-white text-xs font-bold px-6 py-3 rounded-xl hover:opacity-90 transition"
+          >
+            العودة لتسجيل الدخول
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center px-4 py-12">
+      <Suspense fallback={<div className="text-xs text-muted">جاري تحميل الصفحة...</div>}>
+        <VerifyEmailContent />
+      </Suspense>
     </div>
   );
 }

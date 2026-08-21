@@ -58,7 +58,7 @@ export default function LoginClient({
   const [countryOpen, setCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -137,48 +137,41 @@ export default function LoginClient({
     }
   }
 
-  async function handleRegister(e: React.FormEvent) {
-    e.preventDefault();
-    if (form.password !== form.confirm) {
-      setError(D["auth.password_mismatch"] || "كلمتا المرور غير متطابقتين");
-      return;
-    }
-    if (form.password.length < 8) {
-      setError(D["auth.password_short"] || "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
-      return;
-    }
-    setError("");
-    setLoading(true);
-    try {
-      // 1. إنشاء الحساب
-      const regRes = await fetch("/api/donor/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          country: form.country,
-        }),
-      });
-      await parseJsonResponse(regRes);
-
-      // 2. تسجيل الدخول التلقائي فور النجاح والتوجيه لصفحة الحساب
-      const loginRes = await fetch("/api/donor/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }),
-      });
-      await parseJsonResponse(loginRes);
-
-      router.push(`${p}/account`);
-      router.refresh();
-    } catch (e: any) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
+async function handleRegister(e: React.FormEvent) {
+  e.preventDefault();
+  if (form.password !== form.confirm) {
+    setError(D["auth.password_mismatch"] || "كلمتا المرور غير متطابقتين");
+    return;
   }
+  if (form.password.length < 8) {
+    setError(D["auth.password_short"] || "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+    return;
+  }
+  setError("");
+  setSuccessMsg("");
+  setLoading(true);
+
+  try {
+    const regRes = await fetch("/api/donor/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        country: form.country,
+      }),
+    });
+    await parseJsonResponse(regRes);
+
+    setSuccessMsg("تم إنشاء حسابك بنجاح! أرسلنا رابط التفعيل إلى بريدك الإلكتروني، يرجى مراجعة صندوق الوارد (أو الرسائل غير المرغوبة) لتأكيد حسابك.");
+    setForm({ name: "", email: "", password: "", confirm: "", country: "" });
+  } catch (e: any) {
+    setError(e.message);
+  } finally {
+    setLoading(false);
+  }
+}
 
   const inp =
     "w-full rounded-xl border border-line bg-cream py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 transition";
@@ -450,7 +443,12 @@ export default function LoginClient({
               {error}
             </p>
           )}
-
+{successMsg && (
+  <div className="flex items-start gap-2 text-emerald-700 text-xs bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 leading-relaxed font-semibold">
+    <Icon name="check" size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+    <span>{successMsg}</span>
+  </div>
+)}
           <button
             type="submit"
             disabled={loading}

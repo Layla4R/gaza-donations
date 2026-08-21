@@ -42,7 +42,7 @@ export async function registerDonor(opts: {
       passwordHash,
       role: "DONOR",
       country: opts.country || null,
-      emailVerified: true,
+      emailVerified: false,
     })
     .select("id, name, email")
     .single();
@@ -78,13 +78,16 @@ export async function loginDonor(email: string, password: string) {
 
   const { data: user, error } = await supabase
     .from("User")
-    .select("id, name, email, passwordHash, role")
+    .select("id, name, email, passwordHash, role, emailVerified")
     .eq("email", email.toLowerCase())
     .maybeSingle();
 
   if (error) throw new Error(error.message);
   if (!user || !user.passwordHash) throw new Error("INVALID_CREDENTIALS");
   if (["ADMIN", "EDITOR", "VIEWER"].includes(user.role)) throw new Error("USE_ADMIN_LOGIN");
+  if (!user.emailVerified) {
+    throw new Error("EMAIL_NOT_VERIFIED");
+  }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("INVALID_CREDENTIALS");
@@ -93,10 +96,6 @@ export async function loginDonor(email: string, password: string) {
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("30d")
     .sign(SECRET);
-
-  try {
-    await supabase.from("User").update({ lastLoginAt: new Date().toISOString() }).eq("id", user.id);
-  } catch {}
 
   return { user: { id: user.id, name: user.name, email: user.email }, token };
 }

@@ -143,7 +143,7 @@ export async function acceptAdminInvite(token: string, password: string) {
       isStaff: true,
       permissions: invite.permissions,
       invitedBy: invite.invitedBy,
-      emailVerified: true,
+      emailVerified: false,
     });
   }
 

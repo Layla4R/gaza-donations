@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     const msgs: Record<string, string> = {
       INVALID_CREDENTIALS: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
       USE_ADMIN_LOGIN: "استخدم صفحة تسجيل دخول الأدمن",
+      EMAIL_NOT_VERIFIED: "يرجى تفعيل حسابك من خلال الرابط المرسل إلى بريدك الإلكتروني أولاً",
     };
     return NextResponse.json({ error: msgs[e.message] || e.message }, { status: 401 });
   }
