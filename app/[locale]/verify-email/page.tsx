@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -12,12 +12,18 @@ function VerifyEmailContent() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // 🌟 منع تكرار طلب التفعيل في وضع التطوير (React Strict Mode)
+  const isCalled = useRef(false);
+
   useEffect(() => {
     if (!token) {
       setStatus("error");
       setErrorMsg("رابط التفعيل غير صالح أو مفقود.");
       return;
     }
+
+    if (isCalled.current) return;
+    isCalled.current = true;
 
     async function handleVerify() {
       try {

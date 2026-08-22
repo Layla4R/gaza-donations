@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { getSupabase } from "./supabase";
 import crypto from "crypto";
-import { sendMail, loadDonorEmailTemplate } from "./mailer";
+import { sendMail, loadDonorEmailTemplate, sendEmailVerification } from "./mailer";
 
 const SESSION_COOKIE = "donor_session";
 const SALT_ROUNDS = 12;
@@ -22,6 +22,7 @@ export async function registerDonor(opts: {
   password: string;
   country?: string;
 }) {
+  console.log("👉 [Register] بدء إنشاء حساب جديد لـ:", opts.email);
   const supabase = getSupabase();
 
   const { data: existing } = await supabase
@@ -33,6 +34,8 @@ export async function registerDonor(opts: {
   if (existing) throw new Error("EMAIL_EXISTS");
 
   const passwordHash = await bcrypt.hash(opts.password, SALT_ROUNDS);
+  const verifyToken = crypto.randomUUID();
+  const verifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
   const { data: user, error } = await supabase
     .from("User")
@@ -43,32 +46,78 @@ export async function registerDonor(opts: {
       role: "DONOR",
       country: opts.country || null,
       emailVerified: false,
+      verifyToken,
+      verifyExpiry,
     })
     .select("id, name, email")
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("❌ خطأ Supabase:", error.message);
+    throw new Error(error.message);
+  }
+
+  console.log("👉 [Register] تم الحفظ بـ Supabase. جاري تجهيز رابط التفعيل...");
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const verifyUrl = `${siteUrl}/verify-email?token=${verifyToken}`;
+
+  // 🌟 إرسال بريد التفعيل وانتظار النتيجة
+  const sent = await sendEmailVerification({
+    to: user.email,
+    donorName: user.name,
+    verifyUrl,
+  });
+
+  console.log("👉 [Register] نتيجة إرسال الإيميل:", sent ? "نجح ✅" : "فشل ❌");
 
   return { id: user.id, name: user.name, email: user.email };
 }
 
-// ── Verify Email ──────────────────────────────────────────────
+//  Verify Email Token ──────────────────────────────────────────
 export async function verifyEmail(token: string) {
+  console.log("👉 [VerifyEmail] جاري التفعيل بالرمز:", token);
   const supabase = getSupabase();
-  const { data: user } = await supabase
+
+  const { data: user, error } = await supabase
     .from("User")
-    .select("id, verifyExpiry")
+    .select("id, verifyExpiry, emailVerified")
     .eq("verifyToken", token)
     .maybeSingle();
 
-  if (!user) throw new Error("INVALID_TOKEN");
-  if (user.verifyExpiry && new Date(user.verifyExpiry) < new Date()) throw new Error("TOKEN_EXPIRED");
+  if (error) {
+    console.error("❌ [VerifyEmail] خطأ استعلام Supabase:", error.message);
+    throw new Error("INVALID_TOKEN");
+  }
 
-  await supabase
+  if (!user) {
+    console.warn("⚠️ [VerifyEmail] التوكن غير موجود (غالباً تم التفعيل مسبقاً وتصفير التوكن).");
+    throw new Error("INVALID_TOKEN");
+  }
+
+  if (user.emailVerified) {
+    console.log("ℹ️ [VerifyEmail] الحساب مفعل مسبقاً.");
+    return true;
+  }
+
+  if (user.verifyExpiry && new Date(user.verifyExpiry) < new Date()) {
+    throw new Error("TOKEN_EXPIRED");
+  }
+
+  const { error: updateError } = await supabase
     .from("User")
-    .update({ emailVerified: true, verifyToken: null, verifyExpiry: null })
+    .update({
+      emailVerified: true,
+      verifyToken: null,
+      verifyExpiry: null,
+    })
     .eq("id", user.id);
 
+  if (updateError) {
+    console.error("❌ [VerifyEmail] فشل التحديث:", updateError.message);
+    throw new Error(updateError.message);
+  }
+
+  console.log("🎉 [VerifyEmail] تم تفعيل الحساب بنجاح!");
   return true;
 }
 

@@ -39,25 +39,55 @@ async function loadSmtpConfig(): Promise<SmtpConfig | null> {
     row = data;
   }
 
-  // Resolve values: DB → env var → Gmail defaults
-  const host     = row?.smtpHost     || process.env.SMTP_HOST     || "smtp.gmail.com";
+  // قراءة البيانات بالترتيب: DB ← .env.local ← القيمة الافتراضية
+  const host     = row?.smtpHost || process.env.SMTP_HOST || "smtp.gmail.com";
   const port     = Number(row?.smtpPort || process.env.SMTP_PORT || 465);
-  const user     = row?.smtpUser     || process.env.SMTP_USER     || "";
-  // قراءة SMTP_PASS أو SMTP_PASSWORD للتوافق الكامل
-  const password = row?.smtpPassword || process.env.SMTP_PASS || process.env.SMTP_PASSWORD || "";
+  const user     = (row?.smtpUser && row.smtpUser.trim() !== "") ? row.smtpUser : (process.env.SMTP_USER || "");
+  const password = (row?.smtpPassword && row.smtpPassword.trim() !== "") 
+                    ? row.smtpPassword 
+                    : (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || "");
+
   const from     = row?.smtpFrom     || process.env.SMTP_FROM     || row?.contactEmail || user;
   const fromName = row?.smtpFromName || process.env.SMTP_FROM_NAME|| "4Relief Humanitarian Foundation";
-  // تفعيل SSL إجبارياً لمنفذ 465 الخاص بـ Gmail
-  const secure   = row?.smtpSecure   ?? (port === 465 || process.env.SMTP_SECURE === "true");
+  const secure   = port === 465 ? true : (row?.smtpSecure ?? (process.env.SMTP_SECURE === "true"));
 
   if (!user || !password) {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("[mailer] Missing SMTP user or password in env/settings.");
-    }
-    return null;  // Not configured yet
+    console.warn("[mailer] ⚠️ لم يتم العثور على SMTP_USER أو SMTP_PASS بملف .env.local أو قاعدة البيانات.");
+    return null;
   }
 
   return { host, port, secure, user, password, from, fromName };
+}
+
+/**
+ * Send an email via the configured SMTP server.
+ */
+export async function sendMail(opts: MailOptions): Promise<boolean> {
+  try {
+    const cfg = await loadSmtpConfig();
+    if (!cfg) {
+      console.warn("[mailer] ❌ توقف الإرسال: إعدادات SMTP غير مكتملة.");
+      return false;
+    }
+
+    const transporter = buildTransporter(cfg);
+    const fromField = `"${cfg.fromName}" <${cfg.from}>`;
+
+    const info = await transporter.sendMail({
+      from: fromField,
+      to: Array.isArray(opts.to) ? opts.to.join(", ") : opts.to,
+      replyTo: opts.replyTo || cfg.from,
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text || opts.html.replace(/<[^>]*>/g, ""),
+    });
+
+    console.log("[mailer] ✅ تم إرسال البريد الإلكتروني بنجاح:", info.messageId, "إلى:", opts.to);
+    return true;
+  } catch (err) {
+    console.error("[mailer] ❌ خطأ في سيرفر البريد (SMTP Error):", err);
+    return false;
+  }
 }
 
 /** Load email template and apply vars (exported for donorAuth) */
@@ -95,50 +125,40 @@ function buildTransporter(cfg: SmtpConfig) {
   });
 }
 
-/**
- * Send an email via the configured SMTP server.
- * Returns true on success, false on failure (fails silently — never throws).
- */
-export async function sendMail(opts: MailOptions): Promise<boolean> {
-  try {
-    const cfg = await loadSmtpConfig();
-    if (!cfg) {
-      if (process.env.NODE_ENV !== "production") console.warn("[mailer] SMTP not configured — email not sent:", opts.subject);
-      return false;
-    }
-
-    const transporter = buildTransporter(cfg);
-    const fromField = `"${cfg.fromName}" <${cfg.from}>`;
-
-    await transporter.sendMail({
-      from: fromField,
-      to: Array.isArray(opts.to) ? opts.to.join(", ") : opts.to,
-      replyTo: opts.replyTo || cfg.from,
-      subject: opts.subject,
-      html: opts.html,
-      text: opts.text || opts.html.replace(/<[^>]*>/g, ""),
-    });
-
-    if (process.env.NODE_ENV !== "production") console.log("[mailer] Sent:", opts.subject, "→", opts.to);
-    return true;
-  } catch (err) {
-    if (process.env.NODE_ENV !== "production") console.error("[mailer] Error sending email:", err);
-    return false;
-  }
-}
-
 /** Send email verification (standalone, for resend flow) */
 export async function sendEmailVerification(opts: {
   to: string; donorName: string; verifyUrl: string;
 }): Promise<boolean> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const uniqueTag = `<!-- unique_time:${Date.now()} -->`; // 🌟 بصمة زمنية تمنع دمج Gmail للرسائل وإخفاء الزر
   const vars = { donorName: opts.donorName, verifyUrl: opts.verifyUrl, siteUrl };
+
   const tpl = await loadEmailTemplate("email_verification");
-  if (tpl) return sendMail({ to: opts.to, subject: applyVars(tpl.subject, vars), html: applyVars(tpl.html, vars) });
+  if (tpl) {
+    return sendMail({
+      to: opts.to,
+      subject: applyVars(tpl.subject, vars),
+      html: applyVars(tpl.html, vars) + uniqueTag,
+    });
+  }
+
   return sendMail({
     to: opts.to,
     subject: "Verify Your Email — 4Relief",
-    html: `<div style="font-family:Cairo,Arial,sans-serif;padding:32px;background:#F8FAFF;max-width:600px;margin:0 auto;"><div style="background:linear-gradient(135deg,#003C87,#0069D2);padding:28px;border-radius:12px;text-align:center;margin-bottom:24px;"><h1 style="color:#fff;margin:0;font-size:20px;">4Relief</h1></div><h2 style="color:#0069D2;">Verify Your Email Address</h2><p style="color:#5C6880;">Hello ${opts.donorName},<br/>Click below to verify your email address. This link expires in 24 hours.</p><div style="text-align:center;margin:32px 0;"><a href="${opts.verifyUrl}" style="display:inline-block;background:linear-gradient(135deg,#F00F5A,#FF4D88);color:#fff;font-weight:700;padding:14px 32px;border-radius:12px;text-decoration:none;font-size:16px;">Verify Email Address</a></div><p style="color:#aaa;font-size:12px;text-align:center;">If you didn't request this, ignore this email.</p></div>`,
+    html: `<div style="font-family:Cairo,Arial,sans-serif;padding:32px;background:#F8FAFF;max-width:600px;margin:0 auto;">
+      <div style="background:linear-gradient(135deg,#003C87,#0069D2);padding:28px;border-radius:12px;text-align:center;margin-bottom:24px;">
+        <h1 style="color:#ffffff;margin:0;font-size:20px;">4Relief</h1>
+      </div>
+      <h2 style="color:#0069D2;margin-bottom:16px;">Verify Your Email Address</h2>
+      <p style="color:#5C6880;line-height:1.6;margin-bottom:24px;">
+        Hello <strong>${opts.donorName}</strong>,<br/>
+        Click below to verify your email address. This link expires in 24 hours.
+      </p>
+      <div style="text-align:center;margin:32px 0;">
+        <a href="${opts.verifyUrl}" style="display:inline-block;background:linear-gradient(135deg,#F00F5A,#FF4D88);color:#ffffff !important;font-weight:700;padding:14px 32px;border-radius:12px;text-decoration:none;font-size:16px;">Verify Email Address</a>
+      </div>
+      <p style="color:#aaa;font-size:12px;text-align:center;margin-top:24px;">If you didn't request this, ignore this email.</p>
+    </div>${uniqueTag}`,
   });
 }
 
