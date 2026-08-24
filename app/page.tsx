@@ -1,5 +1,9 @@
-import { redirect } from "next/navigation";
+import HomePage, { generateMetadata as generateHomeMetadata } from "./[locale]/page";
 
-export default function RootPage() {
-  redirect("/ar");
+export async function generateMetadata() {
+  return generateHomeMetadata({ params: { locale: "ar" } });
+}
+
+export default async function RootPage() {
+  return <HomePage params={{ locale: "ar" }} />;
 }

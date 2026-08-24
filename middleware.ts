@@ -10,7 +10,6 @@ const SECRET = new TextEncoder().encode(
 async function verifyAdminToken(token: string): Promise<boolean> {
   try {
     const { payload } = await jwtVerify(token, SECRET);
-    // Accept ADMIN, EDITOR, and VIEWER roles
     return ["ADMIN", "EDITOR", "VIEWER"].includes(payload.role as string);
   } catch {
     return false;
@@ -20,7 +19,7 @@ async function verifyAdminToken(token: string): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── Admin route protection ──────────────────────────────
+  // ── 1. Admin route protection ──────────────────────────────
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login") && !pathname.startsWith("/admin/accept-invite")) {
     const cookie = req.cookies.get(COOKIE_NAME)?.value;
     const authHeader = req.headers.get("authorization");
@@ -37,7 +36,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Skip API, static, _next ──────────────────────────────
+  // ── 2. Skip API, static, _next ──────────────────────────────
   if (
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
@@ -47,15 +46,20 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── i18n — already has locale prefix → pass through ─────
+  // ── 3. Root URL handling (Pass directly to app/page.tsx) ──
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
+
+  // ── 4. i18n — Check locale prefix ───────────────────────────
   const hasLocale = LOCALES.some(
     (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
   );
   if (hasLocale) return NextResponse.next();
 
-  // ── i18n — no prefix → rewrite to /ar (Arabic default) ──
+  // ── 5. Unprefixed URLs -> Rewrite internally to default locale (/ar) ──
   const url = req.nextUrl.clone();
-  url.pathname = `/ar${pathname === "/" ? "/" : pathname}`;
+  url.pathname = `/ar${pathname}`;
   return NextResponse.rewrite(url);
 }
 
