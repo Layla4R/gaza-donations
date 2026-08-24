@@ -256,6 +256,53 @@ async function getSiteData(locale: string) {
   };
 }
 
+function safeJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+function buildSiteSchemas(locale: string, settings: any, localeData: { title: string; description: string }) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "@id": `${SITE_URL}/#organization`,
+    name: "4Relief Humanitarian Foundation",
+    alternateName: "4Relief",
+    url: SITE_URL,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SITE_URL}/brand/logo.png`, // عدّلي المسار حسب اللوغو الفعلي عندك بـ public/brand
+    },
+    description: localeData.description,
+    sameAs: [
+      settings?.facebookUrl,
+      settings?.twitterUrl,
+      settings?.instagramUrl,
+      settings?.linkedinUrl,
+      settings?.youtubeUrl,
+      settings?.tiktokUrl,
+    ].filter(Boolean),
+    ...(settings?.whatsappNumber && {
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: settings.whatsappNumber,
+        contactType: "customer support",
+      },
+    }),
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
+    url: SITE_URL,
+    name: "4Relief",
+    inLanguage: locale,
+    publisher: { "@id": `${SITE_URL}/#organization` },
+  };
+
+  return { organizationSchema, websiteSchema };
+}
+
 export default async function LocaleLayout({
   children,
   params: { locale },
@@ -279,6 +326,8 @@ export default async function LocaleLayout({
     dict,
   } = await getSiteData(locale);
 
+  const localeData = LOCALE_METADATA[locale] || LOCALE_METADATA.en;
+  const { organizationSchema, websiteSchema } = buildSiteSchemas(locale, settings, localeData);
   const pixelId =
     settings?.facebookPixelId;
 
@@ -372,7 +421,14 @@ export default async function LocaleLayout({
           </Script>
         </>
       )}
-
+     <script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }}
+/>
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }}
+/>
       <SiteHeader
         navItems={pages}
         settings={settings}

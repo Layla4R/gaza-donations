@@ -394,7 +394,7 @@ export default async function NewsPostPage({
           "ImageObject",
 
         url:
-          `${SITE_URL}/logo.png`,
+          `${SITE_URL}/brand/logo.png.`,
       },
     },
 

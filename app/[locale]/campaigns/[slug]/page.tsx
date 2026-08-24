@@ -341,7 +341,7 @@ export default async function CampaignDetailPage({
       "@id":
         `${SITE_URL}/#organization`,
     },
-
+    dateModified: campaign.updatedAt || new Date().toISOString(),
     breadcrumb: {
       "@id":
         `${pageUrl}/#breadcrumb`,
@@ -361,49 +361,7 @@ export default async function CampaignDetailPage({
     },
   };
 
-  /*
-   * Schema المؤسسة والحملة
-   */
 
-  const campaignEntitySchema = {
-    "@context":
-      "https://schema.org",
-
-    "@type":
-      "Thing",
-
-    "@id":
-      `${pageUrl}/#campaign`,
-
-    name:
-      title,
-
-    description:
-      summary ||
-      description ||
-      title,
-
-    image:
-      campaign.coverImage ||
-      `${SITE_URL}/brand/og-image.png`,
-
-    url:
-      pageUrl,
-
-    inLanguage:
-      locale,
-
-    about: {
-      "@id":
-        `${SITE_URL}/#organization`,
-    },
-
-    additionalType:
-      "https://schema.org/DonateAction",
-
-    category:
-      categoryLabel,
-  };
 
   /*
    * Breadcrumb
@@ -489,18 +447,6 @@ export default async function CampaignDetailPage({
             ),
         }}
       />
-
-      {/* Campaign Schema */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html:
-            safeJsonLd(
-              campaignEntitySchema
-            ),
-        }}
-      />
-
       {/* Breadcrumb Schema */}
       <script
         type="application/ld+json"

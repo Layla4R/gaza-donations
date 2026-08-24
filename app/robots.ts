@@ -21,6 +21,13 @@ export default function robots(): MetadataRoute.Robots {
           "/cart/",
         ],
       },
+      { userAgent: "GPTBot", allow: "/" },
+      { userAgent: "ChatGPT-User", allow: "/" },
+      { userAgent: "anthropic-ai", allow: "/" },
+      { userAgent: "ClaudeBot", allow: "/" },
+      { userAgent: "PerplexityBot", allow: "/" },
+      { userAgent: "Google-Extended", allow: "/" },
+      { userAgent: "CCBot", allow: "/" }, // Common Crawl (بيغذي كتير AI models)
     ],
 
     sitemap:
