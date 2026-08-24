@@ -28,7 +28,6 @@ export default function AcceptInviteClient() {
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.error);
-      // Auto-login: call login API with the credentials
       setDone(true);
       if (d.token) {
         storeAdminToken(d.token);
