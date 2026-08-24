@@ -69,8 +69,55 @@ export default async function LocaleLayout({
   const pixelId = settings?.facebookPixelId;
   const gaId = settings?.gaMeasurementId;
 
+  // 1. إعداد الـ Social Links الديناميكية لـ Schema
+  const sameAsLinks = [
+    settings?.facebookUrl,
+    settings?.twitterUrl,
+    settings?.instagramUrl,
+    settings?.youtubeUrl,
+    settings?.linkedinUrl,
+    settings?.tiktokUrl,
+  ].filter(Boolean);
+
+  // 2. إنشاء GEO Global Schema (NGO + WebSite)
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "NGO",
+        "@id": "https://forrelief.org/#organization",
+        "name": "4Relief Humanitarian Foundation",
+        "alternateName": "4Relief",
+        "url": "https://forrelief.org",
+        "logo": settings?.logoUrl || "https://forrelief.org/logo.png",
+        "description": "An independent humanitarian donation platform dedicated to full transparency and direct relief campaigns.",
+        "sameAs": sameAsLinks,
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": settings?.whatsappNumber || "",
+          "contactType": "customer service",
+          "availableLanguage": ["Arabic", "English", "Turkish", "French"]
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://forrelief.org/#website",
+        "url": "https://forrelief.org",
+        "name": "4Relief",
+        "publisher": { "@id": "https://forrelief.org/#organization" },
+        "inLanguage": locale
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      {/* حقن الـ Schema التأسيسية للذكاء الاصطناعي */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+
       {/* Meta Pixel Script */}
       {pixelId && (
         <Script id="meta-pixel" strategy="afterInteractive">
@@ -81,7 +128,7 @@ export default async function LocaleLayout({
             if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
             n.queue=[];t=b.createElement(e);t.async=!0;
             t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(j,f)}(window, document,'script',
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             fbq('consent', 'revoke');
             fbq('init', '${pixelId}');

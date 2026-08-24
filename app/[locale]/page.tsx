@@ -8,7 +8,7 @@ import FaqSection from "@/components/site/FaqSection";
 import AchievementsSection from "@/components/site/AchievementsSection";
 import NewsletterSection from "@/components/site/NewsletterSection";
 import AboutOverviewSection from "@/components/blocks/AboutOverviewSection";
-import ChatWidget from "@/components/site/ChatWidget"; // 🌟 استيراد مباشر وقياسي
+import ChatWidget from "@/components/site/ChatWidget";
 import type { Metadata } from "next";
 
 export const revalidate = 0;
@@ -25,7 +25,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
   const description = settings?.footerDescription || dict["footer.description"] || "منصة تبرعات إنسانية شفافة";
-  return { title: siteName, description, openGraph: { title: siteName, description, type: "website" } };
+  return { 
+    title: siteName, 
+    description, 
+    openGraph: { title: siteName, description, type: "website" } 
+  };
 }
 
 export default async function HomePage({ params }: PageProps) {
@@ -54,8 +58,47 @@ export default async function HomePage({ params }: PageProps) {
     }
   }
 
+  const faqSection = sections.find((s: any) => s.type?.toLowerCase() === "faq");
+  const faqItems = faqSection?.props?.items || faqSection?.props?.faqs || [];
+
+  const faqSchema = faqItems.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map((item: any) => ({
+      "@type": "Question",
+      "name": item.question || item.q || "",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer || item.a || ""
+      }
+    }))
+  } : null;
+
+  const homeSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `https://forrelief.org/${locale}/#webpage`,
+    "url": `https://forrelief.org/${locale}`,
+    "name": settings?.siteName || "4Relief Humanitarian Foundation",
+    "description": settings?.footerDescription || dict["footer.description"] || "منصة تبرعات إنسانية شفافة للتبرع المباشر",
+    "inLanguage": locale,
+    "publisher": { "@id": "https://forrelief.org/#organization" }
+  };
+
   return (
     <main className="relative">
+      {/* حقن Schema للذكاء الاصطناعي */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeSchema) }}
+      />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
+
       {sections.map((section: any) => {
         const sectionData = section.props || {};
 

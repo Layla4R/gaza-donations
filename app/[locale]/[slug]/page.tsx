@@ -18,7 +18,6 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
 export default async function DynamicPage({ params }: { params: { slug: string; locale: string } }) {
   const { slug, locale } = params;
 
-  // 🌟 جلب ألوان الـ primary و accent المقترنة بإعدادات المظهر من الأدمن
   const supabase = getSupabaseOrNull();
   const [{ data: appearance }, page, campaigns, dict] = await Promise.all([
     supabase?.from("SiteSettings").select("primaryColor, accentColor").eq("id", "default").maybeSingle() || { data: null },
@@ -38,7 +37,6 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
   const isLegalPage = LEGAL_SLUGS.includes(slug);
   const hasCustomSections = !isLegalPage && sections.length > 0;
 
-  // Legal page titles — multilingual
   const LEGAL_TITLES: Record<string, Record<string, string>> = {
     privacy:                 { ar: "سياسة الخصوصية", en: "Privacy Policy", fr: "Politique de Confidentialité", tr: "Gizlilik Politikası" },
     terms:                   { ar: "الشروط والأحكام", en: "Terms & Conditions", fr: "Conditions d'Utilisation", tr: "Kullanım Koşulları" },
@@ -54,14 +52,12 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
     terms:   { ar: "اتفاقية الاستخدام الملزمة", en: "Binding Usage Agreement", fr: "Accord d'Utilisation Contraignant", tr: "Bağlayıcı Kullanım Sözleşmesi" },
   };
 
-  // 🌟 قاموس ترجمة العناوين الشائعة للصفحات غير القانونية
   const COMMON_PAGE_TITLES: Record<string, Record<string, string>> = {
     about: { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
-    transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+    transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffاflık" },
     contact: { ar: "اتصل بنا", en: "Contact Us", fr: "Contactez-nous", tr: "İletişim" },
   };
 
-  // تحديد العنوان بدقة بحسب اللغة النشطة
   const displayTitle = isLegalPage
     ? (LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.["en"] || page.title)
     : (dict[`nav.${slug}`] || COMMON_PAGE_TITLES[slug]?.[locale] || page.title);
@@ -70,9 +66,35 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
     ? (LEGAL_SUBTITLES[slug]?.[locale] || LEGAL_SUBTITLES[slug]?.["en"] || page.description || null)
     : page.description;
 
+  // 🌟 [GEO Dynamic Schema] تحديد نوع الصفحة برمجياً
+  let schemaType = "WebPage";
+  if (slug.includes("about")) schemaType = "AboutPage";
+  if (slug.includes("contact")) schemaType = "ContactPage";
+
+  const dynamicPageSchema = {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    "@id": `https://forrelief.org/${locale}/${slug}/#webpage`,
+    "url": `https://forrelief.org/${locale}/${slug}`,
+    "name": displayTitle,
+    "description": displaySubtitle || displayTitle,
+    "inLanguage": locale,
+    "isPartOf": {
+      "@type": "WebSite",
+      "@id": "https://forrelief.org/#website"
+    },
+    "publisher": {
+      "@id": "https://forrelief.org/#organization"
+    }
+  };
+
   return (
-    <div className="bg-white">
-      {/* 🌟 هيدر الصفحة الرئيسي */}
+    <article className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(dynamicPageSchema) }}
+      />
+
       <header 
         className="relative py-12 sm:py-20 text-center overflow-hidden transition-colors"
         style={{ backgroundColor: primaryColor }}
@@ -84,11 +106,16 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
             4Relief Humanitarian Foundation
           </span>
           <h1 className="font-display text-2xl sm:text-4xl md:text-5xl font-extrabold text-white">{displayTitle}</h1>
+          
+          {/* 🌟 Direct Answer Block: ملخص لزواحف الذكاء الاصطناعي لرفع Content Extractability */}
           {displaySubtitle && (
-            <p className="mt-4 text-white/75 text-lg max-w-xl mx-auto leading-relaxed">{displaySubtitle}</p>
+            <p className="mt-4 text-white/90 text-lg max-w-2xl mx-auto leading-relaxed font-medium bg-white/10 p-4 rounded-xl border border-white/15 backdrop-blur-sm">
+              {displaySubtitle}
+            </p>
           )}
         </div>
       </header>
+
       <div className="bg-white">
         {hasCustomSections ? (
           sections.map((section) => (
@@ -102,6 +129,6 @@ export default async function DynamicPage({ params }: { params: { slug: string; 
           <LegalPageContent slug={slug} locale={locale} />
         ) : null}
       </div>
-    </div>
+    </article>
   );
 }
