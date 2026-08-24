@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Script from "next/script";
+import type { Metadata } from "next";
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
@@ -12,6 +13,22 @@ export const revalidate = 0;
 
 export function generateStaticParams() {
   return LOCALES.map(locale => ({ locale }));
+}
+
+// 🌟 توليد وسم Canonical الديناميكي لجميع الصفحات المترجمة
+export async function generateMetadata({ params }: { params: { locale: string } }): Promise<Metadata> {
+  return {
+    metadataBase: new URL("https://forrelief.org"),
+    alternates: {
+      canonical: `https://forrelief.org/${params.locale}`,
+      languages: {
+        "ar": "https://forrelief.org/ar",
+        "en": "https://forrelief.org/en",
+        "fr": "https://forrelief.org/fr",
+        "tr": "https://forrelief.org/tr",
+      },
+    },
+  };
 }
 
 const SLUG_TO_NAV_LABEL: Record<string, Record<string, string>> = {
@@ -69,7 +86,6 @@ export default async function LocaleLayout({
   const pixelId = settings?.facebookPixelId;
   const gaId = settings?.gaMeasurementId;
 
-  // 1. إعداد الـ Social Links الديناميكية لـ Schema
   const sameAsLinks = [
     settings?.facebookUrl,
     settings?.twitterUrl,
@@ -79,43 +95,36 @@ export default async function LocaleLayout({
     settings?.tiktokUrl,
   ].filter(Boolean);
 
-  // 2. إنشاء GEO Global Schema (NGO + WebSite)
-  const organizationSchema = {
+  // 🌟 الكائنات منفصلة تماماً بدون @graph لتناسب أدوات الفحص المباشر
+  const ngoSchema = {
     "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "NGO",
-        "@id": "https://forrelief.org/#organization",
-        "name": "4Relief Humanitarian Foundation",
-        "alternateName": "4Relief",
-        "url": "https://forrelief.org",
-        "logo": settings?.logoUrl || "https://forrelief.org/logo.png",
-        "description": "An independent humanitarian donation platform dedicated to full transparency and direct relief campaigns.",
-        "sameAs": sameAsLinks,
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "telephone": settings?.whatsappNumber || "",
-          "contactType": "customer service",
-          "availableLanguage": ["Arabic", "English", "Turkish", "French"]
-        }
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://forrelief.org/#website",
-        "url": "https://forrelief.org",
-        "name": "4Relief",
-        "publisher": { "@id": "https://forrelief.org/#organization" },
-        "inLanguage": locale
-      }
-    ]
+    "@type": "NGO",
+    "name": "4Relief Humanitarian Foundation",
+    "alternateName": "4Relief",
+    "url": "https://forrelief.org",
+    "logo": settings?.logoUrl || "https://forrelief.org/logo.png",
+    "description": "An independent humanitarian donation platform dedicated to full transparency and direct relief campaigns.",
+    "sameAs": sameAsLinks
+  };
+
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://forrelief.org",
+    "name": "4Relief",
+    "inLanguage": locale
   };
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* حقن الـ Schema التأسيسية للذكاء الاصطناعي */}
+      {/* حقن الـ Schema التأسيسية كأكواد مستقلة */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ngoSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
       />
 
       {/* Meta Pixel Script */}

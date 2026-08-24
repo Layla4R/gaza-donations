@@ -9,11 +9,15 @@ const tajawal = Tajawal({ weight: ['400', '500', '700', '800'], subsets: ["arabi
 const cairo = Cairo({ subsets: ["arabic", "latin"], display: "swap", variable: "--font-cairo" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://forrelief.org"),
   title: {
     template: "%s | 4Relief",
     default: "4Relief Humanitarian Foundation",
   },
   description: "An independent humanitarian donation platform with full transparency.",
+  alternates: {
+    canonical: "https://forrelief.org",
+  },
 };
 
 export default async function RootLayout({
@@ -31,7 +35,7 @@ export default async function RootLayout({
 
   const supabase = getSupabaseOrNull();
   const settings = supabase
-    ? (await supabase.from("SiteSettings").select("primaryColor, accentColor, facebookUrl, twitterUrl, instagramUrl, youtubeUrl, linkedinUrl, whatsappNumber").eq("id", "default").maybeSingle()).data
+    ? (await supabase.from("SiteSettings").select("primaryColor, accentColor, facebookUrl, twitterUrl, instagramUrl, youtubeUrl, linkedinUrl").eq("id", "default").maybeSingle()).data
     : null;
 
   const primaryColor = settings?.primaryColor || "#0069D2";
@@ -45,16 +49,16 @@ export default async function RootLayout({
     settings?.linkedinUrl,
   ].filter(Boolean);
 
-  // Schema صريحة في جذر الموقع الرئيسي
-  const rootSchema = {
+  // Schema مباشرة في الجذر بدون wrapping بـ @graph
+  const rootOrganizationSchema = {
     "@context": "https://schema.org",
     "@type": "NGO",
-    "@id": "https://forrelief.org/#organization",
     "name": "4Relief Humanitarian Foundation",
+    "alternateName": "4Relief",
     "url": "https://forrelief.org",
     "logo": "https://forrelief.org/logo.png",
     "description": "An independent humanitarian donation platform dedicated to full transparency and direct relief campaigns.",
-    "sameAs": sameAsLinks,
+    "sameAs": sameAsLinks
   };
 
   return (
@@ -67,7 +71,7 @@ export default async function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootOrganizationSchema) }}
         />
         {gtmId && (
           <Script id="gtm-init" strategy="beforeInteractive">{`
