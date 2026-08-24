@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/icons";
@@ -6,14 +5,14 @@ import Icon from "@/components/icons";
 interface NavItem { slug: string; title: string; }
 
 const LEGAL_SLUGS: Array<{ slug: string; key: string }> = [
-  { slug: "privacy",                key: "legal.privacy"               },
-  { slug: "terms",                  key: "legal.terms"                 },
-  { slug: "refund-policy",          key: "legal.refund_policy"         },
-  { slug: "cookie-policy",          key: "legal.cookie_policy"         },
-  { slug: "aml-policy",             key: "legal.aml_policy"            },
-  { slug: "complaints",             key: "legal.complaints"            },
-  { slug: "financial-transparency", key: "legal.financial_transparency"},
-  { slug: "how-we-use-donations",   key: "legal.how_we_use_donations"  },
+  { slug: "privacy",                 key: "legal.privacy"                },
+  { slug: "terms",                   key: "legal.terms"                  },
+  { slug: "refund-policy",           key: "legal.refund_policy"          },
+  { slug: "cookie-policy",           key: "legal.cookie_policy"          },
+  { slug: "aml-policy",              key: "legal.aml_policy"             },
+  { slug: "complaints",              key: "legal.complaints"             },
+  { slug: "financial-transparency",  key: "legal.financial_transparency" },
+  { slug: "how-we-use-donations",    key: "legal.how_we_use_donations"   },
 ];
 
 const SOCIAL_ICONS: Record<string, { icon: string; label: string }> = {
@@ -25,19 +24,30 @@ const SOCIAL_ICONS: Record<string, { icon: string; label: string }> = {
   tiktokUrl:    { icon: "tiktok",    label: "TikTok"    },
 };
 
-export default function SiteFooter({ navItems, settings, locale, dict }: {
-  navItems: NavItem[]; settings: any; locale: string; dict: Record<string, string>;
+export default function SiteFooter({ 
+  navItems = [], 
+  settings = {}, 
+  locale = "ar", 
+  dict = {} 
+}: {
+  navItems?: NavItem[]; 
+  settings?: any; 
+  locale?: string; 
+  dict?: Record<string, string>;
 }) {
   const p = locale === "ar" ? "" : `/${locale}`;
   const loc: "ar" | "en" | "fr" | "tr" = (["ar","en","fr","tr"].includes(locale) ? locale : "ar") as any;
+  
+  // 🌟 حماية عملية القراءة للـ Server Components (dict?.[key])
   const d = (key: string, fallbacks: Record<string, string> = {}) =>
-    dict[key] || fallbacks[loc] || fallbacks["en"] || "";
+    (dict && dict[key]) || fallbacks[loc] || fallbacks["en"] || "";
 
   const socialLinks = Object.entries(SOCIAL_ICONS)
     .filter(([key]) => settings?.[key])
     .map(([key, meta]) => ({ url: settings[key] as string, ...meta }));
 
   const logoSrc = settings?.logoImage || "/brand/logo-horizontal-transparent.png";
+  const safeNavItems = Array.isArray(navItems) ? navItems : [];
 
   return (
     <footer className="relative bg-sidebar-gradient text-white mt-auto overflow-hidden">
@@ -56,13 +66,13 @@ export default function SiteFooter({ navItems, settings, locale, dict }: {
           )}
           <p className="text-white/80 text-sm leading-relaxed mb-6">
            {settings?.footerDescription
-              || d("footer.description", {
-                  ar: "مؤسسة إنسانية عالمية، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها المحلية.",
-                  en: "An independent humanitarian donation platform with full transparency.",
-                  fr: "Une plateforme de dons humanitaires indépendante avec transparence totale.",
-                  tr: "Güvenilir ortaklarla tam şeffaflıkla bağımsız insani yardım platformu.",
-                })
-              || "4Relief Humanitarian Foundation"}
+             || d("footer.description", {
+                 ar: "مؤسسة إنسانية عالمية، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها المحلية.",
+                 en: "An independent humanitarian donation platform with full transparency.",
+                 fr: "Une plateforme de dons humanitaires indépendante avec transparence totale.",
+                 tr: "Güvenilir ortaklarla tam şeffaflıkla bağımsız insani yardım platformu.",
+               })
+             || "4Relief Humanitarian Foundation"}
           </p>
 
           {/* Social icons */}
@@ -95,9 +105,9 @@ export default function SiteFooter({ navItems, settings, locale, dict }: {
             {d("footer.quick_links", { ar: "روابط سريعة", en: "Quick Links", fr: "Liens Rapides", tr: "Hızlı Bağlantılar" })}
           </h2>
           <ul className="space-y-2.5 text-sm text-white/80">
-            {navItems.map(item => {
+            {safeNavItems.map(item => {
               const navKey = `nav.${item.slug}`;
-              const translatedTitle = dict[navKey] || (
+              const translatedTitle = (dict && dict[navKey]) || (
                 item.slug === "home" ? d("nav.home", { ar: "الرئيسية", en: "Home", fr: "Accueil", tr: "Ana Sayfa" }) :
                 item.slug === "about" || item.slug === "about-us" ? d("nav.about", { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" }) :
                 item.slug === "transparency" ? d("nav.transparency", { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" }) :
