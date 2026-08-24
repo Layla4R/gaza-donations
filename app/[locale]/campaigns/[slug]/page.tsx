@@ -1,307 +1,928 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+
 import { formatCurrency } from "@/lib/format";
-import { loadTranslations } from "@/lib/i18n";
+import { loadTranslations, LOCALES } from "@/lib/i18n";
 import { getCampaignDetails } from "@/lib/services/campaign.service";
 import CampaignCard from "@/components/blocks/CampaignCard";
 import Icon from "@/components/icons";
 import { categoryMeta } from "@/lib/categories";
-import type { Metadata } from "next";
 
-export const revalidate = 60;
+export const revalidate = 300;
 
-export async function generateMetadata({ params }: { params: { slug: string; locale: string } }): Promise<Metadata> {
-  const campaign = await getCampaignDetails(params.slug, params.locale);
-  if (!campaign) return {};
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://forrelief.org";
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
-  const url = `${siteUrl}/${params.locale}/campaigns/${campaign.slug}`;
-  const image = campaign.coverImage || `${siteUrl}/brand/og-image.png`;
+function cleanText(value: unknown): string {
+  if (typeof value !== "string") return "";
 
-  const title = campaign.displayTitle || campaign.title;
-  const description = campaign.displaySummary || campaign.summary;
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: {
+    slug: string;
+    locale: string;
+  };
+}): Promise<Metadata> {
+  const campaign =
+    await getCampaignDetails(
+      params.slug,
+      params.locale
+    );
+
+  if (!campaign) {
+    return {};
+  }
+
+  const url =
+    `${SITE_URL}/${params.locale}/campaigns/${campaign.slug}`;
+
+  const image =
+    campaign.coverImage ||
+    `${SITE_URL}/brand/og-image.png`;
+
+  const title =
+    campaign.displayTitle ||
+    campaign.title;
+
+  const description =
+    cleanText(
+      campaign.displaySummary ||
+      campaign.summary ||
+      campaign.displayDescription ||
+      campaign.description
+    );
 
   return {
     title,
+
     description,
+
     alternates: {
       canonical: url,
-      languages: {
-        "ar": `${siteUrl}/ar/campaigns/${campaign.slug}`,
-        "en": `${siteUrl}/en/campaigns/${campaign.slug}`,
-        "fr": `${siteUrl}/fr/campaigns/${campaign.slug}`,
-        "tr": `${siteUrl}/tr/campaigns/${campaign.slug}`,
-      },
+
+      languages: Object.fromEntries(
+        LOCALES.map((locale) => [
+          locale,
+          `${SITE_URL}/${locale}/campaigns/${campaign.slug}`,
+        ])
+      ),
     },
+
     openGraph: {
-      title,
-      description,
-      url,
       type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
+
+      url,
+
+      siteName: "4Relief",
+
+      title,
+
+      description,
+
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
+
     twitter: {
       card: "summary_large_image",
+
       title,
+
       description,
+
       images: [image],
     },
   };
 }
 
-export default async function CampaignDetailPage({ params }: { params: { slug: string; locale: string } }) {
-  const { slug, locale } = params;
+export default async function CampaignDetailPage({
+  params,
+}: {
+  params: {
+    slug: string;
+    locale: string;
+  };
+}) {
+  const {
+    slug,
+    locale,
+  } = params;
 
-  const [campaign, dict] = await Promise.all([
-    getCampaignDetails(slug, locale),
+  const [
+    campaign,
+    dict,
+  ] = await Promise.all([
+    getCampaignDetails(
+      slug,
+      locale
+    ),
+
     loadTranslations(locale),
   ]);
 
-  if (!campaign) notFound();
+  if (!campaign) {
+    notFound();
+  }
 
-  const title = campaign.displayTitle || campaign.title;
-  const summary = campaign.displaySummary || campaign.summary;
-  const description = campaign.displayDescription || campaign.description;
+  const title =
+    campaign.displayTitle ||
+    campaign.title;
 
-  const raised = Number(campaign.raisedAmount) || 0;
-  const goal = Number(campaign.goalAmount) || 1;
-  const pct = Math.min(100, Math.round((raised / goal) * 100));
-  const cat = categoryMeta(campaign.category);
-  const p = locale === "ar" ? "" : `/${locale}`;
+  const summary =
+    cleanText(
+      campaign.displaySummary ||
+      campaign.summary
+    );
 
-  const t = (key: string, fallback: string) => dict[key] || fallback;
+  const description =
+    cleanText(
+      campaign.displayDescription ||
+      campaign.description
+    );
 
-  const isEn = locale === "en";
-  const isTr = locale === "tr";
-  const isFr = locale === "fr";
+  const raised =
+    Number(campaign.raisedAmount) || 0;
 
-  const txtAbout = isEn ? "About the Campaign" : isTr ? "Kampanya Hakkında" : isFr ? "À propos de la campagne" : t("campaigns.about", "عن الحملة");
-  const txtWidgetTitle = isEn ? "Make a Difference Today" : isTr ? "Hayat Değiştirmeye Katkıda Bulunun" : isFr ? "Faites une différence aujourd'hui" : t("donate.widget_title", "ساهم في تغيير الحياة");
-  const txtDirectImpact = isEn ? "Direct impact with no middleman" : isTr ? "Aracısız doğrudan etki" : isFr ? "Impact direct sans intermédiaire" : t("donate.direct", "أثر مباشر بدون وسيط");
-  const txtSecure = isEn ? "All transactions are encrypted and secure" : isTr ? "Tüm işlemler şifreli ve güvenlidir" : isFr ? "Toutes les transactions sont cryptées" : t("donate.secure", "جميع المعاملات مشفرة وآمنة");
+  const goal =
+    Number(campaign.goalAmount) || 0;
 
-  const categoryLabels: Record<string, Record<string, string>> = {
-    medical: { ar: "طبي", en: "Medical", tr: "Tıbbi", fr: "Médical" },
-    food: { ar: "غذاء", en: "Food", tr: "Gıda", fr: "Nourriture" },
-    shelter: { ar: "مأوى", en: "Shelter", tr: "Barınak", fr: "Abri" },
-    water: { ar: "مياه", en: "Water", tr: "Su", fr: "Eau" },
-    education: { ar: "تعليم", en: "Education", tr: "Eğitim", fr: "Éducation" },
-    general: { ar: "عام", en: "General", tr: "Genel", fr: "Général" },
+  const pct =
+    goal > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (raised / goal) * 100
+          )
+        )
+      : 0;
+
+  const cat =
+    categoryMeta(campaign.category);
+
+  const p =
+    locale === "ar"
+      ? ""
+      : `/${locale}`;
+
+  const t = (
+    key: string,
+    fallback: string
+  ) =>
+    dict[key] || fallback;
+
+  const isEn =
+    locale === "en";
+
+  const isTr =
+    locale === "tr";
+
+  const isFr =
+    locale === "fr";
+
+  const txtAbout =
+    isEn
+      ? "About the Campaign"
+      : isTr
+      ? "Kampanya Hakkında"
+      : isFr
+      ? "À propos de la campagne"
+      : t(
+          "campaigns.about",
+          "عن الحملة"
+        );
+
+  const txtWidgetTitle =
+    isEn
+      ? "Make a Difference Today"
+      : isTr
+      ? "Hayat Değiştirmeye Katkıda Bulunun"
+      : isFr
+      ? "Faites une différence aujourd'hui"
+      : t(
+          "donate.widget_title",
+          "ساهم في تغيير الحياة"
+        );
+
+  const txtDirectImpact =
+    isEn
+      ? "Direct humanitarian impact"
+      : isTr
+      ? "Doğrudan insani etki"
+      : isFr
+      ? "Impact humanitaire direct"
+      : t(
+          "donate.direct",
+          "أثر إنساني مباشر"
+        );
+
+  const txtSecure =
+    isEn
+      ? "Secure and encrypted donation process"
+      : isTr
+      ? "Güvenli ve şifrelenmiş bağış süreci"
+      : isFr
+      ? "Processus de don sécurisé et crypté"
+      : t(
+          "donate.secure",
+          "عملية تبرع آمنة ومشفرة"
+        );
+
+  const categoryLabels: Record<
+    string,
+    Record<string, string>
+  > = {
+    medical: {
+      ar: "طبي",
+      en: "Medical",
+      tr: "Tıbbi",
+      fr: "Médical",
+    },
+
+    food: {
+      ar: "غذاء",
+      en: "Food",
+      tr: "Gıda",
+      fr: "Nourriture",
+    },
+
+    shelter: {
+      ar: "مأوى",
+      en: "Shelter",
+      tr: "Barınak",
+      fr: "Abri",
+    },
+
+    water: {
+      ar: "مياه",
+      en: "Water",
+      tr: "Su",
+      fr: "Eau",
+    },
+
+    education: {
+      ar: "تعليم",
+      en: "Education",
+      tr: "Eğitim",
+      fr: "Éducation",
+    },
+
+    general: {
+      ar: "عام",
+      en: "General",
+      tr: "Genel",
+      fr: "Général",
+    },
   };
 
-  const categoryLabel = categoryLabels[campaign.category]?.[locale] || cat.label;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
+  const categoryLabel =
+    categoryLabels[
+      campaign.category
+    ]?.[locale] ||
+    cat.label;
 
-  // 🌟 [GEO Structured Data] إعداد Schema الهيكلية للحملة والـ Breadcrumb
-  const campaignSchema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": t("nav.home", "الرئيسية"),
-            "item": `${siteUrl}/${locale}`
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": t("nav.campaigns", "الحملات"),
-            "item": `${siteUrl}/${locale}/campaigns`
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": title,
-            "item": `${siteUrl}/${locale}/campaigns/${slug}`
-          }
-        ]
+  const pageUrl =
+    `${SITE_URL}/${locale}/campaigns/${campaign.slug}`;
+
+  /*
+   * Schema الصفحة
+   */
+
+  const webPageSchema = {
+    "@context":
+      "https://schema.org",
+
+    "@type":
+      "WebPage",
+
+    "@id":
+      `${pageUrl}/#webpage`,
+
+    url:
+      pageUrl,
+
+    name:
+      title,
+
+    description:
+      summary ||
+      description ||
+      title,
+
+    inLanguage:
+      locale,
+
+    isPartOf: {
+      "@id":
+        `${SITE_URL}/#website`,
+    },
+
+    about: {
+      "@id":
+        `${SITE_URL}/#organization`,
+    },
+
+    publisher: {
+      "@id":
+        `${SITE_URL}/#organization`,
+    },
+
+    breadcrumb: {
+      "@id":
+        `${pageUrl}/#breadcrumb`,
+    },
+
+    potentialAction: {
+      "@type":
+        "DonateAction",
+
+      target: {
+        "@type":
+          "EntryPoint",
+
+        urlTemplate:
+          `${pageUrl}#donate`,
       },
-      {
-        "@type": "DonateAction",
-        "@id": `${siteUrl}/${locale}/campaigns/${slug}#donate`,
-        "name": title,
-        "description": summary || description,
-        "image": campaign.coverImage || `${siteUrl}/brand/og-image.png`,
-        "recipient": {
-          "@type": "NGO",
-          "@id": `${siteUrl}/#organization`,
-          "name": "4Relief Humanitarian Foundation"
-        },
-        "price": goal,
-        "priceCurrency": "USD"
-      }
-    ]
+    },
   };
+
+  /*
+   * Schema المؤسسة والحملة
+   */
+
+  const campaignEntitySchema = {
+    "@context":
+      "https://schema.org",
+
+    "@type":
+      "Thing",
+
+    "@id":
+      `${pageUrl}/#campaign`,
+
+    name:
+      title,
+
+    description:
+      summary ||
+      description ||
+      title,
+
+    image:
+      campaign.coverImage ||
+      `${SITE_URL}/brand/og-image.png`,
+
+    url:
+      pageUrl,
+
+    inLanguage:
+      locale,
+
+    about: {
+      "@id":
+        `${SITE_URL}/#organization`,
+    },
+
+    additionalType:
+      "https://schema.org/DonateAction",
+
+    category:
+      categoryLabel,
+  };
+
+  /*
+   * Breadcrumb
+   */
+
+  const breadcrumbSchema = {
+    "@context":
+      "https://schema.org",
+
+    "@type":
+      "BreadcrumbList",
+
+    "@id":
+      `${pageUrl}/#breadcrumb`,
+
+    itemListElement: [
+      {
+        "@type":
+          "ListItem",
+
+        position: 1,
+
+        name:
+          t(
+            "nav.home",
+            "الرئيسية"
+          ),
+
+        item:
+          `${SITE_URL}/${locale}`,
+      },
+
+      {
+        "@type":
+          "ListItem",
+
+        position: 2,
+
+        name:
+          t(
+            "nav.campaigns",
+            "الحملات"
+          ),
+
+        item:
+          `${SITE_URL}/${locale}/campaigns`,
+      },
+
+      {
+        "@type":
+          "ListItem",
+
+        position: 3,
+
+        name:
+          title,
+
+        item:
+          pageUrl,
+      },
+    ],
+  };
+
+  const safeJsonLd = (
+    data: unknown
+  ) =>
+    JSON.stringify(data)
+      .replace(
+        /</g,
+        "\\u003c"
+      );
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pb-24 border-t border-slate-100">
-      {/* 🌟 حقن Schema التبرع والربط للذكاء الاصطناعي */}
+    <div className="min-h-screen border-t border-slate-100 bg-slate-50/50 pb-24">
+
+      {/* WebPage Schema */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(campaignSchema) }}
+        dangerouslySetInnerHTML={{
+          __html:
+            safeJsonLd(
+              webPageSchema
+            ),
+        }}
       />
 
-      <div className="max-w-screen-xl mx-auto px-6 pt-10">
-        
+      {/* Campaign Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            safeJsonLd(
+              campaignEntitySchema
+            ),
+        }}
+      />
+
+      {/* Breadcrumb Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html:
+            safeJsonLd(
+              breadcrumbSchema
+            ),
+        }}
+      />
+
+      <div className="mx-auto max-w-screen-xl px-6 pt-10">
+
         {/* Breadcrumb Navigation */}
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
-          <Link href={`${p}/`} className="hover:text-brand transition">{t("nav.home", "الرئيسية")}</Link>
+
+        <nav
+          aria-label="Breadcrumb"
+          className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-500"
+        >
+          <Link
+            href={`${p}/`}
+            className="transition hover:text-brand"
+          >
+            {t(
+              "nav.home",
+              "الرئيسية"
+            )}
+          </Link>
+
           <span>/</span>
-          <Link href={`${p}/campaigns`} className="hover:text-brand transition">{t("nav.campaigns", "الحملات")}</Link>
+
+          <Link
+            href={`${p}/campaigns`}
+            className="transition hover:text-brand"
+          >
+            {t(
+              "nav.campaigns",
+              "الحملات"
+            )}
+          </Link>
+
           <span>/</span>
-          <span className="text-slate-700 truncate max-w-xs">{title}</span>
+
+          <span className="max-w-xs truncate text-slate-700">
+            {title}
+          </span>
         </nav>
 
         {/* Hero Banner */}
+
         {campaign.coverImage && (
-          <div className="relative h-72 sm:h-[450px] w-full rounded-3xl overflow-hidden bg-slate-100 mb-10 shadow-xl border border-slate-100">
-            <Image 
-              src={campaign.coverImage} 
-              alt={title} 
-              fill 
-              className="object-cover" 
+          <div className="relative mb-10 h-72 w-full overflow-hidden rounded-3xl border border-slate-100 bg-slate-100 shadow-xl sm:h-[450px]">
+
+            <Image
+              src={
+                campaign.coverImage
+              }
+              alt={title}
+              fill
+              sizes="(max-width: 768px) 100vw, 1200px"
+              className="object-cover"
               priority
             />
+
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            
-            <span className="absolute top-5 right-5 inline-flex items-center gap-2 bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold rounded-full px-4 py-1.5 shadow-md">
-              <Icon name={cat.icon} size={14} />
+
+            <span className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-4 py-1.5 text-xs font-semibold text-white shadow-md backdrop-blur-md">
+              <Icon
+                name={cat.icon}
+                size={14}
+              />
+
               {categoryLabel}
             </span>
+
           </div>
         )}
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          
+        {/* Main Content */}
+
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
+
           {/* Main Column */}
-          <div className="lg:col-span-8 space-y-10">
-            
-            {/* Title & Stats */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
-              <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
+
+          <div className="space-y-10 lg:col-span-8">
+
+            <div className="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+
+              <h1 className="font-display text-2xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
                 {title}
               </h1>
 
-              {/* 🌟 GEO Direct Answer Summary Block (معد لسهولة الاقتباس واستخراج البيانات من قبل ChatGPT/Perplexity) */}
-              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 space-y-1.5">
-                <p><strong>{t("campaigns.organization", "المؤسسة المنظمة")}:</strong> 4Relief Humanitarian Foundation</p>
-                <p><strong>{t("campaigns.category_label", "التصنيف")}:</strong> {categoryLabel}</p>
-                <p><strong>{t("campaigns.target_goal", "الهدف المالي")}:</strong> {formatCurrency(goal, "USD")} | <strong>{t("campaigns.raised_so_far", "المجمع حتى الآن")}:</strong> {formatCurrency(raised, "USD")} ({pct}%)</p>
-                {summary && <p className="pt-1 text-slate-600 italic border-t border-slate-200/50 mt-2">{summary}</p>}
-              </div>
+              {/* Direct Answer Block */}
 
-              {/* Progress Overview Bar */}
-              <div className="space-y-3 pt-2">
-                <div className="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden">
-                  <div 
-                    className="bg-brand h-3.5 rounded-full transition-all duration-1000 shadow-sm" 
-                    style={{ width: `${pct}%` }} 
-                  />
-                </div>
+              <section
+                aria-label="Campaign summary"
+                className="space-y-2 rounded-2xl border border-slate-200/80 bg-slate-50 p-4 text-xs text-slate-700 sm:text-sm"
+              >
+                <p>
+                  <strong>
+                    {t(
+                      "campaigns.organization",
+                      "المؤسسة المنظمة"
+                    )}
+                    :
+                  </strong>{" "}
+                  4Relief Humanitarian Foundation
+                </p>
 
-                <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
-                  <div>
-                    <span className="font-display font-black text-2xl sm:text-3xl text-slate-900">
-                      {formatCurrency(raised, "USD")}
-                    </span>
-                    <span className="text-slate-500 text-xs sm:text-sm ms-2">
-                      {t("campaigns.of_goal", "من الهدف")} {formatCurrency(goal, "USD")}
-                    </span>
+                <p>
+                  <strong>
+                    {t(
+                      "campaigns.category_label",
+                      "التصنيف"
+                    )}
+                    :
+                  </strong>{" "}
+                  {categoryLabel}
+                </p>
+
+                {goal > 0 && (
+                  <p>
+                    <strong>
+                      {t(
+                        "campaigns.target_goal",
+                        "الهدف المالي"
+                      )}
+                      :
+                    </strong>{" "}
+                    {formatCurrency(
+                      goal,
+                      "USD"
+                    )}
+
+                    {" | "}
+
+                    <strong>
+                      {t(
+                        "campaigns.raised_so_far",
+                        "المجمع حتى الآن"
+                      )}
+                      :
+                    </strong>{" "}
+                    {formatCurrency(
+                      raised,
+                      "USD"
+                    )}
+
+                    {" "}
+                    ({pct}%)
+                  </p>
+                )}
+
+                {summary && (
+                  <p className="mt-2 border-t border-slate-200/50 pt-3 text-slate-600">
+                    {summary}
+                  </p>
+                )}
+              </section>
+
+              {/* Progress */}
+
+              {goal > 0 && (
+                <div className="space-y-3 pt-2">
+
+                  <div className="h-3.5 w-full overflow-hidden rounded-full bg-slate-100">
+
+                    <div
+                      className="h-3.5 rounded-full bg-brand shadow-sm transition-all duration-1000"
+                      style={{
+                        width:
+                          `${pct}%`,
+                      }}
+                    />
+
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    <span className="font-extrabold text-brand bg-brand/10 px-3 py-1 rounded-xl text-xs sm:text-sm">
-                      {pct}%
-                    </span>
-                    <span className="text-xs sm:text-sm font-semibold text-slate-500 flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-3 py-1 rounded-xl">
-                      <Icon name="heart" size={14} className="text-brand" />
-                      {campaign.donorCount || 0} {t("campaigns.donors", "متبرع")}
-                    </span>
+                  <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+
+                    <div>
+                      <span className="font-display text-2xl font-black text-slate-900 sm:text-3xl">
+                        {formatCurrency(
+                          raised,
+                          "USD"
+                        )}
+                      </span>
+
+                      <span className="ms-2 text-xs text-slate-500 sm:text-sm">
+                        {t(
+                          "campaigns.of_goal",
+                          "من الهدف"
+                        )}{" "}
+                        {formatCurrency(
+                          goal,
+                          "USD"
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+
+                      <span className="rounded-xl bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand sm:text-sm">
+                        {pct}%
+                      </span>
+
+                      <span className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 sm:text-sm">
+
+                        <Icon
+                          name="heart"
+                          size={14}
+                          className="text-brand"
+                        />
+
+                        {campaign.donorCount || 0}{" "}
+
+                        {t(
+                          "campaigns.donors",
+                          "متبرع"
+                        )}
+
+                      </span>
+
+                    </div>
+
                   </div>
+
                 </div>
-              </div>
+              )}
+
             </div>
 
             {/* Description */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-4">
-              <h2 className="font-display font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2 border-b border-slate-100 pb-4">
-                <Icon name="file-text" size={20} className="text-brand" />
+
+            <section className="space-y-4 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+
+              <h2 className="flex items-center gap-2 border-b border-slate-100 pb-4 font-display text-lg font-extrabold text-slate-900 sm:text-xl">
+
+                <Icon
+                  name="file-text"
+                  size={20}
+                  className="text-brand"
+                />
+
                 {txtAbout}
+
               </h2>
-              <div className="text-slate-700 leading-relaxed text-sm sm:text-base whitespace-pre-line pt-2">
+
+              <div className="whitespace-pre-line pt-2 text-sm leading-relaxed text-slate-700 sm:text-base">
                 {description}
               </div>
-            </div>
 
-            {/* Updates Section */}
-            {campaign.updates && campaign.updates.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
-                <h2 className="font-display font-extrabold text-slate-900 text-lg sm:text-xl flex items-center gap-2 border-b border-slate-100 pb-4">
-                  <Icon name="layers" size={20} className="text-brand" />
-                  {dict["campaigns.updates"] || (isEn ? "Field Updates" : isTr ? "Saha Güncellemeleri" : "تحديثات الميدان")}
+            </section>
+
+            {/* Updates */}
+
+            {campaign.updates &&
+              campaign.updates.length > 0 && (
+
+              <section className="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+
+                <h2 className="flex items-center gap-2 border-b border-slate-100 pb-4 font-display text-lg font-extrabold text-slate-900 sm:text-xl">
+
+                  <Icon
+                    name="layers"
+                    size={20}
+                    className="text-brand"
+                  />
+
+                  {dict[
+                    "campaigns.updates"
+                  ] ||
+                    (
+                      isEn
+                        ? "Field Updates"
+                        : isTr
+                        ? "Saha Güncellemeleri"
+                        : isFr
+                        ? "Mises à jour du terrain"
+                        : "تحديثات الميدان"
+                    )}
+
                 </h2>
+
                 <div className="space-y-4">
-                  {campaign.updates.map((u: any) => (
-                    <div key={u.id} className="border border-slate-100 rounded-2xl p-5 bg-slate-50/60 relative">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-bold text-slate-900 text-sm sm:text-base">{u.title}</h3>
-                        <span className="text-xs text-slate-500 font-medium bg-white px-2.5 py-1 rounded-md border border-slate-100">
-                          {new Date(u.createdAt).toLocaleDateString(locale)}
-                        </span>
-                      </div>
-                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{u.body}</p>
-                    </div>
-                  ))}
+
+                  {campaign.updates.map(
+                    (u: any) => (
+
+                      <article
+                        key={u.id}
+                        className="relative rounded-2xl border border-slate-100 bg-slate-50/60 p-5"
+                      >
+
+                        <div className="mb-2 flex items-center justify-between gap-4">
+
+                          <h3 className="text-sm font-bold text-slate-900 sm:text-base">
+                            {u.title}
+                          </h3>
+
+                          <time
+                            dateTime={
+                              new Date(
+                                u.createdAt
+                              ).toISOString()
+                            }
+                            className="rounded-md border border-slate-100 bg-white px-2.5 py-1 text-xs font-medium text-slate-500"
+                          >
+                            {new Date(
+                              u.createdAt
+                            ).toLocaleDateString(
+                              locale
+                            )}
+                          </time>
+
+                        </div>
+
+                        <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">
+                          {u.body}
+                        </p>
+
+                      </article>
+
+                    )
+                  )}
+
                 </div>
-              </div>
+
+              </section>
+
             )}
 
-            {/* Trust Badges Bar */}
-            <div className="bg-brand text-white rounded-3xl p-6 shadow-lg flex flex-wrap items-center justify-around gap-4 text-center">
+            {/* Trust */}
+
+            <div className="flex flex-wrap items-center justify-around gap-4 rounded-3xl bg-brand p-6 text-center text-white shadow-lg">
+
               <div className="flex items-center gap-2 text-xs font-semibold">
-                <Icon name="shield-check" size={18} />
-                <span>{txtSecure}</span>
+
+                <Icon
+                  name="shield-check"
+                  size={18}
+                />
+
+                <span>
+                  {txtSecure}
+                </span>
+
               </div>
+
               <div className="flex items-center gap-2 text-xs font-semibold">
-                <Icon name="hand-heart" size={18} />
-                <span>{txtDirectImpact}</span>
+
+                <Icon
+                  name="hand-heart"
+                  size={18}
+                />
+
+                <span>
+                  {txtDirectImpact}
+                </span>
+
               </div>
+
             </div>
 
           </div>
 
-          {/* Right Sticky Donation Box */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
-            <div className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden">
-              <div className="bg-brand p-4 text-white text-center">
-                <p className="text-xs font-bold text-white uppercase tracking-widest">{txtWidgetTitle}</p>
+          {/* Donation Box */}
+
+          <aside className="lg:sticky lg:top-24 lg:col-span-4 lg:self-start">
+
+            <div
+              id="donate"
+              className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-xl"
+            >
+
+              <div className="bg-brand p-4 text-center text-white">
+
+                <p className="text-xs font-bold uppercase tracking-widest">
+                  {txtWidgetTitle}
+                </p>
+
               </div>
-              
+
               <div className="p-2">
+
                 <CampaignCard
                   id={campaign.id}
                   slug={campaign.slug}
                   title={title}
                   summary={summary}
-                  coverImage={campaign.coverImage}
-                  goalAmount={Number(campaign.goalAmount)}
-                  raisedAmount={Number(campaign.raisedAmount)}
-                  donorCount={campaign.donorCount}
-                  category={campaign.category}
+                  coverImage={
+                    campaign.coverImage
+                  }
+                  goalAmount={
+                    Number(
+                      campaign.goalAmount
+                    )
+                  }
+                  raisedAmount={
+                    Number(
+                      campaign.raisedAmount
+                    )
+                  }
+                  donorCount={
+                    campaign.donorCount
+                  }
+                  category={
+                    campaign.category
+                  }
                   locale={locale}
                   dict={dict}
                 />
+
               </div>
+
             </div>
-          </div>
+
+          </aside>
 
         </div>
+
       </div>
+
     </div>
   );
 }

@@ -1,26 +1,31 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
+
+const SITE_URL = "https://forrelief.org";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/admin/', '/api/'],
-      },
-      {
-        userAgent: [
-          'GPTBot',
-          'ChatGPT-User',
-          'PerplexityBot',
-          'ClaudeBot',
-          'Google-Extended',
-          'CCBot',
-          'FacebookBot'
+        userAgent: "*",
+
+        allow: "/",
+
+        disallow: [
+          "/admin/",
+          "/api/",
+          "/account/",
+          "/login/",
+          "/forgot-password/",
+          "/reset-password/",
+          "/verify-email/",
+          "/cart/",
         ],
-        allow: '/',
       },
     ],
-    sitemap: 'https://forrelief.org/sitemap.xml',
+
+    sitemap:
+      `${SITE_URL}/sitemap.xml`,
+
+    host: SITE_URL,
   };
 }

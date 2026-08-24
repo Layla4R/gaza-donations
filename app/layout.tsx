@@ -1,41 +1,139 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { getSupabaseOrNull } from "@/lib/supabase"; 
+
+import { getSupabaseOrNull } from "@/lib/supabase";
 import { Alexandria, Tajawal, Cairo } from "next/font/google";
 
-const alexandria = Alexandria({ subsets: ["arabic", "latin"], display: "swap", variable: "--font-display" });
-const tajawal = Tajawal({ weight: ['400', '500', '700', '800'], subsets: ["arabic", "latin"], display: "swap", variable: "--font-sans" });
-const cairo = Cairo({ subsets: ["arabic", "latin"], display: "swap", variable: "--font-cairo" });
+const alexandria = Alexandria({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-display",
+});
+
+const tajawal = Tajawal({
+  weight: ["400", "500", "700", "800"],
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-sans",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  display: "swap",
+  variable: "--font-cairo",
+});
+
+const SITE_URL = "https://forrelief.org";
+
+export const viewport: Viewport = {
+  themeColor: "#0069D2",
+};
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://forrelief.org"),
+  metadataBase: new URL(SITE_URL),
+
+  applicationName: "4Relief",
+
   title: {
-    template: "%s | 4Relief",
     default: "4Relief Humanitarian Foundation",
+    template: "%s | 4Relief",
   },
-  description: "An independent humanitarian donation platform with full transparency.",
+
+  description:
+    "4Relief is an independent humanitarian foundation connecting donors with transparent relief and humanitarian campaigns.",
+
+  keywords: [
+    "4Relief",
+    "humanitarian aid",
+    "humanitarian foundation",
+    "donations",
+    "charity",
+    "relief campaigns",
+    "emergency aid",
+    "Gaza donations",
+    "humanitarian crowdfunding",
+  ],
+
+  authors: [
+    {
+      name: "4Relief Humanitarian Foundation",
+      url: SITE_URL,
+    },
+  ],
+
+  creator: "4Relief Humanitarian Foundation",
+
+  publisher: "4Relief Humanitarian Foundation",
+
   alternates: {
-    canonical: "https://forrelief.org",
+    canonical: SITE_URL,
+    languages: {
+      ar: `${SITE_URL}/ar`,
+      en: `${SITE_URL}/en`,
+      tr: `${SITE_URL}/tr`,
+    },
   },
+
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "4Relief",
+    title: "4Relief Humanitarian Foundation",
+    description:
+      "Connecting donors with transparent humanitarian and relief campaigns.",
+    locale: "ar",
+    alternateLocale: ["en", "tr"],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "4Relief Humanitarian Foundation",
+    description:
+      "Connecting donors with transparent humanitarian and relief campaigns.",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+  category: "Humanitarian Organization",
 };
 
 export default async function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params?: { locale?: string };
 }) {
-  const locale = params?.locale || "ar";
-  const dir = locale === "ar" ? "rtl" : "ltr";
-
-  const gaId  = process.env.NEXT_PUBLIC_GA_ID;
+  const gaId = process.env.NEXT_PUBLIC_GA_ID;
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   const supabase = getSupabaseOrNull();
+
   const settings = supabase
-    ? (await supabase.from("SiteSettings").select("primaryColor, accentColor, facebookUrl, twitterUrl, instagramUrl, youtubeUrl, linkedinUrl").eq("id", "default").maybeSingle()).data
+    ? (
+        await supabase
+          .from("SiteSettings")
+          .select(`
+            primaryColor,
+            accentColor,
+            facebookUrl,
+            twitterUrl,
+            instagramUrl,
+            youtubeUrl,
+            linkedinUrl
+          `)
+          .eq("id", "default")
+          .maybeSingle()
+      ).data
     : null;
 
   const primaryColor = settings?.primaryColor || "#0069D2";
@@ -47,70 +145,213 @@ export default async function RootLayout({
     settings?.instagramUrl,
     settings?.youtubeUrl,
     settings?.linkedinUrl,
-  ].filter(Boolean);
+  ].filter((url): url is string => Boolean(url));
 
-  // Schema مباشرة في الجذر بدون wrapping بـ @graph
-  const rootOrganizationSchema = {
+  /*
+   * Main Entity IDs
+   */
+
+  const organizationId = `${SITE_URL}/#organization`;
+
+  const websiteId = `${SITE_URL}/#website`;
+
+  /*
+   * Complete semantic graph
+   */
+
+  const structuredData = {
     "@context": "https://schema.org",
-    "@type": "NGO",
-    "name": "4Relief Humanitarian Foundation",
-    "alternateName": "4Relief",
-    "url": "https://forrelief.org",
-    "logo": "https://forrelief.org/logo.png",
-    "description": "An independent humanitarian donation platform dedicated to full transparency and direct relief campaigns.",
-    "sameAs": sameAsLinks
+
+    "@graph": [
+      {
+        "@type": "NGO",
+
+        "@id": organizationId,
+
+        name: "4Relief Humanitarian Foundation",
+
+        alternateName: [
+          "4Relief",
+          "For Relief",
+          "فور ريليف",
+        ],
+
+        url: SITE_URL,
+
+        description:
+          "4Relief is an independent humanitarian foundation connecting donors with transparent humanitarian and relief campaigns.",
+
+        logo: {
+          "@type": "ImageObject",
+
+          "@id": `${SITE_URL}/#logo`,
+
+          url: `${SITE_URL}/brand/logo.png`,
+        },
+
+        image: `${SITE_URL}/brand/logo.png`,
+
+        sameAs: sameAsLinks,
+
+        knowsAbout: [
+          "Humanitarian Aid",
+          "Emergency Relief",
+          "Humanitarian Crowdfunding",
+          "Charitable Donations",
+          "Community Development",
+          "Child Protection",
+          "Education",
+          "Women Empowerment",
+        ],
+      },
+
+      {
+        "@type": "WebSite",
+
+        "@id": websiteId,
+
+        url: SITE_URL,
+
+        name: "4Relief",
+
+        alternateName: "4Relief Humanitarian Foundation",
+
+        publisher: {
+          "@id": organizationId,
+        },
+
+        inLanguage: [
+          "ar",
+          "en",
+          "tr",
+        ],
+
+        potentialAction: {
+          "@type": "SearchAction",
+
+          target: {
+            "@type": "EntryPoint",
+
+            urlTemplate: `${SITE_URL}/en/campaigns?search={search_term_string}`,
+          },
+
+          "query-input":
+            "required name=search_term_string",
+        },
+      },
+    ],
   };
 
   return (
-    <html 
-      lang={locale} 
-      dir={dir} 
-      suppressHydrationWarning 
-      className={`${alexandria.variable} ${tajawal.variable} ${cairo.variable}`}
+    <html
+      lang="ar"
+      dir="rtl"
+      suppressHydrationWarning
+      className={`
+        ${alexandria.variable}
+        ${tajawal.variable}
+        ${cairo.variable}
+      `}
     >
       <head>
-        <script
+        <Script
+          id="organization-schema"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootOrganizationSchema) }}
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(
+              /</g,
+              "\\u003c"
+            ),
+          }}
         />
-        {gtmId && (
-          <Script id="gtm-init" strategy="beforeInteractive">{`
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtag/js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','${gtmId}');
-          `}</Script>
-        )}
-        
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            :root {
-              --brand: ${primaryColor};
-              --accent: ${accentColor};
-            }
-          `
-        }} />
+
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root {
+                --brand: ${primaryColor};
+                --accent: ${accentColor};
+              }
+            `,
+          }}
+        />
       </head>
-      
+
       <body className="font-sans min-h-screen antialiased bg-cream text-ink">
         {gtmId && (
-          <noscript>
-            <iframe src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`} height="0" width="0" style={{ display: "none", visibility: "hidden" }} />
-          </noscript>
+          <>
+            <Script
+              id="gtm-init"
+              strategy="beforeInteractive"
+            >
+              {`
+                (function(w,d,s,l,i){
+                  w[l]=w[l]||[];
+                  w[l].push({
+                    'gtm.start': new Date().getTime(),
+                    event:'gtm.js'
+                  });
+
+                  var f=d.getElementsByTagName(s)[0],
+                  j=d.createElement(s),
+                  dl=l!='dataLayer'
+                    ? '&l='+l
+                    : '';
+
+                  j.async=true;
+
+                  j.src=
+                    'https://www.googletagmanager.com/gtm.js?id='
+                    + i + dl;
+
+                  f.parentNode.insertBefore(j,f);
+
+                })(window,document,'script','dataLayer','${gtmId}');
+              `}
+            </Script>
+
+            <noscript>
+              <iframe
+                src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+                height="0"
+                width="0"
+                style={{
+                  display: "none",
+                  visibility: "hidden",
+                }}
+              />
+            </noscript>
+          </>
         )}
 
         {children}
 
         {gaId && !gtmId && (
           <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
-            <Script id="ga-init" strategy="afterInteractive">{`
-              window.dataLayer=window.dataLayer||[];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js',new Date());
-              gtag('config','${gaId}',{page_path:window.location.pathname});
-            `}</Script>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+              strategy="afterInteractive"
+            />
+
+            <Script
+              id="ga-init"
+              strategy="afterInteractive"
+            >
+              {`
+                window.dataLayer = window.dataLayer || [];
+
+                function gtag(){
+                  dataLayer.push(arguments);
+                }
+
+                gtag('js', new Date());
+
+                gtag('config', '${gaId}', {
+                  page_path: window.location.pathname
+                });
+              `}
+            </Script>
           </>
         )}
       </body>
