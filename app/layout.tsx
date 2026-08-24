@@ -186,10 +186,10 @@ export default async function RootLayout({
 
           "@id": `${SITE_URL}/#logo`,
 
-          url: `${SITE_URL}/brand/logo.png`,
+          url: `${SITE_URL}/brand/logo-horizontal-transparent.png`,
         },
 
-        image: `${SITE_URL}/brand/logo.png`,
+        image: `${SITE_URL}/brand/logo-horizontal-transparent.png`,
 
         sameAs: sameAsLinks,
 

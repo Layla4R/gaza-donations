@@ -59,62 +59,50 @@ export default function FaqSection({
         {items.length > 0 && (
           <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-xl shadow-slate-200/40 w-full mb-10">
             <div className="divide-y divide-slate-100">
-              {items.map((item: any, i: number) => {
-                const isOpen = open === i;
-                const questionText = item.q || item.question || item.title;
-                const answerText = item.a || item.answer || item.content || item.body;
+            {items.map((item: any, i: number) => {
+  const isOpen = open === i;
+  const questionText = item.q || item.question || item.title;
+  const answerText = item.a || item.answer || item.content || item.body;
 
-                return (
-                  <div
-                    key={i}
-                    className="py-4 first:pt-0 last:pb-0 transition-colors"
-                  >
-                    <button
-                      onClick={() => setOpen(isOpen ? null : i)}
-                      className="w-full flex items-center justify-between gap-4 py-3 text-start transition-colors group"
-                    >
-                      <span
-                        className={`font-display font-bold text-base sm:text-lg leading-snug transition-colors ${
-                          isOpen ? "text-brand" : "text-slate-900 group-hover:text-brand"
-                        }`}
-                      >
-                        {questionText}
-                      </span>
+  return (
+    <div key={i} className="py-4 first:pt-0 last:pb-0 transition-colors">
+      <button
+        onClick={() => setOpen(isOpen ? null : i)}
+        className="w-full flex items-center justify-between gap-4 py-3 text-start transition-colors group"
+        aria-expanded={isOpen}
+      >
+        <span className={`font-display font-bold text-base sm:text-lg leading-snug transition-colors ${
+          isOpen ? "text-brand" : "text-slate-900 group-hover:text-brand"
+        }`}>
+          {questionText}
+        </span>
 
-                      {/* Toggle Icon */}
-                      <div
-                        className={`shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
-                          isOpen
-                            ? "bg-brand border-brand text-white rotate-180 shadow-sm"
-                            : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-brand/40 group-hover:text-brand"
-                        }`}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
-                      </div>
-                    </button>
+        <div className={`shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
+          isOpen
+            ? "bg-brand border-brand text-white rotate-180 shadow-sm"
+            : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-brand/40 group-hover:text-brand"
+        }`}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </div>
+      </button>
 
-                    {/* Collapsible Answer */}
-                    {isOpen && (
-                      <div className="pt-2 pb-3 text-slate-600 text-sm sm:text-base leading-relaxed">
-                        <p className="text-slate-500 leading-loose">
-                          {answerText}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+      {/* دايماً موجودة بالـ DOM — بس نتحكم فيها بالـ CSS max-height/opacity بدل ما نشيلها بالكامل */}
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          isOpen ? "grid-rows-[1fr] opacity-100 pt-2 pb-3" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-slate-500 text-sm sm:text-base leading-loose">
+            {answerText}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+})}
             </div>
           </div>
         )}
