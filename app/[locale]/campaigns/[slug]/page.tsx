@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { slug: string; loc
   const campaign = await getCampaignDetails(params.slug, params.locale);
   if (!campaign) return {};
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
   const url = `${siteUrl}/${params.locale}/campaigns/${campaign.slug}`;
   const image = campaign.coverImage || `${siteUrl}/brand/og-image.png`;
 
@@ -60,7 +60,6 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
   if (!campaign) notFound();
 
-  // اعتماد العنوان والملخص والتفاصيل المترجمة
   const title = campaign.displayTitle || campaign.title;
   const summary = campaign.displaySummary || campaign.summary;
   const description = campaign.displayDescription || campaign.description;
@@ -73,7 +72,6 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
   const t = (key: string, fallback: string) => dict[key] || fallback;
 
-  // 🌟 قاموس نصوص الواجهة الديناميكي
   const isEn = locale === "en";
   const isTr = locale === "tr";
   const isFr = locale === "fr";
@@ -83,7 +81,6 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
   const txtDirectImpact = isEn ? "Direct impact with no middleman" : isTr ? "Aracısız doğrudan etki" : isFr ? "Impact direct sans intermédiaire" : t("donate.direct", "أثر مباشر بدون وسيط");
   const txtSecure = isEn ? "All transactions are encrypted and secure" : isTr ? "Tüm işlemler şifreli ve güvenlidir" : isFr ? "Toutes les transactions sont cryptées" : t("donate.secure", "جميع المعاملات مشفرة وآمنة");
 
-  // ترجمة التصنيفات
   const categoryLabels: Record<string, Record<string, string>> = {
     medical: { ar: "طبي", en: "Medical", tr: "Tıbbi", fr: "Médical" },
     food: { ar: "غذاء", en: "Food", tr: "Gıda", fr: "Nourriture" },
@@ -94,19 +91,70 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
   };
 
   const categoryLabel = categoryLabels[campaign.category]?.[locale] || cat.label;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
+
+  // 🌟 [GEO Structured Data] إعداد Schema الهيكلية للحملة والـ Breadcrumb
+  const campaignSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": t("nav.home", "الرئيسية"),
+            "item": `${siteUrl}/${locale}`
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": t("nav.campaigns", "الحملات"),
+            "item": `${siteUrl}/${locale}/campaigns`
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": title,
+            "item": `${siteUrl}/${locale}/campaigns/${slug}`
+          }
+        ]
+      },
+      {
+        "@type": "DonateAction",
+        "@id": `${siteUrl}/${locale}/campaigns/${slug}#donate`,
+        "name": title,
+        "description": summary || description,
+        "image": campaign.coverImage || `${siteUrl}/brand/og-image.png`,
+        "recipient": {
+          "@type": "NGO",
+          "@id": `${siteUrl}/#organization`,
+          "name": "4Relief Humanitarian Foundation"
+        },
+        "price": goal,
+        "priceCurrency": "USD"
+      }
+    ]
+  };
 
   return (
     <div className="bg-slate-50/50 min-h-screen pb-24 border-t border-slate-100">
+      {/* 🌟 حقن Schema التبرع والربط للذكاء الاصطناعي */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(campaignSchema) }}
+      />
+
       <div className="max-w-screen-xl mx-auto px-6 pt-10">
         
         {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
+        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-slate-500 mb-6">
           <Link href={`${p}/`} className="hover:text-brand transition">{t("nav.home", "الرئيسية")}</Link>
           <span>/</span>
           <Link href={`${p}/campaigns`} className="hover:text-brand transition">{t("nav.campaigns", "الحملات")}</Link>
           <span>/</span>
           <span className="text-slate-700 truncate max-w-xs">{title}</span>
-        </div>
+        </nav>
 
         {/* Hero Banner */}
         {campaign.coverImage && (
@@ -138,6 +186,14 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <h1 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight">
                 {title}
               </h1>
+
+              {/* 🌟 GEO Direct Answer Summary Block (معد لسهولة الاقتباس واستخراج البيانات من قبل ChatGPT/Perplexity) */}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 space-y-1.5">
+                <p><strong>{t("campaigns.organization", "المؤسسة المنظمة")}:</strong> 4Relief Humanitarian Foundation</p>
+                <p><strong>{t("campaigns.category_label", "التصنيف")}:</strong> {categoryLabel}</p>
+                <p><strong>{t("campaigns.target_goal", "الهدف المالي")}:</strong> {formatCurrency(goal, "USD")} | <strong>{t("campaigns.raised_so_far", "المجمع حتى الآن")}:</strong> {formatCurrency(raised, "USD")} ({pct}%)</p>
+                {summary && <p className="pt-1 text-slate-600 italic border-t border-slate-200/50 mt-2">{summary}</p>}
+              </div>
 
               {/* Progress Overview Bar */}
               <div className="space-y-3 pt-2">

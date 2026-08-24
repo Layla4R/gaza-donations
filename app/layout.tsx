@@ -4,24 +4,9 @@ import "./globals.css";
 import { getSupabaseOrNull } from "@/lib/supabase"; 
 import { Alexandria, Tajawal, Cairo } from "next/font/google";
 
-const alexandria = Alexandria({
-  subsets: ["arabic", "latin"],
-  display: "swap",
-  variable: "--font-display",
-});
-
-const tajawal = Tajawal({
-  weight: ['400', '500', '700', '800'],
-  subsets: ["arabic", "latin"],
-  display: "swap",
-  variable: "--font-sans",
-});
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  display: "swap",
-  variable: "--font-cairo",
-});
+const alexandria = Alexandria({ subsets: ["arabic", "latin"], display: "swap", variable: "--font-display" });
+const tajawal = Tajawal({ weight: ['400', '500', '700', '800'], subsets: ["arabic", "latin"], display: "swap", variable: "--font-sans" });
+const cairo = Cairo({ subsets: ["arabic", "latin"], display: "swap", variable: "--font-cairo" });
 
 export const metadata: Metadata = {
   title: {
@@ -46,11 +31,31 @@ export default async function RootLayout({
 
   const supabase = getSupabaseOrNull();
   const settings = supabase
-    ? (await supabase.from("SiteSettings").select("primaryColor, accentColor").eq("id", "default").maybeSingle()).data
+    ? (await supabase.from("SiteSettings").select("primaryColor, accentColor, facebookUrl, twitterUrl, instagramUrl, youtubeUrl, linkedinUrl, whatsappNumber").eq("id", "default").maybeSingle()).data
     : null;
 
   const primaryColor = settings?.primaryColor || "#0069D2";
   const accentColor = settings?.accentColor || "#F00F5A";
+
+  const sameAsLinks = [
+    settings?.facebookUrl,
+    settings?.twitterUrl,
+    settings?.instagramUrl,
+    settings?.youtubeUrl,
+    settings?.linkedinUrl,
+  ].filter(Boolean);
+
+  // Schema صريحة في جذر الموقع الرئيسي
+  const rootSchema = {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "@id": "https://forrelief.org/#organization",
+    "name": "4Relief Humanitarian Foundation",
+    "url": "https://forrelief.org",
+    "logo": "https://forrelief.org/logo.png",
+    "description": "An independent humanitarian donation platform dedicated to full transparency and direct relief campaigns.",
+    "sameAs": sameAsLinks,
+  };
 
   return (
     <html 
@@ -60,12 +65,16 @@ export default async function RootLayout({
       className={`${alexandria.variable} ${tajawal.variable} ${cairo.variable}`}
     >
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootSchema) }}
+        />
         {gtmId && (
           <Script id="gtm-init" strategy="beforeInteractive">{`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            'https://www.googletagmanager.com/gtag/js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','${gtmId}');
           `}</Script>
         )}
