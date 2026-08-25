@@ -151,7 +151,14 @@ export default async function DynamicPage({
   }));
 
   const isLegalPage = LEGAL_SLUGS.includes(slug);
-  const isAboutPage = slug === "about" || slug === "about-us";
+  
+  // 🌟 تضمين الصفحات المؤسسية والشفافية لإظهار بار الثقة
+  const isTrustPage = 
+    slug === "about" || 
+    slug === "about-us" || 
+    slug === "transparency" || 
+    slug === "financial-transparency";
+
   const hasCustomSections = !isLegalPage && sections.length > 0;
 
   const displayTitle = isLegalPage
@@ -170,7 +177,7 @@ export default async function DynamicPage({
   const isTr = locale === "tr";
   const isFr = locale === "fr";
 
-  // 🌟 Dynamic E-E-A-T & Organization Graph Schema
+  // Dynamic E-E-A-T & Organization Graph Schema
   const dynamicPageSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -188,7 +195,7 @@ export default async function DynamicPage({
         publisher: { "@id": `${SITE_URL}/#organization` },
         breadcrumb: { "@id": `${pageUrl}/#breadcrumb` },
       },
-      ...(isAboutPage
+      ...(isTrustPage
         ? [
             {
               "@type": "NGO",
@@ -272,8 +279,8 @@ export default async function DynamicPage({
         </div>
       </header>
 
-      {/* 🌟 Direct Answer / E-E-A-T Summary Block for Core Pages */}
-      {isAboutPage && (
+      {/* 🌟 Direct Answer / E-E-A-T Summary Block for About & Transparency Pages */}
+      {isTrustPage && (
         <section className="mx-auto max-w-screen-xl px-6 pt-8">
           <div className="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm">
             <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
@@ -281,7 +288,7 @@ export default async function DynamicPage({
             </div>
             <div className="flex-1">
               <span className="font-bold text-slate-900">
-                {isEn ? "Verified NGO Credentials" : isTr ? "Doğrulanmış STK Bilgileri" : isFr ? "Accréditation ONG Vérifiée" : "معلومات الاعتماد والترخيص الرسمي"}
+                {isEn ? "Verified NGO Credentials & Transparency" : isTr ? "Doğrulanmış STK & Şeffaflık Bilgileri" : isFr ? "Accréditation ONG & Transparence" : "معلومات الاعتماد والترخيص والشفافية الرسمية"}
               </span>
               <p className="text-slate-500 text-xs">
                 {isEn ? "Registered Independent NGO | 100% Financial Governance" : "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%"}
@@ -291,19 +298,19 @@ export default async function DynamicPage({
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs sm:text-sm font-medium">
             <div>
-              <span className="block text-slate-400 text-xs">{isEn ? "Founded" : "سنة التأسيس"}</span>
-              <strong className="text-slate-900">2024</strong>
+              <span className="block text-slate-700 text-s font-medium">{isEn ? "Founded" : "سنة التأسيس"}</span>
+              <strong className="text-slate-900">2026</strong>
             </div>
             <div>
-              <span className="block text-slate-400 text-xs">{isEn ? "Legal Entity" : "الصفة القانونية"}</span>
+              <span className="block text-slate-700 text-s font-medium">{isEn ? "Legal Entity" : "الصفة القانونية"}</span>
               <strong className="text-slate-900">{isEn ? "Registered NGO" : "منظمة غير ربحية (NGO)"}</strong>
             </div>
             <div>
-              <span className="block text-slate-400 text-xs">{isEn ? "Transparency" : "الشفافية المالية"}</span>
+              <span className="block text-slate-700 text-s font-medium">{isEn ? "Transparency" : "الشفافية المالية"}</span>
               <strong className="text-brand">100% {isEn ? "Audited" : "تقارير موثقة"}</strong>
             </div>
             <div>
-              <span className="block text-slate-400 text-xs">{isEn ? "Coverage" : "النطاق الميداني"}</span>
+              <span className="block text-slate-700 text-s font-medium">{isEn ? "Coverage" : "النطاق الميداني"}</span>
               <strong className="text-slate-900">12+ {isEn ? "Regions" : "دولة ومتأثر"}</strong>
             </div>
           </div>
