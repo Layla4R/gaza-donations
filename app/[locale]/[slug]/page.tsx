@@ -281,7 +281,7 @@ export default async function DynamicPage({
               ],
               url: SITE_URL,
               logo: `${SITE_URL}/brand/logo.png`,
-              foundingDate: "2024",
+              foundingDate: "2026",
               knowsAbout: [
                 "Humanitarian Aid",
                 "Emergency Relief",
@@ -395,7 +395,7 @@ export default async function DynamicPage({
               <span className="block text-slate-700 text-s font-medium">
                 {isEn ? "Founded" : "سنة التأسيس"}
               </span>
-              <strong className="text-slate-900">2024</strong>
+              <strong className="text-slate-900">2026</strong>
             </div>
             <div>
               <span className="block text-slate-700 text-s font-medium">
