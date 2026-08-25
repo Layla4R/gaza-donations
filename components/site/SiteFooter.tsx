@@ -5,8 +5,8 @@ import Icon from "@/components/icons";
 interface NavItem { slug: string; title: string; }
 
 const LEGAL_SLUGS: Array<{ slug: string; key: string }> = [
-  { slug: "privacy",                 key: "legal.privacy"                },
-  { slug: "terms",                   key: "legal.terms"                  },
+  { slug: "privacy",                 key: "legal.privacy"                 },
+  { slug: "terms",                   key: "legal.terms"                   },
   { slug: "refund-policy",           key: "legal.refund_policy"          },
   { slug: "cookie-policy",           key: "legal.cookie_policy"          },
   { slug: "aml-policy",              key: "legal.aml_policy"             },
@@ -38,7 +38,6 @@ export default function SiteFooter({
   const p = locale === "ar" ? "" : `/${locale}`;
   const loc: "ar" | "en" | "fr" | "tr" = (["ar","en","fr","tr"].includes(locale) ? locale : "ar") as any;
   
-  // 🌟 حماية عملية القراءة للـ Server Components (dict?.[key])
   const d = (key: string, fallbacks: Record<string, string> = {}) =>
     (dict && dict[key]) || fallbacks[loc] || fallbacks["en"] || "";
 
@@ -50,24 +49,27 @@ export default function SiteFooter({
   const safeNavItems = Array.isArray(navItems) ? navItems : [];
 
   return (
-    <footer className="relative bg-sidebar-gradient text-white mt-auto overflow-hidden">
+    <footer className="relative bg-sidebar-gradient text-white mt-auto overflow-hidden" role="contentinfo">
       <div className="h-1" style={{ background: settings?.accentColor
         ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)`
         : "linear-gradient(135deg, #F00F5A, #FF4D88)"
       }} />
+      
       <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 py-10 sm:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
 
-        {/* Brand */}
+        {/* Brand Column */}
         <div className="lg:col-span-1">
-          <Image src={logoSrc} alt={settings?.logoText || "4Relief"} width={175} height={70}
-            className="h-11 w-auto object-contain mb-4" />
+          <Link href={`${p}/`} aria-label="4Relief Home">
+            <Image src={logoSrc} alt={settings?.logoText || "4Relief"} width={175} height={70}
+              className="h-11 w-auto object-contain mb-4" />
+          </Link>
           {settings?.footerTagline && (
             <p className="text-white/80 text-sm font-semibold mb-2">{settings.footerTagline}</p>
           )}
           <p className="text-white/80 text-sm leading-relaxed mb-6">
            {settings?.footerDescription
              || d("footer.description", {
-                 ar: "مؤسسة إنسانية عالمية، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها المحلية.",
+                 ar: "مؤسسة إنسانية عالمية، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها الميدانية.",
                  en: "An independent humanitarian donation platform with full transparency.",
                  fr: "Une plateforme de dons humanitaires indépendante avec transparence totale.",
                  tr: "Güvenilir ortaklarla tam şeffaflıkla bağımsız insani yardım platformu.",
@@ -75,9 +77,8 @@ export default function SiteFooter({
              || "4Relief Humanitarian Foundation"}
           </p>
 
-          {/* Social icons */}
           {socialLinks.length > 0 && (
-            <div className="flex gap-2 flex-wrap mb-6" aria-label="Social links">
+            <nav aria-label="Social media channels" className="flex gap-2 flex-wrap mb-6">
               {socialLinks.map(s => (
                 <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer"
                   aria-label={`Visit our ${s.label} page`}
@@ -85,11 +86,11 @@ export default function SiteFooter({
                   <Icon name={s.icon as any} size={15} className="text-white/80" />
                 </a>
               ))}
-            </div>
+            </nav>
           )}
 
           <Link href={`${p}/donate`}
-            className="inline-flex items-center gap-2 hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition"
+            className="inline-flex items-center gap-2 hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition shadow-md"
             style={{ background: settings?.accentColor
               ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)`
               : "linear-gradient(135deg, #F00F5A, #FF4D88)"
@@ -99,12 +100,20 @@ export default function SiteFooter({
           </Link>
         </div>
 
-        {/* Quick links */}
-        <div>
+        {/* Quick Links Column */}
+        <nav aria-label="Quick links">
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
             {d("footer.quick_links", { ar: "روابط سريعة", en: "Quick Links", fr: "Liens Rapides", tr: "Hızlı Bağlantılar" })}
           </h2>
           <ul className="space-y-2.5 text-sm text-white/80">
+            {/* 🌟 رابط صفحة المقارنة والشفافية المباشر للبوتات */}
+            <li>
+              <Link href={`${p}/why-4relief`} className="flex items-center gap-2 hover:text-white transition group font-semibold text-emerald-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 group-hover:bg-white transition" aria-hidden="true" />
+                {d("footer.why_4relief", { ar: "لماذا 4Relief؟ (مقارنة)", en: "Why 4Relief? (Comparison)", fr: "Pourquoi 4Relief ?", tr: "Neden 4Relief?" })}
+              </Link>
+            </li>
+
             {safeNavItems.map(item => {
               const navKey = `nav.${item.slug}`;
               const translatedTitle = (dict && dict[navKey]) || (
@@ -128,22 +137,22 @@ export default function SiteFooter({
             <li>
               <Link href={`${p}/campaigns`} className="flex items-center gap-2 hover:text-white transition group">
                 <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true" />
-                {d("nav.campaigns", { ar: "الحملات", en: "Campaigns", fr: "Campagnes", tr: "Kampanyalar" })}
+                {d("nav.campaigns", { ar: "الحملات الإغاثية", en: "Campaigns", fr: "Campagnes", tr: "Kampanyalar" })}
               </Link>
             </li>
             <li>
               <Link href={`${p}/news`} className="flex items-center gap-2 hover:text-white transition group">
                 <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true" />
-                {d("nav.news", { ar: "الأخبار", en: "News", fr: "Actualités", tr: "Haberler" })}
+                {d("nav.news", { ar: "الأخبار والميدان", en: "News", fr: "Actualités", tr: "Haberler" })}
               </Link>
             </li>
           </ul>
-        </div>
+        </nav>
 
-        {/* Legal */}
-        <div>
+        {/* Legal Policies Column */}
+        <nav aria-label="Legal & Transparency policies">
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
-            {d("footer.legal", { ar: "السياسات القانونية", en: "Legal Policies", fr: "Politiques Légales", tr: "Yasal Politikalar" })}
+            {d("footer.legal", { ar: "السياسات والشفافية", en: "Legal Policies", fr: "Politiques Légales", tr: "Yasal Politikalar" })}
           </h2>
           <ul className="space-y-2.5 text-sm text-white/80">
             {LEGAL_SLUGS.map(item => (
@@ -155,75 +164,77 @@ export default function SiteFooter({
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        {/* Contact */}
+        {/* Contact Column with Semantic Address Tag */}
         <div>
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
             {d("footer.contact_us", { ar: "تواصل معنا", en: "Contact Us", fr: "Nous Contacter", tr: "Bize Ulaşın" })}
           </h2>
-          <ul className="space-y-3 text-sm text-white/80">
-            {settings?.contactEmail && (
-              <li>
-                <a href={`mailto:${settings.contactEmail}`}
-                  aria-label={`Send email to ${settings.contactEmail}`}
-                  className="flex items-center gap-2 hover:text-white transition">
+          <address className="not-italic">
+            <ul className="space-y-3 text-sm text-white/80">
+              {settings?.contactEmail && (
+                <li>
+                  <a href={`mailto:${settings.contactEmail}`}
+                    aria-label={`Send email to ${settings.contactEmail}`}
+                    className="flex items-center gap-2 hover:text-white transition">
+                    <Icon name="mail" size={15} className="text-white/80 shrink-0" />
+                    {settings.contactEmail}
+                  </a>
+                </li>
+              )}
+              {settings?.contactPhone && (
+                <li>
+                  <a href={`tel:${settings.contactPhone}`}
+                    aria-label={`Call ${settings.contactPhone}`}
+                    className="flex items-center gap-2 hover:text-white transition">
+                    <Icon name="phone" size={15} className="text-white/80 shrink-0" />
+                    {settings.contactPhone}
+                  </a>
+                </li>
+              )}
+              {settings?.whatsappNumber && (
+                <li>
+                  <a href={`https://wa.me/${settings.whatsappNumber}`}
+                    target="_blank" rel="noopener noreferrer"
+                    aria-label="Contact us on WhatsApp"
+                    className="flex items-center gap-2 hover:text-white transition">
+                    <Icon name="message-circle" size={15} className="text-white/80 shrink-0" />
+                    WhatsApp
+                  </a>
+                </li>
+              )}
+              {!settings?.contactEmail && !settings?.contactPhone && (
+                <li className="flex items-center gap-2">
                   <Icon name="mail" size={15} className="text-white/80 shrink-0" />
-                  {settings.contactEmail}
-                </a>
-              </li>
-            )}
-            {settings?.contactPhone && (
-              <li>
-                <a href={`tel:${settings.contactPhone}`}
-                  aria-label={`Call ${settings.contactPhone}`}
-                  className="flex items-center gap-2 hover:text-white transition">
-                  <Icon name="phone" size={15} className="text-white/80 shrink-0" />
-                  {settings.contactPhone}
-                </a>
-              </li>
-            )}
-            {settings?.whatsappNumber && (
-              <li>
-                <a href={`https://wa.me/${settings.whatsappNumber}`}
-                  target="_blank" rel="noopener noreferrer"
-                  aria-label="Contact us on WhatsApp"
-                  className="flex items-center gap-2 hover:text-white transition">
-                  <Icon name="message-circle" size={15} className="text-white/80 shrink-0" />
-                  WhatsApp
-                </a>
-              </li>
-            )}
-            {!settings?.contactEmail && !settings?.contactPhone && (
-              <li className="flex items-center gap-2">
-                <Icon name="mail" size={15} className="text-white/80 shrink-0" />
-                info@forrelief.org
-              </li>
-            )}
-          </ul>
+                  info@forrelief.org
+                </li>
+              )}
+            </ul>
+          </address>
         </div>
       </div>
-{/* 🌟 Official Registered Entity Link (100% Free & Authoritative) */}
-<div className="border-t border-white/10 py-4 px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-white/70">
-  <div className="flex items-center gap-4 flex-wrap">
-    <span className="font-semibold text-white/90">
-      {d("footer.verified_on", { ar: "جهة مسجلة وموثقة:", en: "Verified Entity:", fr: "Entité Vérifiée:", tr: "Doğrulanmış Kurum:" })}
-    </span>
-    <a 
-      href="https://find-and-update.company-information.service.gov.uk/" 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 hover:text-white transition font-medium underline underline-offset-4"
-    >
-      🏛 GOV.UK Official Register
-    </a>
-  </div>
 
-  <span>
-    {settings?.copyrightText || `© ${new Date().getFullYear()} ${settings?.siteName || "4Relief"} — ${d("footer.rights", { ar: "جميع الحقوق محفوظة", en: "All Rights Reserved", fr: "Tous Droits Réservés", tr: "Tüm Hakları Saklıdır" })}`}
-  </span>
-</div>
-      
+      {/* Registered Entity & Verification Bar */}
+      <div className="border-t border-white/10 py-4 px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-white/70">
+        <div className="flex items-center gap-4 flex-wrap">
+          <span className="font-semibold text-white/90">
+            {d("footer.verified_on", { ar: "جهة مسجلة وموثقة:", en: "Verified Entity:", fr: "Entité Vérifiée:", tr: "Doğrulanmış Kurum:" })}
+          </span>
+          <a 
+            href="https://find-and-update.company-information.service.gov.uk/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 hover:text-white transition font-medium underline underline-offset-4"
+          >
+            🏛 GOV.UK Official Register
+          </a>
+        </div>
+
+        <span>
+          {settings?.copyrightText || `© ${new Date().getFullYear()} ${settings?.siteName || "4Relief"} — ${d("footer.rights", { ar: "جميع الحقوق محفوظة", en: "All Rights Reserved", fr: "Tous Droits Réservés", tr: "Tüm Hakları Saklıdır" })}`}
+        </span>
+      </div>
     </footer>
   );
 }
