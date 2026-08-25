@@ -31,20 +31,19 @@ const DEFAULT_DESCRIPTIONS: Record<string, string> = {
   tr: "Bağışçıları şeffaf yardım kampanyaları ve sürdürülebilir insani projelerle buluşturan bağımsız bir insani yardım kuruluşu.",
 };
 
-function cleanSchemaText(value: unknown): string {
-  if (typeof value !== "string") {
-    return "";
-  }
+const OPTIMIZED_HOME_TITLES: Record<string, string> = {
+  ar: "4Relief | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)",
+  en: "4Relief | International Humanitarian Foundation & Emergency Relief",
+  fr: "4Relief | Fondation Humanitaire Internationale & Secours d'Urgence",
+  tr: "4Relief | Uluslararası İnsani Yardım Vakfı",
+};
 
-  return value
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+function cleanSchemaText(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = params;
 
   const [dict, data] = await Promise.all([
@@ -54,8 +53,9 @@ export async function generateMetadata({
 
   const settings: any = data?.settings || {};
 
-  const siteName =
-    settings?.siteName || "4Relief Humanitarian Foundation";
+  const siteTitle =
+    OPTIMIZED_HOME_TITLES[locale] ||
+    OPTIMIZED_HOME_TITLES.en;
 
   const description =
     cleanSchemaText(settings?.footerDescription) ||
@@ -66,7 +66,7 @@ export async function generateMetadata({
   const currentUrl = `${SITE_URL}/${locale}`;
 
   return {
-    title: siteName,
+    title: siteTitle,
     description,
 
     alternates: {
@@ -76,14 +76,14 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: "4Relief",
-      title: siteName,
+      siteName: "4Relief Humanitarian Foundation",
+      title: siteTitle,
       description,
     },
 
     twitter: {
       card: "summary_large_image",
-      title: siteName,
+      title: siteTitle,
       description,
     },
   };
@@ -126,8 +126,7 @@ export default async function HomePage({ params }: PageProps) {
     (section: any) => section.type?.toLowerCase() === "faq"
   );
 
-  const rawFaqItems =
-    faqSection?.props?.items || faqSection?.props?.faqs || [];
+  const rawFaqItems = faqSection?.props?.items || faqSection?.props?.faqs || [];
 
   const faqItems = Array.isArray(rawFaqItems)
     ? rawFaqItems
@@ -151,11 +150,9 @@ export default async function HomePage({ params }: PageProps) {
   const isTr = locale === "tr";
   const isFr = locale === "fr";
 
-  // 🌟 معالجة التواريخ القياسية لتعزيز الموثوقية والحداثة
   const publishedDateISO = "2024-01-01T00:00:00.000Z";
   const updatedDateISO = new Date().toISOString();
 
-  // 🌟 نصوص إشارات E-E-A-T المترجمة
   const txtTrustBadge = isEn
     ? "Registered Independent NGO | 100% Financial Transparency"
     : isTr
@@ -188,9 +185,6 @@ export default async function HomePage({ params }: PageProps) {
     ? "Dernière mise à jour:"
     : "آخر تحديث:";
 
-  /*
-   * 🌟 Enriched Schema.org Graph including WebPage, NGO/Organization, and FAQPage
-   */
   const homeSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -198,26 +192,20 @@ export default async function HomePage({ params }: PageProps) {
         "@type": "WebPage",
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: settings?.siteName || "4Relief Humanitarian Foundation",
+        name: "4Relief | International Humanitarian Foundation & Emergency Relief",
         description,
         inLanguage: locale,
         datePublished: publishedDateISO,
         dateModified: updatedDateISO,
-        isPartOf: {
-          "@id": `${SITE_URL}/#website`,
-        },
-        about: {
-          "@id": `${SITE_URL}/#organization`,
-        },
-        publisher: {
-          "@id": `${SITE_URL}/#organization`,
-        },
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        about: { "@id": `${SITE_URL}/#organization` },
+        publisher: { "@id": `${SITE_URL}/#organization` },
       },
       {
         "@type": ["NGO", "Organization"],
         "@id": `${SITE_URL}/#organization`,
         name: "4Relief Humanitarian Foundation",
-        alternateName: "4Relief",
+        alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
         url: SITE_URL,
         logo: {
           "@type": "ImageObject",
@@ -261,7 +249,6 @@ export default async function HomePage({ params }: PageProps) {
 
   return (
     <>
-      {/* 🌟 Unified Enriched Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -269,7 +256,6 @@ export default async function HomePage({ params }: PageProps) {
         }}
       />
 
-      {/* 🌟 Top Visible E-E-A-T Trust Banner */}
       <section className="bg-slate-900 text-white py-2.5 px-6 text-xs border-b border-slate-800">
         <div className="max-w-screen-xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
@@ -292,30 +278,24 @@ export default async function HomePage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* Dynamic Sections Rendering */}
       {sections.map((section: any) => {
         const sectionData = section.props || {};
 
         switch (section.type?.toLowerCase()) {
           case "hero": {
-            const sliderSlides = rawSlides.map(
-              (slide: any, index: number) => {
-                if (index === 0 && section.props) {
-                  return {
-                    ...slide,
-                    image:
-                      sectionData.backgroundImage || slide.image,
-                    title_ar: sectionData.title || slide.title_ar,
-                    title_en: sectionData.title || slide.title_en,
-                    subtitle_ar:
-                      sectionData.subtitle || slide.subtitle_ar,
-                    subtitle_en:
-                      sectionData.subtitle || slide.subtitle_en,
-                  };
-                }
-                return slide;
+            const sliderSlides = rawSlides.map((slide: any, index: number) => {
+              if (index === 0 && section.props) {
+                return {
+                  ...slide,
+                  image: sectionData.backgroundImage || slide.image,
+                  title_ar: sectionData.title || slide.title_ar,
+                  title_en: sectionData.title || slide.title_en,
+                  subtitle_ar: sectionData.subtitle || slide.subtitle_ar,
+                  subtitle_en: sectionData.subtitle || slide.subtitle_en,
+                };
               }
-            );
+              return slide;
+            });
 
             return (
               <HeroSection

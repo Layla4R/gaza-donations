@@ -17,7 +17,7 @@ import {
 
 export const revalidate = 300;
 
-const SITE_URL = "https://forrelief.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({
@@ -34,28 +34,28 @@ const LOCALE_METADATA: Record<
   }
 > = {
   ar: {
-    title: "مؤسسة فور ريليف الإنسانية",
+    title: "4Relief | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)",
     description:
       "نبني جسور العطاء ونحوّل التعاطف الإنساني إلى أثر مستدام من خلال حملات ومشاريع إنسانية شفافة.",
     ogLocale: "ar_AR",
   },
 
   en: {
-    title: "4Relief Humanitarian Foundation",
+    title: "4Relief | International Humanitarian Foundation & Emergency Relief",
     description:
-      "4Relief connects donors with transparent humanitarian campaigns and sustainable relief projects.",
+      "4Relief connects donors with transparent humanitarian campaigns and sustainable relief projects worldwide.",
     ogLocale: "en_US",
   },
 
   fr: {
-    title: "Fondation Humanitaire 4Relief",
+    title: "4Relief | Fondation Humanitaire Internationale & Secours d'Urgence",
     description:
       "4Relief relie les donateurs à des campagnes humanitaires transparentes et à des projets durables.",
     ogLocale: "fr_FR",
   },
 
   tr: {
-    title: "4Relief İnsani Yardım Vakfı",
+    title: "4Relief | Uluslararası İnsani Yardım Vakfı",
     description:
       "4Relief, bağışçıları şeffaf insani yardım kampanyaları ve sürdürülebilir projelerle buluşturur.",
     ogLocale: "tr_TR",
@@ -78,7 +78,7 @@ export async function generateMetadata({
   return {
     title: {
       default: localeData.title,
-      template: `%s | 4Relief`,
+      template: `%s | 4Relief Humanitarian Foundation`,
     },
 
     description: localeData.description,
@@ -98,7 +98,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: "4Relief",
+      siteName: "4Relief Humanitarian Foundation",
       title: localeData.title,
       description: localeData.description,
       locale: localeData.ogLocale,
@@ -116,47 +116,12 @@ const SLUG_TO_NAV_LABEL: Record<
   string,
   Record<string, string>
 > = {
-  about: {
-    ar: "من نحن",
-    en: "About Us",
-    fr: "À Propos",
-    tr: "Hakkımızda",
-  },
-
-  "about-us": {
-    ar: "من نحن",
-    en: "About Us",
-    fr: "À Propos",
-    tr: "Hakkımızda",
-  },
-
-  contact: {
-    ar: "اتصل بنا",
-    en: "Contact",
-    fr: "Contact",
-    tr: "İletişim",
-  },
-
-  transparency: {
-    ar: "الشفافية",
-    en: "Transparency",
-    fr: "Transparence",
-    tr: "Şeffaflık",
-  },
-
-  "financial-transparency": {
-    ar: "الشفافية",
-    en: "Transparency",
-    fr: "Transparence",
-    tr: "Şeffaflık",
-  },
-
-  "how-we-work": {
-    ar: "كيف نعمل",
-    en: "How We Work",
-    fr: "Comment ça marche",
-    tr: "Nasıl Çalışırız",
-  },
+  about: { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
+  "about-us": { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
+  contact: { ar: "اتصل بنا", en: "Contact", fr: "Contact", tr: "İletişim" },
+  transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+  "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+  "how-we-work": { ar: "كيف نعمل", en: "How We Work", fr: "Comment ça marche", tr: "Nasıl Çalışırız" },
 };
 
 async function getSiteData(locale: string) {
@@ -170,90 +135,61 @@ async function getSiteData(locale: string) {
     };
   }
 
-  const [pagesRes, settings, dict] =
-    await Promise.all([
-      supabase
-        .from("Page")
-        .select("id,slug,title")
-        .eq("isPublished", true)
-        .eq("showInMenu", true)
-        .order("order", {
-          ascending: true,
-        })
-        .then((result) => result.data || []),
+  const [pagesRes, settings, dict] = await Promise.all([
+    supabase
+      .from("Page")
+      .select("id,slug,title")
+      .eq("isPublished", true)
+      .eq("showInMenu", true)
+      .order("order", { ascending: true })
+      .then((result) => result.data || []),
 
-      supabase
-        .from("SiteSettings")
-        .select("*")
-        .eq("id", "default")
-        .maybeSingle()
-        .then((result) => result.data),
+    supabase
+      .from("SiteSettings")
+      .select("*")
+      .eq("id", "default")
+      .maybeSingle()
+      .then((result) => result.data),
 
-      loadTranslations(locale),
-    ]);
+    loadTranslations(locale),
+  ]);
 
   let pages = pagesRes.map((page: any) => {
-    const labels =
-      SLUG_TO_NAV_LABEL[page.slug];
-
-    if (!labels) {
-      return page;
-    }
+    const labels = SLUG_TO_NAV_LABEL[page.slug];
+    if (!labels) return page;
 
     return {
       ...page,
-      title:
-        labels[locale] ||
-        labels.en ||
-        page.title,
+      title: labels[locale] || labels.en || page.title,
     };
   });
 
-  if (
-    locale !== "ar" &&
-    pagesRes.length > 0
-  ) {
+  if (locale !== "ar" && pagesRes.length > 0) {
     try {
-      const ids = pagesRes.map(
-        (page: any) => page.id
-      );
-
-      const { data: translations } =
-        await supabase
-          .from("PageTranslation")
-          .select("pageId,title")
-          .eq("locale", locale)
-          .in("pageId", ids);
+      const ids = pagesRes.map((page: any) => page.id);
+      const { data: translations } = await supabase
+        .from("PageTranslation")
+        .select("pageId,title")
+        .eq("locale", locale)
+        .in("pageId", ids);
 
       if (translations?.length) {
-        const translationMap: Record<
-          string,
-          string
-        > = {};
-
+        const translationMap: Record<string, string> = {};
         for (const translation of translations) {
-          translationMap[
-            translation.pageId
-          ] = translation.title;
+          translationMap[translation.pageId] = translation.title;
         }
 
         pages = pages.map((page: any) => ({
           ...page,
-          title:
-            translationMap[page.id] ||
-            page.title,
+          title: translationMap[page.id] || page.title,
         }));
       }
     } catch {
-      // Use original titles if translations cannot be loaded.
+      // Use original titles
     }
   }
 
-  return {
-    pages,
-    settings,
-    dict,
-  };
+  return { pages, settings, dict };
 }
 
 function safeJsonLd(data: unknown) {
@@ -261,43 +197,34 @@ function safeJsonLd(data: unknown) {
 }
 
 function buildSiteSchemas(locale: string, settings: any, localeData: { title: string; description: string }) {
-  const socialProfiles = [
-    settings?.facebookUrl,
-    settings?.twitterUrl,
-    settings?.instagramUrl,
-    settings?.linkedinUrl,
-    settings?.youtubeUrl,
-    settings?.tiktokUrl,
-  ].filter(Boolean);
-
   const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": ["NGO", "Organization"],
-  "@id": `${SITE_URL}/#organization`,
-  name: "4Relief Humanitarian Foundation",
-  alternateName: "4Relief",
-  url: SITE_URL,
-  logo: {
-    "@type": "ImageObject",
-    url: `${SITE_URL}/brand/logo.png`,
-  },
-  description: localeData.description,
-  sameAs: [
-    settings?.facebookUrl,
-    settings?.twitterUrl,
-    settings?.instagramUrl,
-    settings?.linkedinUrl,
-    settings?.youtubeUrl,
-    "https://find-and-update.company-information.service.gov.uk/", 
-  ].filter(Boolean),
-};
+    "@context": "https://schema.org",
+    "@type": ["NGO", "Organization"],
+    "@id": `${SITE_URL}/#organization`,
+    name: "4Relief Humanitarian Foundation",
+    alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+    url: SITE_URL,
+    logo: {
+      "@type": "ImageObject",
+      url: `${SITE_URL}/brand/logo.png`,
+    },
+    description: localeData.description,
+    sameAs: [
+      settings?.facebookUrl,
+      settings?.twitterUrl,
+      settings?.instagramUrl,
+      settings?.linkedinUrl,
+      settings?.youtubeUrl,
+      "https://find-and-update.company-information.service.gov.uk/",
+    ].filter(Boolean),
+  };
 
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": `${SITE_URL}/#website`,
     url: SITE_URL,
-    name: "4Relief",
+    name: "4Relief Humanitarian Foundation",
     inLanguage: locale,
     publisher: { "@id": `${SITE_URL}/#organization` },
   };
@@ -310,183 +237,72 @@ export default async function LocaleLayout({
   params: { locale },
 }: {
   children: React.ReactNode;
-  params: {
-    locale: string;
-  };
+  params: { locale: string };
 }) {
-  if (
-    !LOCALES.includes(
-      locale as Locale
-    )
-  ) {
+  if (!LOCALES.includes(locale as Locale)) {
     notFound();
   }
 
-  const {
-    pages,
-    settings,
-    dict,
-  } = await getSiteData(locale);
-
+  const { pages, settings, dict } = await getSiteData(locale);
   const localeData = LOCALE_METADATA[locale] || LOCALE_METADATA.en;
   const { organizationSchema, websiteSchema } = buildSiteSchemas(locale, settings, localeData);
-  const pixelId =
-    settings?.facebookPixelId;
-
-  const gaId =
-    settings?.gaMeasurementId;
+  const pixelId = settings?.facebookPixelId;
+  const gaId = settings?.gaMeasurementId;
 
   return (
     <div className="flex min-h-screen flex-col">
       {pixelId && (
-        <Script
-          id="meta-pixel"
-          strategy="afterInteractive"
-        >
+        <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
-            {
-              if(f.fbq)return;
-
-              n=f.fbq=function(){
-                n.callMethod
-                  ? n.callMethod.apply(n,arguments)
-                  : n.queue.push(arguments)
-              };
-
-              if(!f._fbq)f._fbq=n;
-
-              n.push=n;
-              n.loaded=!0;
-              n.version='2.0';
-              n.queue=[];
-
-              t=b.createElement(e);
-              t.async=!0;
-              t.src=v;
-
-              s=b.getElementsByTagName(e)[0];
-
-              s.parentNode.insertBefore(t,s);
-
-            }(
-              window,
-              document,
-              'script',
-              'https://connect.facebook.net/en_US/fbevents.js'
-            );
-
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
             fbq('consent', 'revoke');
-
-            fbq(
-              'init',
-              '${pixelId}'
-            );
-
-            fbq(
-              'track',
-              'PageView'
-            );
+            fbq('init', '${pixelId}');
+            fbq('track', 'PageView');
           `}
         </Script>
       )}
 
       {gaId && (
         <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-            strategy="afterInteractive"
-          />
-
-          <Script
-            id="google-analytics"
-            strategy="afterInteractive"
-          >
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
+          <Script id="google-analytics" strategy="afterInteractive">
             {`
-              window.dataLayer =
-                window.dataLayer || [];
-
-              function gtag(){
-                dataLayer.push(arguments);
-              }
-
-              gtag(
-                'js',
-                new Date()
-              );
-
-              gtag(
-                'config',
-                '${gaId}'
-              );
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${gaId}');
             `}
           </Script>
         </>
       )}
-     <script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }}
-/>
-<script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }}
-/>
-      <SiteHeader
-        navItems={pages}
-        settings={settings}
-        locale={locale}
-        dict={dict}
-        transparent={true}
-      />
 
-      <CookieBanner
-        locale={locale}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} />
 
-      <main className="flex-1 pt-20">
-        {children}
-      </main>
+      <SiteHeader navItems={pages} settings={settings} locale={locale} dict={dict} transparent={true} />
+      <CookieBanner locale={locale} />
 
-      <SiteFooter
-        navItems={pages}
-        settings={settings}
-        locale={locale}
-        dict={dict}
-      />
+      <main className="flex-1 pt-20">{children}</main>
 
-      <WhatsAppButton
-        phone={settings?.whatsappNumber}
-      />
+      <SiteFooter navItems={pages} settings={settings} locale={locale} dict={dict} />
+      <WhatsAppButton phone={settings?.whatsappNumber} />
 
       <SocialSidebar
-        whatsapp={
-          settings?.whatsappNumber
-        }
-        facebook={
-          settings?.facebookUrl
-        }
-        twitter={
-          settings?.twitterUrl
-        }
-        instagram={
-          settings?.instagramUrl
-        }
-        tiktok={
-          settings?.tiktokUrl
-        }
-        youtube={
-          settings?.youtubeUrl
-        }
-        linkedin={
-          settings?.linkedinUrl
-        }
-        position={
-          (
-            settings?.socialPosition as
-              | "left"
-              | "right"
-          ) || "right"
-        }
+        whatsapp={settings?.whatsappNumber}
+        facebook={settings?.facebookUrl}
+        twitter={settings?.twitterUrl}
+        instagram={settings?.instagramUrl}
+        tiktok={settings?.tiktokUrl}
+        youtube={settings?.youtubeUrl}
+        linkedin={settings?.linkedinUrl}
+        position={(settings?.socialPosition as "left" | "right") || "right"}
       />
     </div>
   );

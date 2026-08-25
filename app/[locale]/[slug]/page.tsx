@@ -6,15 +6,9 @@ import Icon from "@/components/icons";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import LegalPageContent from "@/components/site/LegalPageContent";
 
-import {
-  getPageBySlug,
-  getCampaignsLite,
-} from "@/lib/pageData";
+import { getPageBySlug, getCampaignsLite } from "@/lib/pageData";
 
-import {
-  LOCALES,
-  loadTranslations,
-} from "@/lib/i18n";
+import { LOCALES, loadTranslations } from "@/lib/i18n";
 
 import { PageSection } from "@/lib/blocks";
 import { getSupabaseOrNull } from "@/lib/supabase";
@@ -36,31 +30,104 @@ const LEGAL_SLUGS = [
 ];
 
 const LEGAL_TITLES: Record<string, Record<string, string>> = {
-  privacy: { ar: "سياسة الخصوصية", en: "Privacy Policy", fr: "Politique de Confidentialité", tr: "Gizlilik Politikası" },
-  terms: { ar: "الشروط والأحكام", en: "Terms & Conditions", fr: "Conditions d'Utilisation", tr: "Kullanım Koşulları" },
-  "refund-policy": { ar: "سياسة الاسترداد", en: "Refund Policy", fr: "Politique de Remboursement", tr: "İade Politikası" },
-  "cookie-policy": { ar: "سياسة ملفات تعريف الارتباط", en: "Cookie Policy", fr: "Politique des Cookies", tr: "Çerez Politikası" },
-  "aml-policy": { ar: "سياسة مكافحة غسيل الأموال", en: "Anti-Money Laundering Policy", fr: "Politique Anti-Blanchiment", tr: "Kara Para Aklamayla Mücadele" },
-  complaints: { ar: "الشكاوى", en: "Complaints Policy", fr: "Politique de Réclamations", tr: "Şikayet Politikası" },
-  "financial-transparency": { ar: "الشفافية المالية", en: "Financial Transparency", fr: "Transparence Financière", tr: "Mali Şeffaflık" },
-  "how-we-use-donations": { ar: "كيف نستخدم التبرعات", en: "How We Use Donations", fr: "Comment Nous Utilisons les Dons", tr: "Bağışları Nasıl Kullanıyoruz" },
+  privacy: {
+    ar: "سياسة الخصوصية",
+    en: "Privacy Policy",
+    fr: "Politique de Confidentialité",
+    tr: "Gizlilik Politikası",
+  },
+  terms: {
+    ar: "الشروط والأحكام",
+    en: "Terms & Conditions",
+    fr: "Conditions d'Utilisation",
+    tr: "Kullanım Koşulları",
+  },
+  "refund-policy": {
+    ar: "سياسة الاسترداد",
+    en: "Refund Policy",
+    fr: "Politique de Remboursement",
+    tr: "İade Politikası",
+  },
+  "cookie-policy": {
+    ar: "سياسة ملفات تعريف الارتباط",
+    en: "Cookie Policy",
+    fr: "Politique des Cookies",
+    tr: "Çerez Politikası",
+  },
+  "aml-policy": {
+    ar: "سياسة مكافحة غسيل الأموال",
+    en: "Anti-Money Laundering Policy",
+    fr: "Politique Anti-Blanchiment",
+    tr: "Kara Para Aklamayla Mücadele",
+  },
+  complaints: {
+    ar: "الشكاوى",
+    en: "Complaints Policy",
+    fr: "Politique de Réclamations",
+    tr: "Şikayet Politikası",
+  },
+  "financial-transparency": {
+    ar: "الشفافية المالية",
+    en: "Financial Transparency",
+    fr: "Transparence Financière",
+    tr: "Mali Şeffaflık",
+  },
+  "how-we-use-donations": {
+    ar: "كيف نستخدم التبرعات",
+    en: "How We Use Donations",
+    fr: "Comment Nous Utilisons les Dons",
+    tr: "Bağışları Nasıl Kullanıyoruz",
+  },
 };
 
 const LEGAL_SUBTITLES: Record<string, Record<string, string>> = {
-  privacy: { ar: "حماية بياناتك وخصوصيتك أولوية بالنسبة لنا.", en: "Protecting your personal data and privacy is our priority.", fr: "La protection de vos données personnelles et de votre vie privée est notre priorité.", tr: "Kişisel verilerinizi ve gizliliğinizi korumak önceliğimizdir." },
-  terms: { ar: "الشروط والأحكام المنظمة لاستخدام منصة 4Relief.", en: "The terms and conditions governing the use of the 4Relief platform.", fr: "Les conditions générales régissant l'utilisation de la plateforme 4Relief.", tr: "4Relief platformunun kullanımını düzenleyen hüküm ve koşullar." },
+  privacy: {
+    ar: "حماية بياناتك وخصوصيتك أولوية بالنسبة لنا.",
+    en: "Protecting your personal data and privacy is our priority.",
+    fr: "La protection de vos données personnelles et de votre vie privée est notre priorité.",
+    tr: "Kişisel verilerinizi ve gizliliğinizi korumak önceliğimizdir.",
+  },
+  terms: {
+    ar: "الشروط والأحكام المنظمة لاستخدام منصة 4Relief.",
+    en: "The terms and conditions governing the use of the 4Relief platform.",
+    fr: "Les conditions générales régissant l'utilisation de la plateforme 4Relief.",
+    tr: "4Relief platformunun kullanımını düzenleyen hüküm ve koşullar.",
+  },
 };
 
 const COMMON_PAGE_TITLES: Record<string, Record<string, string>> = {
-  about: { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
-  "about-us": { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
-  transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
-  contact: { ar: "اتصل بنا", en: "Contact Us", fr: "Contactez-nous", tr: "İletişim" },
+  about: {
+    ar: "من نحن | 4Relief Humanitarian Foundation",
+    en: "About Us | 4Relief Humanitarian Foundation",
+    fr: "À Propos | Fondation 4Relief",
+    tr: "Hakkımızda | 4Relief İnsani Yardım",
+  },
+  "about-us": {
+    ar: "من نحن | 4Relief Humanitarian Foundation",
+    en: "About Us | 4Relief Humanitarian Foundation",
+    fr: "À Propos | Fondation 4Relief",
+    tr: "Hakkımızda | 4Relief İnsani Yardım",
+  },
+  transparency: {
+    ar: "الشفافية والتقارير المالية | 4Relief",
+    en: "Financial Transparency | 4Relief Humanitarian Foundation",
+    fr: "Transparence Financière | Fondation 4Relief",
+    tr: "Mali Şeffaflık | 4Relief",
+  },
+  contact: {
+    ar: "اتصل بنا | 4Relief Humanitarian Foundation",
+    en: "Contact Us | 4Relief Humanitarian Foundation",
+    fr: "Contactez-nous | Fondation 4Relief",
+    tr: "İletişim | 4Relief",
+  },
 };
 
 function cleanText(value: unknown): string {
   if (typeof value !== "string") return "";
-  return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function getSchemaType(slug: string) {
@@ -80,9 +147,13 @@ export async function generateMetadata({
   if (!page) return {};
 
   const isLegalPage = LEGAL_SLUGS.includes(slug);
-  const title = isLegalPage
+  const baseTitle = isLegalPage
     ? LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.en || page.title
-    : page.title;
+    : COMMON_PAGE_TITLES[slug]?.[locale] || page.title;
+
+  const title = baseTitle.includes("4Relief")
+    ? baseTitle
+    : `${baseTitle} | 4Relief Humanitarian Foundation`;
 
   const description = cleanText(page.description) || title;
   const currentUrl = `${SITE_URL}/${locale}/${slug}`;
@@ -96,13 +167,13 @@ export async function generateMetadata({
         LOCALES.map((currentLocale) => [
           currentLocale,
           `${SITE_URL}/${currentLocale}/${slug}`,
-        ])
+        ]),
       ),
     },
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: "4Relief",
+      siteName: "4Relief Humanitarian Foundation",
       title,
       description,
     },
@@ -126,7 +197,9 @@ export default async function DynamicPage({
     supabase
       ? supabase
           .from("SiteSettings")
-          .select("primaryColor, accentColor, facebookUrl, twitterUrl, instagramUrl, linkedinUrl, youtubeUrl")
+          .select(
+            "primaryColor, accentColor, facebookUrl, twitterUrl, instagramUrl, linkedinUrl, youtubeUrl",
+          )
           .eq("id", "default")
           .maybeSingle()
       : Promise.resolve({ data: null }),
@@ -151,12 +224,10 @@ export default async function DynamicPage({
   }));
 
   const isLegalPage = LEGAL_SLUGS.includes(slug);
-  
-  // 🌟 تضمين الصفحات المؤسسية والشفافية لإظهار بار الثقة
-  const isTrustPage = 
-    slug === "about" || 
-    slug === "about-us" || 
-    slug === "transparency" || 
+  const isTrustPage =
+    slug === "about" ||
+    slug === "about-us" ||
+    slug === "transparency" ||
     slug === "financial-transparency";
 
   const hasCustomSections = !isLegalPage && sections.length > 0;
@@ -166,7 +237,10 @@ export default async function DynamicPage({
     : dict[`nav.${slug}`] || COMMON_PAGE_TITLES[slug]?.[locale] || page.title;
 
   const displaySubtitle = isLegalPage
-    ? LEGAL_SUBTITLES[slug]?.[locale] || LEGAL_SUBTITLES[slug]?.en || cleanText(page.description) || null
+    ? LEGAL_SUBTITLES[slug]?.[locale] ||
+      LEGAL_SUBTITLES[slug]?.en ||
+      cleanText(page.description) ||
+      null
     : cleanText(page.description) || null;
 
   const pageUrl = `${SITE_URL}/${locale}/${slug}`;
@@ -177,7 +251,6 @@ export default async function DynamicPage({
   const isTr = locale === "tr";
   const isFr = locale === "fr";
 
-  // Dynamic E-E-A-T & Organization Graph Schema
   const dynamicPageSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -185,7 +258,7 @@ export default async function DynamicPage({
         "@type": schemaType,
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: displayTitle,
+        name: `${displayTitle} | 4Relief Humanitarian Foundation`,
         description: displaySubtitle || displayTitle,
         inLanguage: locale,
         datePublished: (page as any).createdAt || "2026-01-01T00:00:00Z",
@@ -198,20 +271,30 @@ export default async function DynamicPage({
       ...(isTrustPage
         ? [
             {
-              "@type": "NGO",
+              "@type": ["NGO", "Organization"],
               "@id": `${SITE_URL}/#organization`,
               name: "4Relief Humanitarian Foundation",
-              alternateName: "4Relief",
+              alternateName: [
+                "4Relief",
+                "4Relief NGO",
+                "4Relief International Humanitarian Foundation",
+              ],
               url: SITE_URL,
               logo: `${SITE_URL}/brand/logo.png`,
               foundingDate: "2024",
-              knowsAbout: ["Humanitarian Aid", "Emergency Relief", "Financial Transparency", "Zakat"],
+              knowsAbout: [
+                "Humanitarian Aid",
+                "Emergency Relief",
+                "Financial Transparency",
+                "Zakat",
+              ],
               sameAs: [
                 appearance?.facebookUrl,
                 appearance?.twitterUrl,
                 appearance?.instagramUrl,
                 appearance?.linkedinUrl,
                 appearance?.youtubeUrl,
+                "https://find-and-update.company-information.service.gov.uk/",
               ].filter(Boolean),
             },
           ]
@@ -254,7 +337,6 @@ export default async function DynamicPage({
         }}
       />
 
-      {/* Header Banner */}
       <header
         className="relative overflow-hidden py-12 text-center transition-colors sm:py-20"
         style={{ backgroundColor: primaryColor }}
@@ -262,9 +344,14 @@ export default async function DynamicPage({
         <div className="absolute -bottom-20 -left-20 hidden h-80 w-80 rounded-full border border-white/10 sm:block" />
 
         <div className="relative mx-auto max-w-screen-xl px-6">
-          <span className="mb-4 inline-flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-[0.3em] text-white/70">
+          <span
+            className="mb-4 inline-flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-[0.3em] text-white/70"
+            suppressHydrationWarning
+          >
             <span className="inline-block h-px w-6 bg-white/40" />
-            4Relief Humanitarian Foundation
+            {isAr
+              ? "مؤسسة 4Relief الإنسانية"
+              : "4Relief Humanitarian Foundation"}
           </span>
 
           <h1 className="font-display text-2xl font-extrabold text-white sm:text-4xl md:text-5xl">
@@ -279,7 +366,6 @@ export default async function DynamicPage({
         </div>
       </header>
 
-      {/* 🌟 Direct Answer / E-E-A-T Summary Block for About & Transparency Pages */}
       {isTrustPage && (
         <section className="mx-auto max-w-screen-xl px-6 pt-8">
           <div className="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm">
@@ -288,36 +374,57 @@ export default async function DynamicPage({
             </div>
             <div className="flex-1">
               <span className="font-bold text-slate-900">
-                {isEn ? "Verified NGO Credentials & Transparency" : isTr ? "Doğrulanmış STK & Şeffaflık Bilgileri" : isFr ? "Accréditation ONG & Transparence" : "معلومات الاعتماد والترخيص والشفافية الرسمية"}
+                {isEn
+                  ? "Verified NGO Credentials & Transparency"
+                  : isTr
+                    ? "Doğrulanmış STK & Şeffaflık Bilgileri"
+                    : isFr
+                      ? "Accréditation ONG & Transparence"
+                      : "معلومات الاعتماد والترخيص والشفافية الرسمية"}
               </span>
               <p className="text-slate-500 text-xs">
-                {isEn ? "Registered Independent NGO | 100% Financial Governance" : "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%"}
+                {isEn
+                  ? "Registered Independent NGO | 100% Financial Governance"
+                  : "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%"}
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs sm:text-sm font-medium">
             <div>
-              <span className="block text-slate-700 text-s font-medium">{isEn ? "Founded" : "سنة التأسيس"}</span>
-              <strong className="text-slate-900">2026</strong>
+              <span className="block text-slate-700 text-s font-medium">
+                {isEn ? "Founded" : "سنة التأسيس"}
+              </span>
+              <strong className="text-slate-900">2024</strong>
             </div>
             <div>
-              <span className="block text-slate-700 text-s font-medium">{isEn ? "Legal Entity" : "الصفة القانونية"}</span>
-              <strong className="text-slate-900">{isEn ? "Registered NGO" : "منظمة غير ربحية (NGO)"}</strong>
+              <span className="block text-slate-700 text-s font-medium">
+                {isEn ? "Legal Entity" : "الصفة القانونية"}
+              </span>
+              <strong className="text-slate-900">
+                {isEn ? "Registered NGO" : "منظمة غير ربحية (NGO)"}
+              </strong>
             </div>
             <div>
-              <span className="block text-slate-700 text-s font-medium">{isEn ? "Transparency" : "الشفافية المالية"}</span>
-              <strong className="text-brand">100% {isEn ? "Audited" : "تقارير موثقة"}</strong>
+              <span className="block text-slate-700 text-s font-medium">
+                {isEn ? "Transparency" : "الشفافية المالية"}
+              </span>
+              <strong className="text-brand">
+                100% {isEn ? "Audited" : "تقارير موثقة"}
+              </strong>
             </div>
             <div>
-              <span className="block text-slate-700 text-s font-medium">{isEn ? "Coverage" : "النطاق الميداني"}</span>
-              <strong className="text-slate-900">12+ {isEn ? "Regions" : "دولة ومتأثر"}</strong>
+              <span className="block text-slate-700 text-s font-medium">
+                {isEn ? "Coverage" : "النطاق الميداني"}
+              </span>
+              <strong className="text-slate-900">
+                12+ {isEn ? "Regions" : "دولة ومتأثر"}
+              </strong>
             </div>
           </div>
         </section>
       )}
 
-      {/* Main CMS Sections Rendering */}
       <div className="bg-white py-6">
         {hasCustomSections ? (
           sections.map((section) => (
