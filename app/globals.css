@@ -1,36 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-sans: 'Tajawal', Tahoma, Arial, sans-serif;
-  --font-display: 'Cairo', Tahoma, Arial, sans-serif;
+  --font-sans: 'IBM Plex Sans Arabic', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'IBM Plex Sans Arabic', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-/* 🌟 تحسين المقروئية والتباين للـ Accessibility */
+/* 🌟 تطبيق خط IBM Plex Sans Arabic وضبط المقروئية والتباين */
 @layer base {
+  html[dir="rtl"],
+  html[dir="rtl"] body {
+    font-family: var(--font-sans) !important;
+    letter-spacing: normal !important;
+  }
+
+  html[dir="rtl"] * {
+    letter-spacing: normal !important;
+  }
+
   body {
     background-color: #F8FAFF;
-    color: #0F172A; /* Slate-900 بدلاً من الرمادي الباهت لزيادة التباين */
+    color: #0F172A;
     font-family: var(--font-sans);
-    font-weight: 500; /* سُمك متوسط يجعل العربية حادة وواضحة */
+    font-weight: 500;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   p {
-    color: #334155; /* Slate-700 ممتاز للفقرات والنصوص الفرعية */
-    font-weight: 600;
+    color: #334155;
+    font-weight: 500;
     line-height: 1.7;
   }
 
   h1, h2, h3, h4, h5, h6 {
     color: #0F172A;
     font-family: var(--font-display);
+    font-weight: 700;
   }
 }
 

@@ -12,12 +12,12 @@ const config: Config = {
         cream: "#F8FAFF",
         beige: "#EEF3FB",
         
-        // 🌟 جعل ألوان Brand ديناميكية تقرأ من متغيرات CSS
+        // 🌟 ألوان Brand الديناميكية
         brand: "var(--brand, #0069D2)",
         "brand-dark": "var(--brand-dark, #003C87)",
         "brand-light": "var(--brand-light, #4A9AE8)",
         
-        // 🌟 جعل ألوان Accent ديناميكية
+        // 🌟 ألوان Accent الديناميكية
         accent: "var(--accent, #F00F5A)",
         "accent-dark": "var(--accent-dark, #C3003C)",
         "accent-light": "var(--accent-light, #FF4D88)",
@@ -35,7 +35,6 @@ const config: Config = {
         dashbg: "#F4F7FD",
       },
       backgroundImage: {
-        // 🌟 تحديث التدرجات لتقرأ من المتغيرات الديناميكية أيضاً
         "accent-gradient": "linear-gradient(135deg, var(--accent, #F00F5A) 0%, var(--accent-light, #FF4D88) 100%)",
         "brand-gradient": "linear-gradient(135deg, var(--brand-dark, #003C87) 0%, var(--brand, #0069D2) 100%)",
         
@@ -43,8 +42,8 @@ const config: Config = {
         "sidebar-gradient": "linear-gradient(180deg, #0F1E3D 0%, #1A3366 100%)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Tahoma", "Arial", "sans-serif"],
-        display: ["var(--font-display)", "Tahoma", "Arial", "sans-serif"],
+        sans: ["var(--font-sans)", "IBM Plex Sans Arabic", "Tahoma", "Arial", "sans-serif"],
+        display: ["var(--font-display)", "IBM Plex Sans Arabic", "Tahoma", "Arial", "sans-serif"],
       },
       borderRadius: {
         xl2: "1.25rem",
@@ -53,4 +52,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;
