@@ -226,7 +226,7 @@ export default async function HomePage({ params }: PageProps) {
     JSON.stringify(data).replace(/</g, "\\u003c");
 
   return (
-    <>
+    <main suppressHydrationWarning>
       {/* 🌟 Unified Enriched Schema */}
       <script
         type="application/ld+json"
@@ -355,6 +355,6 @@ export default async function HomePage({ params }: PageProps) {
             return null;
         }
       })}
-    </>
+    </main>
   );
 }

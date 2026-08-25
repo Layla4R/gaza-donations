@@ -12,6 +12,7 @@ interface Achievement {
 
 function useCountUp(target: number, duration = 2200, started: boolean) {
   const [count, setCount] = useState(0);
+
   useEffect(() => {
     if (!started) return;
     const start = Date.now();
@@ -24,12 +25,19 @@ function useCountUp(target: number, duration = 2200, started: boolean) {
     }, 16);
     return () => clearInterval(timer);
   }, [target, duration, started]);
+
   return count;
 }
 
 function StatCard({ item, locale, started, primaryColor }: { item: Achievement; locale: string; started: boolean; primaryColor: string }) {
-  const count = useCountUp(item.value, 2200, started);
-  const loc = (["ar","en","fr","tr"].includes(locale) ? locale : "en") as "ar"|"en"|"fr"|"tr";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const count = useCountUp(item.value, 2200, started && mounted);
+  const loc = (["ar", "en", "fr", "tr"].includes(locale) ? locale : "en") as "ar" | "en" | "fr" | "tr";
   const label = item[`label_${loc}`] || item.label_ar;
   const desc = item[`desc_${loc}`] || item.desc_ar;
 
@@ -38,7 +46,7 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
   const formatCount = (n: number) => {
     if (item.value >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
     if (item.value >= 1000) return (n / 1000).toFixed(0) + "K";
-    return n.toLocaleString();
+    return String(n);
   };
 
   return (
@@ -47,13 +55,11 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
       onMouseLeave={() => setHovered(false)}
       className="group bg-white rounded-3xl border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center text-center relative overflow-hidden"
     >
-      {/* Top Subtle Line accent */}
       <div 
         className="absolute top-0 left-0 right-0 h-1 transition-colors duration-300" 
         style={{ backgroundColor: primaryColor, opacity: hovered ? 1 : 0.2 }}
       />
       
-      {/* Icon Badge */}
       <div 
         className="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-colors duration-300"
         style={{ 
@@ -64,7 +70,6 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
         <Icon name={item.icon || "heart"} size={22} />
       </div>
 
-      {/* Giant Stat Counter */}
       <div className="flex items-baseline justify-center gap-0.5 mb-2" dir="ltr">
         {(item.suffix === "%" || item.suffix === "+") && (
           <span className="font-display text-2xl lg:text-3xl font-extrabold" style={{ color: primaryColor }}>{item.suffix}</span>
@@ -73,8 +78,9 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
         <span 
           className="font-display text-4xl lg:text-5xl font-black tracking-tight text-slate-900 transition-colors"
           style={{ color: hovered ? primaryColor : undefined }}
+          suppressHydrationWarning
         >
-          {formatCount(count)}
+          {mounted ? formatCount(count) : formatCount(0)}
         </span>
         
         {item.suffix !== "%" && item.suffix !== "+" && item.suffix !== "" && (
@@ -82,7 +88,6 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
         )}
       </div>
 
-      {/* Label & Description */}
       <h3 className="font-display font-extrabold text-slate-900 text-base mb-1">{label}</h3>
       {desc && <p className="text-slate-500 text-xs leading-relaxed max-w-[200px]">{desc}</p>}
     </div>
@@ -148,9 +153,7 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
   return (
     <section ref={ref} className="py-6 bg-slate-50/60 border-t border-slate-100 relative overflow-hidden">
       <div className="max-w-screen-xl mx-auto px-6 relative z-10">
-        
-        {/* Section Heading */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <header className="text-center max-w-2xl mx-auto mb-16">
           <span 
             className="inline-flex items-center gap-2 font-semibold text-xs tracking-widest uppercase mb-3 px-3 py-1 rounded-full"
             style={{ backgroundColor: `${primary}15`, color: primary }}
@@ -164,17 +167,15 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
           <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
             {subtitle}
           </p>
-        </div>
+        </header>
 
-        {/* Stats Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {achievements.map((item, i) => (
             <StatCard key={i} item={item} locale={locale} started={started} primaryColor={primary} />
           ))}
         </div>
 
-        {/* Bottom Trust Badges Banner */}
-        <div className="mt-16 pt-8 border-t border-slate-200/60 flex flex-wrap justify-center gap-6 sm:gap-10">
+        <aside className="mt-16 pt-8 border-t border-slate-200/60 flex flex-wrap justify-center gap-6 sm:gap-10">
           {[
             { icon: "shield-check" as const, ar: "مؤسسة معتمدة ومرخصة", en: "Certified & Licensed NGO", fr: "ONG Certifiée", tr: "Sertifikalı STK" },
             { icon: "globe" as const, ar: "شراكات دولية موثوقة", en: "Trusted Global Partners", fr: "Partenaires Mondiaux", tr: "Güvenilir Ortaklar" },
@@ -192,8 +193,7 @@ export default function AchievementsSection({ locale, dict, totalRaised = 0, tot
               </span>
             </div>
           ))}
-        </div>
-
+        </aside>
       </div>
     </section>
   );

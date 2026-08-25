@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/icons";
 
 interface NewsletterProps {
@@ -13,6 +13,11 @@ interface NewsletterProps {
 export default function NewsletterSection({ locale, dict, primaryColor, accentColor, data }: NewsletterProps) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle"|"loading"|"success"|"error">("idle");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isRTL = locale === "ar";
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
@@ -26,7 +31,6 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
     "Bağışlarınızın etkisini ve insani kampanyalarımızın son haberlerini ilk öğrenen siz olun."
   );
 
-  // 🌟 الألوان الديناميكية
   const primary = primaryColor || "var(--color-brand, #0069D2)";
   const accent = accentColor || "var(--color-accent, #F00F5A)";
 
@@ -46,52 +50,59 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
   }
 
   return (
-    <section className="py-20 bg-slate-50/50 border-t border-slate-100">
+    <section 
+      aria-labelledby="newsletter-heading" 
+      className="py-20 bg-slate-50/50 border-t border-slate-100"
+      suppressHydrationWarning
+    >
       <div className="max-w-screen-xl mx-auto px-6">
         
-        {/* 🌟 Floating Container Colored by Primary Color */}
+        {/* Floating Container */}
         <div 
           className="relative overflow-hidden rounded-3xl p-8 sm:p-14 lg:p-16 shadow-2xl text-center transition-colors"
           style={{ backgroundColor: primary }}
+          suppressHydrationWarning
         >
           
-          {/* Decorative Subtle Light Effects */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+          {/* Decorative Blur Effects */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" aria-hidden="true" />
 
           <div className="relative z-10 max-w-2xl mx-auto">
-            {/* Icon Badge */}
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 border border-white/20 text-white mb-6 backdrop-blur-md shadow-sm">
-              <Icon name="mail" size={24} />
-            </div>
+            
+            {/* Header Section */}
+            <header className="mb-10">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 border border-white/20 text-white mb-6 backdrop-blur-md shadow-sm">
+                <Icon name="mail" size={24} />
+              </div>
 
-            {/* Eyebrow */}
-            <p className="text-white/70 font-semibold text-xs tracking-widest uppercase mb-3">
-              {t("newsletter.eyebrow", "ابقَ على تواصل", "Stay Connected", "Restez Connecté", "Bağlı Kalın")}
-            </p>
+              <span className="block text-white/70 font-semibold text-xs tracking-widest uppercase mb-3" suppressHydrationWarning>
+                {t("newsletter.eyebrow", "ابقَ على تواصل", "Stay Connected", "Restez Connecté", "Bağlı Kalın")}
+              </span>
 
-            {/* Title */}
-            <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-              {sectionTitle}
-            </h2>
+              <h2 id="newsletter-heading" className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight" suppressHydrationWarning>
+                {sectionTitle}
+              </h2>
 
-            {/* Subtitle */}
-            <p className="text-white/80 text-sm sm:text-base mb-10 leading-relaxed max-w-lg mx-auto">
-              {sectionSubtitle}
-            </p>
+              <p className="text-white/80 text-sm sm:text-base leading-relaxed max-w-lg mx-auto" suppressHydrationWarning>
+                {sectionSubtitle}
+              </p>
+            </header>
 
-            {/* Form Container */}
+            {/* Form Section */}
             {status === "success" ? (
               <div className="inline-flex items-center gap-3 bg-white/20 border border-white/30 text-white font-bold rounded-2xl px-6 py-3.5 text-sm backdrop-blur">
-                <div className="w-6 h-6 rounded-full bg-white text-slate-900 flex items-center justify-center shrink-0">
+                <span className="w-6 h-6 rounded-full bg-white text-slate-900 flex items-center justify-center shrink-0">
                   <Icon name="check" size={14} />
-                </div>
-                {t("newsletter.success",
-                  "شكراً! تم تسجيل بريدك بنجاح ✨",
-                  "Thank you! You're now subscribed ✨",
-                  "Merci ! Vous êtes maintenant abonné ✨",
-                  "Teşekkürler! Başarıyla abone oldunuz ✨"
-                )}
+                </span>
+                <span suppressHydrationWarning>
+                  {t("newsletter.success",
+                    "شكراً! تم تسجيل بريدك بنجاح ✨",
+                    "Thank you! You're now subscribed ✨",
+                    "Merci ! Vous êtes maintenant abonné ✨",
+                    "Teşekkürler! Başarıyla abone oldunuz ✨"
+                  )}
+                </span>
               </div>
             ) : (
               <form onSubmit={subscribe} className="max-w-md mx-auto">
@@ -104,11 +115,11 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       placeholder={t("newsletter.placeholder", "بريدك الإلكتروني...", "Your email address...", "Votre adresse email...", "E-posta adresiniz...")}
+                      aria-label={t("newsletter.placeholder", "بريدك الإلكتروني...", "Your email address...", "Votre adresse email...", "E-posta adresiniz...")}
                       className={`w-full bg-transparent text-slate-900 placeholder-slate-400 py-3 text-xs sm:text-sm font-medium focus:outline-none ${isRTL ? "pr-11 pl-4" : "pl-11 pr-4"}`}
                     />
                   </div>
 
-                  {/* Submit Button Using Accent Color */}
                   <button
                     type="submit"
                     disabled={status === "loading"}
@@ -119,7 +130,7 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
                       "..."
                     ) : (
                       <>
-                        <span>{t("newsletter.btn", "اشترك الآن", "Subscribe", "S'abonner", "Abone Ol")}</span>
+                        <span suppressHydrationWarning>{t("newsletter.btn", "اشترك الآن", "Subscribe", "S'abonner", "Abone Ol")}</span>
                         <Icon name="send" size={14} className={isRTL ? "rotate-180" : ""} />
                       </>
                     )}
@@ -129,20 +140,23 @@ export default function NewsletterSection({ locale, dict, primaryColor, accentCo
             )}
 
             {status === "error" && (
-              <p className="mt-3 text-red-200 text-xs font-medium">
+              <p className="mt-3 text-red-200 text-xs font-medium" suppressHydrationWarning>
                 {t("newsletter.error", "حدث خطأ، حاول مجدداً.", "Something went wrong, please try again.", "Une erreur s'est produite.", "Bir hata oluştu.")}
               </p>
             )}
 
-            {/* Trust Note */}
-            <p className="mt-6 text-white/80 text-[11px] flex items-center justify-center gap-1.5">
+            {/* Trust Note wrapped in Footer */}
+            <footer className="mt-6 text-white/80 text-[11px] flex items-center justify-center gap-1.5">
               <Icon name="shield-check" size={13} />
-              {t("newsletter.trust", "لن نشارك بريدك مع أي جهة. يمكنك إلغاء الاشتراك في أي وقت.",
-                "We'll never share your email. Unsubscribe anytime.",
-                "Nous ne partagerons jamais votre email. Désabonnez-vous à tout moment.",
-                "E-postanızı asla paylaşmayacağız. İstediğiniz zaman aboneliği iptal edebilirsiniz."
-              )}
-            </p>
+              <span suppressHydrationWarning>
+                {t("newsletter.trust", "لن نشارك بريدك مع أي جهة. يمكنك إلغاء الاشتراك في أي وقت.",
+                  "We'll never share your email. Unsubscribe anytime.",
+                  "Nous ne partagerons jamais votre email. Désabonnez-vous à tout moment.",
+                  "E-postanızı asla paylaşmayacağız. İstediğiniz zaman aboneliği iptal edebilirsiniz."
+                )}
+              </span>
+            </footer>
+
           </div>
 
         </div>

@@ -56,7 +56,7 @@ export default function AboutOverviewSection({ data, locale = "ar" }: Props) {
 
   return (
     <section className="py-12 sm:py-20 bg-slate-50/60 border-t border-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* 🌟 H2 Title formatted as direct query */}
         <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 mb-4 leading-snug max-w-4xl mx-auto">
@@ -82,7 +82,7 @@ export default function AboutOverviewSection({ data, locale = "ar" }: Props) {
                 className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 flex flex-col group text-start"
               >
                 {/* Image Container */}
-                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
+                <figure className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
                   {card.image ? (
                     <Image
                       src={card.image}
@@ -96,10 +96,10 @@ export default function AboutOverviewSection({ data, locale = "ar" }: Props) {
                       <Icon name={card.icon || "globe"} size={36} />
                     </div>
                   )}
-                  <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100 text-brand z-10">
+                  <figcaption className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100 text-brand z-10">
                     <Icon name={card.icon || "globe"} size={20} />
-                  </div>
-                </div>
+                  </figcaption>
+                </figure>
 
                 {/* Card Content */}
                 <div className="pt-8 pb-6 px-5 flex-1 flex flex-col items-center text-center">
@@ -115,7 +115,7 @@ export default function AboutOverviewSection({ data, locale = "ar" }: Props) {
           })}
         </div>
 
-      </div>
+      </header>
     </section>
   );
 }

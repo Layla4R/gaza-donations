@@ -29,7 +29,7 @@ export default function FaqSection({
         
         {/* Header */}
         {(title || subtitle) && (
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <header className="text-center max-w-2xl mx-auto mb-16">
             <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-widest uppercase mb-3 px-3 py-1 bg-brand/5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-brand" />
               {t(
@@ -52,13 +52,13 @@ export default function FaqSection({
                 {subtitle}
               </p>
             )}
-          </div>
+          </header>
         )}
 
-        {/* 🌟 Main Integrated Box Container for Perfect Vertical Alignment */}
+        {/* Semantic Description List (<dl>) Container for Perfect LLM Crawling */}
         {items.length > 0 && (
           <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-xl shadow-slate-200/40 w-full mb-10">
-            <div className="divide-y divide-slate-100">
+            <dl className="divide-y divide-slate-100 m-0 p-0">
               {items.map((item: any, i: number) => {
                 const isOpen = open === i;
                 const questionText = item.q || item.question || item.title;
@@ -69,58 +69,64 @@ export default function FaqSection({
                     key={i}
                     className="py-4 first:pt-0 last:pb-0 transition-colors"
                   >
-                    <button
-                      onClick={() => setOpen(isOpen ? null : i)}
-                      className="w-full flex items-center justify-between gap-4 py-3 text-start transition-colors group"
-                    >
-                      <span
-                        className={`font-display font-bold text-base sm:text-lg leading-snug transition-colors ${
-                          isOpen ? "text-brand" : "text-slate-900 group-hover:text-brand"
-                        }`}
+                    <dt>
+                      <button
+                        onClick={() => setOpen(isOpen ? null : i)}
+                        aria-expanded={isOpen}
+                        className="w-full flex items-center justify-between gap-4 py-3 text-start transition-colors group"
                       >
-                        {questionText}
-                      </span>
-
-                      {/* Toggle Icon */}
-                      <div
-                        className={`shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
-                          isOpen
-                            ? "bg-brand border-brand text-white rotate-180 shadow-sm"
-                            : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-brand/40 group-hover:text-brand"
-                        }`}
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                        <span
+                          className={`font-display font-bold text-base sm:text-lg leading-snug transition-colors ${
+                            isOpen ? "text-brand" : "text-slate-900 group-hover:text-brand"
+                          }`}
                         >
-                          <path d="m6 9 6 6 6-6" />
-                        </svg>
-                      </div>
-                    </button>
+                          {questionText}
+                        </span>
 
-                    {/* Collapsible Answer */}
+                        {/* Toggle Icon */}
+                        <div
+                          className={`shrink-0 w-8 h-8 rounded-full border flex items-center justify-center transition-all duration-300 ${
+                            isOpen
+                              ? "bg-brand border-brand text-white rotate-180 shadow-sm"
+                              : "border-slate-200 bg-slate-50 text-slate-500 group-hover:border-brand/40 group-hover:text-brand"
+                          }`}
+                        >
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="m6 9 6 6 6-6" />
+                          </svg>
+                        </div>
+                      </button>
+                    </dt>
+
+                    {/* Collapsible Answer wrapped in <dd> */}
                     {isOpen && (
-                      <div className="pt-2 pb-3 text-slate-600 text-sm sm:text-base leading-relaxed">
+                      <dd className="pt-2 pb-3 text-slate-600 text-sm sm:text-base leading-relaxed m-0">
                         <p className="text-slate-500 leading-loose">
                           {answerText}
                         </p>
-                      </div>
+                      </dd>
                     )}
                   </div>
                 );
               })}
-            </div>
+            </dl>
           </div>
         )}
 
-        {/* Bottom Help Banner aligned to container */}
-        <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 w-full">
+        {/* Bottom Help Banner wrapped in <aside> */}
+        <aside 
+          aria-label="Contact support" 
+          className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 w-full"
+        >
           <div className="text-start">
             <h4 className="text-slate-900 font-extrabold text-base sm:text-lg mb-1">
               {t(
@@ -156,7 +162,7 @@ export default function FaqSection({
               "Bize Ulaşın",
             )}
           </a>
-        </div>
+        </aside>
 
       </div>
     </section>

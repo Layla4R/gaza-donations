@@ -47,7 +47,7 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
         : "bg-white border-b border-line shadow-sm"
     }`}>
       {!isTransparent && (
-        <div className="h-1" style={{ background: settings?.accentColor
+        <div className="h-1" role="presentation" style={{ background: settings?.accentColor
           ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)`
           : "linear-gradient(135deg, #F00F5A, #FF4D88)"
         }} />
@@ -62,6 +62,7 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-7" aria-label="Main Navigation">
+          <ul className="flex items-center gap-7">
           {navItems.map(item => {
             const navKey = `nav.${item.slug}`;
             const translatedTitle = dict[navKey] || (
@@ -73,19 +74,26 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
             );
 
             return (
-              <Link key={item.slug}
-                href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
-                className={navLinkCls}>
-                {translatedTitle}
-              </Link>
+              <li key={item.slug}>
+                <Link
+                  href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
+                  className={navLinkCls}>
+                  {translatedTitle}
+                </Link>
+              </li>
             );
           })}
-          <Link href={`${p}/campaigns`} className={navLinkCls}>
-            {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
-          </Link>
-          <Link href={`${p}/news`} className={navLinkCls}>
-            {t("nav.news","الأخبار","News","Actualités","Haberler")}
-          </Link>
+          <li>
+            <Link href={`${p}/campaigns`} className={navLinkCls}>
+              {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
+            </Link>
+          </li>
+          <li>
+            <Link href={`${p}/news`} className={navLinkCls}>
+              {t("nav.news","الأخبار","News","Actualités","Haberler")}
+            </Link>
+          </li>
+          </ul>
         </nav>
 
         {/* Actions */}
@@ -120,9 +128,11 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
 
           {/* Mobile hamburger */}
           <button 
+            type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle mobile menu"
             aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
             className={`md:hidden p-2 rounded-xl transition ${isTransparent ? "text-white hover:bg-white/15" : "text-ink/70 hover:text-brand"}`}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               {mobileOpen
@@ -135,7 +145,8 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <nav className="md:hidden bg-white border-t border-line shadow-xl px-6 py-4 space-y-1" aria-label="Mobile Navigation">
+        <nav id="mobile-navigation" className="md:hidden bg-white border-t border-line shadow-xl px-6 py-4" aria-label="Mobile Navigation">
+          <ul className="space-y-1">
           {navItems.map(item => {
             const navKey = `nav.${item.slug}`;
             const translatedTitle = dict[navKey] || (
@@ -147,23 +158,32 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
             );
 
             return (
-              <Link key={item.slug}
-                href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 last:border-0 transition">
-                {translatedTitle}
-              </Link>
+              <li key={item.slug}>
+                <Link
+                  href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
+                  onClick={() => setMobileOpen(false)}
+                  className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 last:border-0 transition">
+                  {translatedTitle}
+                </Link>
+              </li>
             );
           })}
-          <Link href={`${p}/campaigns`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
-            {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
-          </Link>
-          <Link href={`${p}/news`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
-            {t("nav.news","الأخبار","News","Actualités","Haberler")}
-          </Link>
-          <Link href={`${p}/contact`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand transition">
-            {t("nav.contact","اتصل بنا","Contact","Contact","İletişim")}
-          </Link>
+          <li>
+            <Link href={`${p}/campaigns`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
+              {t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}
+            </Link>
+          </li>
+          <li>
+            <Link href={`${p}/news`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
+              {t("nav.news","الأخبار","News","Actualités","Haberler")}
+            </Link>
+          </li>
+          <li>
+            <Link href={`${p}/contact`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand transition">
+              {t("nav.contact","اتصل بنا","Contact","Contact","İletişim")}
+            </Link>
+          </li>
+          </ul>
         </nav>
       )}
     </header>
