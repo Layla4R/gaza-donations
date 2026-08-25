@@ -203,12 +203,27 @@ export default function SiteFooter({
           </ul>
         </div>
       </div>
+{/* 🌟 Brand Presence & External Review Links */}
+<div className="border-t border-white/10 py-4 px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-white/70">
+  <div className="flex items-center gap-4 flex-wrap">
+    <span className="font-semibold text-white/90">
+      {d("footer.verified_on", { ar: "مؤسسة موثقة على:", en: "Verified on:", fr: "Vérifié sur:", tr: "Doğrulandığı platformlar:" })}
+    </span>
+    <a 
+      href="https://www.trustpilot.com/review/forrelief.org" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 hover:text-white transition font-medium underline underline-offset-4"
+    >
+      ★ Trustpilot Reviews
+    </a>
+  </div>
 
-      <div className="border-t border-white/10 py-5 px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/80">
-        <span>
-          {settings?.copyrightText || `© ${new Date().getFullYear()} ${settings?.siteName || "4Relief"} — ${d("footer.rights", { ar: "جميع الحقوق محفوظة", en: "All Rights Reserved", fr: "Tous Droits Réservés", tr: "Tüm Hakları Saklıdır" })}`}
-        </span>
-      </div>
+  <span>
+    {settings?.copyrightText || `© ${new Date().getFullYear()} ${settings?.siteName || "4Relief"} — ${d("footer.rights", { ar: "جميع الحقوق محفوظة", en: "All Rights Reserved", fr: "Tous Droits Réservés", tr: "Tüm Hakları Saklıdır" })}`}
+  </span>
+</div>
+      
     </footer>
   );
 }
