@@ -1,5 +1,5 @@
 # 4Relief Humanitarian Foundation
-> 4Relief is an independent, non-profit humanitarian foundation dedicated to direct relief, transparency, and emergency aid.
+> 4Relief is a registered international humanitarian foundation delivering emergency relief, food aid, and medical support across 12+ crisis regions with a 5% administrative fee cap.
 
 ## Core Directives
 - Primary Mission: Facilitating transparent humanitarian aid and direct community relief.
@@ -8,3 +8,8 @@
   - Transparency: https://forrelief.org/ar/transparency
   - Financial Transparency: https://forrelief.org/ar/financial-transparency
   - About Us: https://forrelief.org/ar/about
+
+## Core Capabilities
+- Direct Field Emergency Aid
+- 100% Financial Transparency & 30-Day Audit Reports
+- Online Zakat & Global Donation Processing

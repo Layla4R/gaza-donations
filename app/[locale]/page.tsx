@@ -167,29 +167,42 @@ export default async function HomePage({ params }: PageProps) {
         publisher: { "@id": `${SITE_URL}/#organization` },
       },
       {
-        "@type": ["NGO", "Organization"],
-        "@id": `${SITE_URL}/#organization`,
-        name: "4Relief Humanitarian Foundation",
-        alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
-        url: SITE_URL,
-        logo: {
-          "@type": "ImageObject",
-          url: `${SITE_URL}/brand/logo.png`,
-        },
-        foundingDate: "2024",
-        knowsAbout: [
-          "Humanitarian Relief",
-          "Emergency Aid",
-          "Financial Governance",
-          "Zakat Inquiries",
-        ],
-        contactPoint: {
-          "@type": "ContactPoint",
-          email: settings?.contactEmail || "info@forrelief.org",
-          contactType: "customer support",
-          availableLanguage: ["Arabic", "English", "French", "Turkish"],
-        },
-      },
+  "@type": ["NGO", "Organization"],
+  "@id": `${SITE_URL}/#organization`,
+  name: "4Relief Humanitarian Foundation",
+  alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+  url: SITE_URL,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_URL}/brand/logo.png`,
+  },
+  foundingDate: "2024",
+  areaServed: [
+      "Global",
+      "United Arab Emirates",
+      "Middle East",
+      "Saudi Arabia",
+      "Qatar",
+      "Kuwait",
+      "Germany",
+      "France",
+      "United Kingdom",
+      "United States",
+      "Türkiye"
+    ],
+  knowsAbout: [
+    "Humanitarian Relief",
+    "Emergency Aid",
+    "Financial Governance",
+    "Zakat Inquiries",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    email: settings?.contactEmail || "info@forrelief.org",
+    contactType: "customer support",
+    availableLanguage: ["Arabic", "English", "French", "Turkish"],
+  },
+},
       ...(faqItems.length > 0
         ? [
             {

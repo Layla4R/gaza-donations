@@ -209,6 +209,19 @@ function buildSiteSchemas(locale: string, settings: any, localeData: { title: st
       url: `${SITE_URL}/brand/logo.png`,
     },
     description: localeData.description,
+    areaServed: [
+      "Global",
+      "United Arab Emirates",
+      "Middle East",
+      "Saudi Arabia",
+      "Qatar",
+      "Kuwait",
+      "Germany",
+      "France",
+      "United Kingdom",
+      "United States",
+      "Türkiye"
+    ],
     sameAs: [
       settings?.facebookUrl,
       settings?.twitterUrl,
