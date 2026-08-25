@@ -271,30 +271,26 @@ function buildSiteSchemas(locale: string, settings: any, localeData: { title: st
   ].filter(Boolean);
 
   const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": ["NGO", "Organization"],
-    "@id": `${SITE_URL}/#organization`,
-    name: "4Relief Humanitarian Foundation",
-    alternateName: "4Relief",
-    url: SITE_URL,
-    logo: {
-      "@type": "ImageObject",
-      url: `${SITE_URL}/brand/logo.png`,
-    },
-    description: localeData.description,
-    sameAs: [
-      ...socialProfiles,
-      settings?.trustpilotUrl || "https://www.trustpilot.com/review/forrelief.org",
-    ],
-    ...(settings?.whatsappNumber && {
-      contactPoint: {
-        "@type": "ContactPoint",
-        telephone: settings.whatsappNumber,
-        contactType: "customer support",
-        availableLanguage: ["Arabic", "English", "French", "Turkish"],
-      },
-    }),
-  };
+  "@context": "https://schema.org",
+  "@type": ["NGO", "Organization"],
+  "@id": `${SITE_URL}/#organization`,
+  name: "4Relief Humanitarian Foundation",
+  alternateName: "4Relief",
+  url: SITE_URL,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_URL}/brand/logo.png`,
+  },
+  description: localeData.description,
+  sameAs: [
+    settings?.facebookUrl,
+    settings?.twitterUrl,
+    settings?.instagramUrl,
+    settings?.linkedinUrl,
+    settings?.youtubeUrl,
+    "https://find-and-update.company-information.service.gov.uk/", 
+  ].filter(Boolean),
+};
 
   const websiteSchema = {
     "@context": "https://schema.org",
