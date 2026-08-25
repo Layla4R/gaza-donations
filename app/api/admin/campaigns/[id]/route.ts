@@ -31,6 +31,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     "title", "summary", "description", "category", "coverImage",
     "goalAmount", "raisedAmount", "defaultAmount", "country",
     "isActive", "isFeatured", "isZakatable",
+    "authorName", "authorRole", "publishedAt"
   ]) {
     if (body[key] !== undefined) data[key] = body[key];
   }
@@ -68,13 +69,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   }
 
   const supabase = getSupabase();
-  // Check for existing donations before deleting
-  // Check for any non-failed donations (COMPLETED or PENDING)
   const { count: completedCount } = await supabase.from("Donation").select("id", { count: "exact", head: true }).eq("campaignId", params.id).eq("status", "COMPLETED");
   if ((completedCount || 0) > 0) {
     return NextResponse.json({ error: `Cannot delete — this campaign has ${completedCount} completed donation(s). Deactivate it instead.` }, { status: 409 });
   }
-  // Mark any PENDING donations as FAILED before deleting
   await supabase.from("Donation").update({ status: "FAILED" }).eq("campaignId", params.id).eq("status", "PENDING");
   const { error } = await supabase.from("Campaign").delete().eq("id", params.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

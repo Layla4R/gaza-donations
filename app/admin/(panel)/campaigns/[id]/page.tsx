@@ -33,7 +33,7 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
           </Link>
           <div>
             <h1 className="font-display text-2xl font-extrabold text-ink">Edit Campaign</h1>
-            <p className="text-xs text-muted">Manage campaign settings, translations, and updates</p>
+            <p className="text-xs text-muted">Manage campaign settings, EEAT trust signals, translations, and updates</p>
           </div>
         </div>
         <a 
@@ -53,9 +53,11 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
         defaultAmount: campaign.defaultAmount, category: campaign.category,
         country: campaign.country, isActive: campaign.isActive,
         isFeatured: campaign.isFeatured, isZakatable: campaign.isZakatable,
+        authorName: campaign.authorName, authorRole: campaign.authorRole,
+        publishedAt: campaign.publishedAt,
       }} />
 
-      {/* Content Translations with Auto Translate Button */}
+      {/* Content Translations */}
       <CampaignTranslationsPanel
         campaignId={campaign.id}
         baseTitle={campaign.title}

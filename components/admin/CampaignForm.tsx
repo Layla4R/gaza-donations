@@ -10,6 +10,7 @@ interface CampaignData {
   description?: string; coverImage?: string; goalAmount?: number;
   defaultAmount?: number | null; category?: string; country?: string;
   isActive?: boolean; isFeatured?: boolean; isZakatable?: boolean;
+  authorName?: string; authorRole?: string; publishedAt?: string;
 }
 
 const CATEGORIES = ["food","medical","shelter","education","water","general"];
@@ -46,6 +47,9 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
     isActive: initial?.isActive ?? true,
     isFeatured: initial?.isFeatured ?? false,
     isZakatable: initial?.isZakatable ?? false,
+    authorName: initial?.authorName || "فريق الرقابة الميدانية والشفافية — 4Relief",
+    authorRole: initial?.authorRole || "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%",
+    publishedAt: initial?.publishedAt ? new Date(initial.publishedAt).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -126,7 +130,7 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
         <textarea value={form.description} onChange={e => upd("description", e.target.value)} rows={6} placeholder="Detailed campaign description..." className={`${inp} resize-y`} />
       </div>
 
-      {/* Category + Country + Goals (4 Column Responsive Grid) */}
+      {/* Category + Country + Goals */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div>
           <label className={lbl}>Category</label>
@@ -147,6 +151,28 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
         <div>
           <label className={lbl}>Default Amount ($)</label>
           <input type="number" min={0} value={form.defaultAmount} onChange={e => upd("defaultAmount", Number(e.target.value))} className={inp} />
+        </div>
+      </div>
+
+      {/* 🌟 E-E-A-T & AI Optimization Settings Section */}
+      <div className="p-5 rounded-2xl bg-slate-50 border border-line space-y-4">
+        <div className="flex items-center gap-2 text-ink font-bold text-sm">
+          <Icon name="shield-check" size={18} className="text-brand" />
+          <span>E-E-A-T & GEO Trust Signals (حقول الموثوقية للذكاء الاصطناعي)</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <label className={lbl}>Author / Audit Team (اسم الكاتب/الفريق)</label>
+            <input value={form.authorName} onChange={e => upd("authorName", e.target.value)} placeholder="e.g. فريق الرقابة الميدانية — 4Relief" className={inp} />
+          </div>
+          <div>
+            <label className={lbl}>Trust Badge / Role (شارة الاعتماد والترخيص)</label>
+            <input value={form.authorRole} onChange={e => upd("authorRole", e.target.value)} placeholder="e.g. منظمة إنسانية مسجلة ومستقلة" className={inp} />
+          </div>
+          <div>
+            <label className={lbl}>Publication Date (تاريخ النشر الصريح)</label>
+            <input type="datetime-local" value={form.publishedAt} onChange={e => upd("publishedAt", e.target.value)} className={inp} />
+          </div>
         </div>
       </div>
 
