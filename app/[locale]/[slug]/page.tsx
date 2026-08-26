@@ -369,7 +369,7 @@ export default async function DynamicPage({
                     "4Relief International Humanitarian Foundation",
                   ],
               url: siteUrl,
-              logo: `${siteUrl}${isDestekol ? "/brand/desekol_logo.jpeg" : "/brand/logo.png"}`,
+              logo: `${siteUrl}${isDestekol ? "/brand/desekol_logo.png" : "/brand/logo.png"}`,
               foundingDate: "2026",
               knowsAbout: [
                 "Humanitarian Aid",

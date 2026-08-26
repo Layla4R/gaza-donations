@@ -56,7 +56,7 @@ export default function SiteFooter({
     .map(([key, meta]) => ({ url: settings[key] as string, ...meta }));
 
   const logoSrc = isDestekol 
-    ? "/brand/desekol_logo.jpeg" 
+    ? "/brand/desekol_logo.png" 
     : (settings?.logoImage || "/brand/logo-horizontal-transparent.png");
 
   const logoText = isDestekol 

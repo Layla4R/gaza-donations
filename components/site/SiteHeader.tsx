@@ -58,7 +58,7 @@ export default function SiteHeader({
     (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
   const logoImage = isDestekol
-    ? "/brand/desekol_logo.jpeg"
+    ? "/brand/desekol_logo.png"
     : settings?.logoImage || "/brand/logo-horizontal-transparent.png";
 
   const logoText = isDestekol ? "Destekol" : settings?.logoText || "4Relief";

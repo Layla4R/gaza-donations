@@ -230,7 +230,7 @@ function buildSiteSchemas(
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: `${siteUrl}${isDestekol ? "/brand/desekol_logo.jpeg" : "/brand/logo.png"}`,
+      url: `${siteUrl}${isDestekol ? "/brand/desekol_logo.png" : "/brand/logo.png"}`,
     },
     description: localeData.description,
     areaServed: [
