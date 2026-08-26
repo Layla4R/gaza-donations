@@ -182,7 +182,7 @@ export default async function HomePage({ params }: PageProps) {
         url: SITE_URL,
         logo: {
           "@type": "ImageObject",
-          url: `${SITE_URL}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
+          url: `${SITE_URL}${isDestekol ? "/brand/desekol_logo.jpeg" : "/brand/logo.png"}`,
         },
         foundingDate: "2026",
         areaServed: [
