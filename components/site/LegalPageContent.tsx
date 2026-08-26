@@ -68,7 +68,7 @@ function PrivacyContent({ locale }: { locale: string }) {
       <Section title="Your Rights Under GDPR">
         <UL items={["Access your personal data","Correct inaccurate data","Request data deletion where permitted by law","Restrict data processing","Object to certain types of processing","Withdraw consent at any time","Request data portability","Lodge a complaint with the competent supervisory authority"]} />
       </Section>
-      <ContactCTA locale={locale} email="privacy@forrelief.org" label="Questions about your privacy? Our Data Protection Officer responds within 72 hours." />
+      <ContactCTA locale={locale} email="info@forrelief.org" label="Questions about your privacy? Our Data Protection Officer responds within 72 hours." />
     </>
   );
   if (locale === "fr") return (
@@ -82,7 +82,7 @@ function PrivacyContent({ locale }: { locale: string }) {
       <Section title="Vos Droits (RGPD)">
         <UL items={["Accéder à vos données personnelles","Corriger les données inexactes","Demander la suppression des données","Restreindre le traitement","Vous opposer à certains traitements","Retirer votre consentement à tout moment","Demander la portabilité des données","Déposer une plainte auprès de l'autorité compétente"]} />
       </Section>
-      <ContactCTA locale={locale} email="privacy@forrelief.org" label="Questions sur votre vie privée ? Notre DPO répond sous 72 heures." />
+      <ContactCTA locale={locale} email="info@forrelief.org" label="Questions sur votre vie privée ? Notre DPO répond sous 72 heures." />
     </>
   );
   if (locale === "tr") return (
@@ -96,7 +96,7 @@ function PrivacyContent({ locale }: { locale: string }) {
       <Section title="GDPR Kapsamındaki Haklarınız">
         <UL items={["Kişisel verilerinize erişim","Yanlış verilerin düzeltilmesi","Verilerin silinmesini talep etme","Veri işlemeyi kısıtlama","Belirli işlemlere itiraz etme","İstediğiniz zaman onayı geri çekme","Veri taşınabilirliği talep etme","Yetkili denetim makamına şikayette bulunma"]} />
       </Section>
-      <ContactCTA locale={locale} email="privacy@forrelief.org" label="Gizliliğiniz hakkında sorularınız mı var? Veri Koruma Yetkilimiz 72 saat içinde yanıt verir." />
+      <ContactCTA locale={locale} email="info@forrelief.org" label="Gizliliğiniz hakkında sorularınız mı var? Veri Koruma Yetkilimiz 72 saat içinde yanıt verir." />
     </>
   );
   return (
@@ -116,7 +116,7 @@ function PrivacyContent({ locale }: { locale: string }) {
       <Section title="حقوقكم وفقاً للائحة GDPR">
         <UL items={["الوصول إلى بياناتكم الشخصية","تصحيح البيانات غير الدقيقة","طلب حذف البيانات عندما يسمح القانون بذلك","تقييد معالجة البيانات","الاعتراض على بعض أنواع المعالجة","سحب الموافقة في أي وقت","طلب نقل البيانات إلى مزود آخر","تقديم شكوى إلى الجهة الرقابية المختصة"]} />
       </Section>
-      <ContactCTA locale={locale} email="privacy@forrelief.org" label="أسئلة حول خصوصيتك؟ مسؤول حماية البيانات يرد خلال 72 ساعة." />
+      <ContactCTA locale={locale} email="info@forrelief.org" label="أسئلة حول خصوصيتك؟ مسؤول حماية البيانات يرد خلال 72 ساعة." />
     </>
   );
 }
@@ -267,7 +267,7 @@ function CookieContent({ locale }: { locale: string }) {
       <Section title={d.s1t}><P>{d.s1}</P></Section>
       <Section title={d.s2t}><UL items={d.s2} /></Section>
       <Section title={d.s3t}><P>{d.s3}</P></Section>
-      <ContactCTA aria-label={`Send email to ${"privacy@forrelief.org"}`} locale={locale} email="privacy@forrelief.org" label={d.cta} />
+      <ContactCTA aria-label={`Send email to ${"info@forrelief.org"}`} locale={locale} email="info@forrelief.org" label={d.cta} />
     </>
   );
 }
@@ -337,7 +337,7 @@ function ComplaintsContent({ locale }: { locale: string }) {
     { label: { ar: "الاستفسارات العامة", en: "General Inquiries", fr: "Renseignements Généraux", tr: "Genel Sorular" }, email: "info@forrelief.org" },
     { label: { ar: "الشكاوى والملاحظات", en: "Complaints & Feedback", fr: "Réclamations", tr: "Şikayetler" }, email: "complaints@forrelief.org" },
     { label: { ar: "استرداد التبرعات", en: "Donation Refunds", fr: "Remboursements", tr: "İadeler" }, email: "refunds@forrelief.org" },
-    { label: { ar: "الخصوصية وحماية البيانات", en: "Privacy & Data", fr: "Confidentialité", tr: "Gizlilik" }, email: "privacy@forrelief.org" },
+    { label: { ar: "الخصوصية وحماية البيانات", en: "Privacy & Data", fr: "Confidentialité", tr: "Gizlilik" }, email: "info@forrelief.org" },
     { label: { ar: "الإبلاغ عن الاحتيال", en: "Report Fraud", fr: "Signaler une Fraude", tr: "Dolandırıcılık Bildirimi" }, email: "fraud@forrelief.org" },
     { label: { ar: "الشؤون القانونية", en: "Legal Affairs", fr: "Affaires Juridiques", tr: "Hukuki Konular" }, email: "info@forrelief.org" },
     { label: { ar: "الشراكات", en: "Partnerships", fr: "Partenariats", tr: "Ortaklıklar" }, email: "partners@forrelief.org" },
