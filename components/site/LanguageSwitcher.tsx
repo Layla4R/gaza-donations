@@ -1,15 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { LOCALES, LOCALE_NAMES, type Locale } from "@/i18n";
 import FlagIcon from "./FlagIcon";
 
 export default function LanguageSwitcher({ currentLocale, transparent = false }: { currentLocale: string; transparent?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [isDestekol, setIsDestekol] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const current = currentLocale as Locale;
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname.includes("destekol")) {
+      setIsDestekol(true);
+    }
+  }, []);
 
   function switchLocale(newLocale: Locale) {
     setOpen(false);
@@ -23,10 +30,14 @@ export default function LanguageSwitcher({ currentLocale, transparent = false }:
     }
     // base is now the clean path without any locale prefix
 
-    if (newLocale === "ar") {
-      // Arabic = no prefix (default)
+    // اللغة الافتراضية بدون بادئة تتغير بحسب الدومين
+    const defaultLocale = isDestekol ? "tr" : "ar";
+
+    if (newLocale === defaultLocale) {
+      // اللغة الافتراضية للدومين تفتح بدون بادئة
       router.push(base || "/");
     } else {
+      // باقي اللغات تضاف البادئة الخاصة بها صراحة (مثل /ar أو /en)
       router.push(`/${newLocale}${base === "/" ? "" : base}`);
     }
     router.refresh();
