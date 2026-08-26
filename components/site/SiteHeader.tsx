@@ -32,7 +32,6 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Transparent only when: homepage + transparent prop + not scrolled + mobile menu closed
   const isTransparent = canBeTransparent && !scrolled && !mobileOpen;
 
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
@@ -45,8 +44,6 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
   const logoText = isDestekol 
     ? "Destekol" 
     : (settings?.logoText || "4Relief");
-
-  console.log("SiteHeader settings:", settings);
 
   const navLinkCls = `text-sm font-semibold transition-colors hover:opacity-80 ${
     isTransparent ? "text-white" : "text-ink/70 hover:text-brand"
@@ -65,11 +62,11 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
         }} />
       )}
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
+      <div className="max-w-screen-xl mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
 
         {/* Logo */}
         <Link href={`${p}/`} className="flex items-center gap-2 shrink-0" aria-label={`${logoText} Home`}>
-          <Image src={logoImage} alt={logoText} width={175} height={70} className="h-11 w-auto object-contain" priority />
+          <Image src={logoImage} alt={logoText} width={175} height={70} className="h-8 sm:h-11 w-auto object-contain" priority />
         </Link>
 
         {/* Desktop Nav */}
@@ -80,7 +77,7 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
             const translatedTitle = dict[navKey] || (
               item.slug === "home" ? t("nav.home","الرئيسية","Home","Accueil","Ana Sayfa") :
               item.slug === "about" || item.slug === "about-us" ? t("nav.about","من نحن","About Us","À Propos","Hakkımızda") :
-              item.slug === "transparency" ? t("nav.transparency","الشفافية","Transparency","Transparence","Şeffaflık") :
+              item.slug === "transparency" ? t("nav.transparency","الشفافية","Transparency","Transparence","Şeffاflık") :
               item.slug === "contact" ? t("nav.contact","اتصل بنا","Contact","Contact","İletişim") :
               item.title
             );
@@ -109,21 +106,21 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <LanguageSwitcher currentLocale={locale} transparent={isTransparent} />
 
           {/* Cart */}
           <CartIcon prefix={p} transparent={isTransparent} />
 
-          {/* Account */}
+          {/* Account / Login - ظاهرة الآن على الموبايل والدسكتب */}
           <Link href={`${p}/account`}
             aria-label="User Account"
-            className={`hidden sm:flex items-center gap-1.5 text-sm font-semibold border rounded-xl px-3 py-2 transition ${
+            className={`flex items-center gap-1.5 text-xs sm:text-sm font-semibold border rounded-xl p-2 sm:px-3 sm:py-2 transition ${
               isTransparent
                 ? "border-white/30 text-white hover:bg-white/15"
                 : "border-line text-ink/70 hover:text-brand hover:border-brand"
             }`}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/>
             </svg>
             <span className="hidden lg:inline">{t("nav.account","حسابي","My Account","Mon Compte","Hesabım")}</span>
@@ -131,7 +128,7 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
 
           {/* Donate */}
           <Link href={`${p}/donate`}
-            className="font-bold rounded-xl px-5 py-2.5 text-sm shadow-lg transition-all hover:-translate-y-0.5 hover:opacity-90"
+            className="font-bold rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm shadow-lg transition-all hover:-translate-y-0.5 hover:opacity-90 shrink-0"
             style={{ background: settings?.accentColor
               ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)`
               : "linear-gradient(135deg,#F00F5A,#FF4D88)", color: "white" }}>
@@ -164,7 +161,7 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
             const translatedTitle = dict[navKey] || (
               item.slug === "home" ? t("nav.home","الرئيسية","Home","Accueil","Ana Sayfa") :
               item.slug === "about" || item.slug === "about-us" ? t("nav.about","من نحن","About Us","À Propos","Hakkımızda") :
-              item.slug === "transparency" ? t("nav.transparency","الشفافية","Transparency","Transparence","Şeffaflık") :
+              item.slug === "transparency" ? t("nav.transparency","الشفافية","Transparency","Transparence","Şeffاflık") :
               item.slug === "contact" ? t("nav.contact","اتصل بنا","Contact","Contact","İletişim") :
               item.title
             );
@@ -188,6 +185,12 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
           <li>
             <Link href={`${p}/news`} onClick={() => setMobileOpen(false)} className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition">
               {t("nav.news","الأخبار","News","Actualités","Haberler")}
+            </Link>
+          </li>
+          <li>
+            <Link href={`${p}/account`} onClick={() => setMobileOpen(false)} className="py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>
+              {t("nav.account","حسابي","My Account","Mon Compte","Hesabım")}
             </Link>
           </li>
           <li>

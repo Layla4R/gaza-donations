@@ -35,24 +35,20 @@ interface Props {
 }
 
 export default function CampaignsCarousel({
-  campaigns,
+  campaigns = [],
   locale,
   dict,
   data,
 }: Props) {
-  const [active, setActive] =
-    useState(0);
-
-  const [visibleCount, setVisibleCount] =
-    useState(3);
+  const [active, setActive] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   /*
    * Responsive visible cards
    */
   useEffect(() => {
     function handleResize() {
-      const width =
-        window.innerWidth;
+      const width = window.innerWidth;
 
       const nextCount =
         width < 640
@@ -61,23 +57,13 @@ export default function CampaignsCarousel({
             ? 2
             : 3;
 
-      setVisibleCount(
-        nextCount
-      );
+      setVisibleCount(nextCount);
     }
 
     handleResize();
 
-    window.addEventListener(
-      "resize",
-      handleResize
-    );
-
-    return () =>
-      window.removeEventListener(
-        "resize",
-        handleResize
-      );
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const t = (
@@ -99,55 +85,31 @@ export default function CampaignsCarousel({
     );
   };
 
+  const safeCampaigns = Array.isArray(campaigns) ? campaigns : [];
+
   /*
    * Limit
    */
   const limit = useMemo(() => {
-    const parsed =
-      Number.parseInt(
-        String(
-          data?.limit ?? ""
-        ),
-        10
-      );
+    const parsed = Number.parseInt(String(data?.limit ?? ""), 10);
 
-    if (
-      Number.isFinite(parsed) &&
-      parsed > 0
-    ) {
+    if (Number.isFinite(parsed) && parsed > 0) {
       return parsed;
     }
 
-    return campaigns.length;
-  }, [
-    data?.limit,
-    campaigns.length,
-  ]);
+    return safeCampaigns.length;
+  }, [data?.limit, safeCampaigns.length]);
 
-  const displayCampaigns =
-    campaigns.slice(
-      0,
-      limit
-    );
+  const displayCampaigns = safeCampaigns.slice(0, limit);
+  const total = displayCampaigns.length;
 
-  const total =
-    displayCampaigns.length;
-
-  const maxIdx = Math.max(
-    0,
-    total - visibleCount
-  );
+  const maxIdx = Math.max(0, total - visibleCount);
 
   /*
    * Keep active index valid
    */
   useEffect(() => {
-    setActive((value) =>
-      Math.min(
-        value,
-        maxIdx
-      )
-    );
+    setActive((value) => Math.min(value, maxIdx));
   }, [maxIdx]);
 
   if (total === 0) {
@@ -184,17 +146,10 @@ export default function CampaignsCarousel({
       "Bir Kampanya Seçin"
     );
 
-  const isRTL =
-    locale === "ar";
+  const isRTL = locale === "ar";
+  const prefix = locale === "ar" ? "" : `/${locale}`;
 
-  const prefix =
-    locale === "ar"
-      ? ""
-      : `/${locale}`;
-
-  const offsetPercentage =
-    active *
-    (100 / visibleCount);
+  const offsetPercentage = active * (100 / visibleCount);
 
   return (
     <section className="border-y border-slate-100 bg-slate-50/60 py-12">
@@ -224,13 +179,7 @@ export default function CampaignsCarousel({
             <button
               type="button"
               onClick={() =>
-                setActive(
-                  (value) =>
-                    Math.max(
-                      0,
-                      value - 1
-                    )
-                )
+                setActive((value) => Math.max(0, value - 1))
               }
               aria-label={t(
                 "campaigns.prev",
@@ -240,9 +189,7 @@ export default function CampaignsCarousel({
                 "Önceki"
               )}
               className={`absolute ${
-                isRTL
-                  ? "-right-2 sm:-right-4"
-                  : "-left-2 sm:-left-4"
+                isRTL ? "-right-2 sm:-right-4" : "-left-2 sm:-left-4"
               } top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-700 shadow-lg transition-all hover:border-brand hover:bg-brand hover:text-white`}
             >
               <svg
@@ -270,13 +217,7 @@ export default function CampaignsCarousel({
             <button
               type="button"
               onClick={() =>
-                setActive(
-                  (value) =>
-                    Math.min(
-                      maxIdx,
-                      value + 1
-                    )
-                )
+                setActive((value) => Math.min(maxIdx, value + 1))
               }
               aria-label={t(
                 "campaigns.next",
@@ -286,9 +227,7 @@ export default function CampaignsCarousel({
                 "Sonraki"
               )}
               className={`absolute ${
-                isRTL
-                  ? "-left-2 sm:-left-4"
-                  : "-right-2 sm:-right-4"
+                isRTL ? "-left-2 sm:-left-4" : "-right-2 sm:-right-4"
               } top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-100 bg-white text-slate-700 shadow-lg transition-all hover:border-brand hover:bg-brand hover:text-white`}
             >
               <svg
@@ -317,65 +256,33 @@ export default function CampaignsCarousel({
               className="flex transition-transform duration-500 ease-out"
               style={{
                 transform: `translateX(${
-                  isRTL
-                    ? offsetPercentage
-                    : -offsetPercentage
+                  isRTL ? offsetPercentage : -offsetPercentage
                 }%)`,
               }}
             >
-              {displayCampaigns.map(
-                (campaign) => (
-                  <div
-                    key={
-                      campaign.id ||
-                      campaign.slug
-                    }
-                    className="shrink-0 px-2 sm:px-3"
-                    style={{
-                      width: `${
-                        100 /
-                        visibleCount
-                      }%`,
-                    }}
-                  >
-                    <CampaignCard
-                      id={
-                        campaign.id
-                      }
-                      slug={
-                        campaign.slug
-                      }
-                      title={
-                        campaign.title
-                      }
-                      summary={
-                        campaign.summary
-                      }
-                      coverImage={
-                        campaign.coverImage
-                      }
-                      goalAmount={
-                        campaign.goalAmount
-                      }
-                      raisedAmount={
-                        campaign.raisedAmount
-                      }
-                      donorCount={
-                        campaign.donorCount
-                      }
-                      category={
-                        campaign.category
-                      }
-                      locale={
-                        locale
-                      }
-                      dict={
-                        dict
-                      }
-                    />
-                  </div>
-                )
-              )}
+              {displayCampaigns.map((campaign, idx) => (
+                <div
+                  key={campaign.id || campaign.slug || idx}
+                  className="w-full shrink-0 min-w-0 px-2 sm:px-3"
+                  style={{
+                    width: `${100 / visibleCount}%`,
+                  }}
+                >
+                  <CampaignCard
+                    id={campaign.id}
+                    slug={campaign.slug}
+                    title={campaign.title || ""}
+                    summary={campaign.summary || ""}
+                    coverImage={campaign.coverImage}
+                    goalAmount={campaign.goalAmount || 0}
+                    raisedAmount={campaign.raisedAmount || 0}
+                    donorCount={campaign.donorCount || 0}
+                    category={campaign.category}
+                    locale={locale}
+                    dict={dict}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -384,36 +291,21 @@ export default function CampaignsCarousel({
           {total > visibleCount && (
             <div className="mt-8 flex justify-center gap-2">
               {Array.from({
-                length:
-                  maxIdx + 1,
-              }).map(
-                (_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() =>
-                      setActive(
-                        index
-                      )
-                    }
-                    aria-label={`Go to slide page ${
-                      index + 1
-                    }`}
-                    aria-current={
-                      index ===
-                      active
-                        ? "true"
-                        : undefined
-                    }
-                    className={`rounded-full transition-all ${
-                      index ===
-                      active
-                        ? "h-2.5 w-8 bg-brand"
-                        : "h-2.5 w-2.5 bg-slate-200 hover:bg-brand/40"
-                    }`}
-                  />
-                )
-              )}
+                length: maxIdx + 1,
+              }).map((_, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setActive(index)}
+                  aria-label={`Go to slide page ${index + 1}`}
+                  aria-current={index === active ? "true" : undefined}
+                  className={`rounded-full transition-all ${
+                    index === active
+                      ? "h-2.5 w-8 bg-brand"
+                      : "h-2.5 w-2.5 bg-slate-200 hover:bg-brand/40"
+                  }`}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -441,17 +333,9 @@ export default function CampaignsCarousel({
             )}
 
             <Icon
-              name={
-                isRTL
-                  ? "arrow-left"
-                  : "arrow-down"
-              }
+              name={isRTL ? "arrow-left" : "arrow-down"}
               size={16}
-              className={
-                isRTL
-                  ? ""
-                  : "-rotate-90"
-              }
+              className={isRTL ? "" : "-rotate-90"}
             />
           </Link>
         </div>
