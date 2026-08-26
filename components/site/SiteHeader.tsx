@@ -15,12 +15,17 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDestekol, setIsDestekol] = useState(false);
 
   // Only show transparent on homepage
   const isHomePage = pathname === "/" || pathname === `/${locale}` || pathname === `/${locale}/`;
   const canBeTransparent = transparent && isHomePage;
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname.includes("destekol")) {
+      setIsDestekol(true);
+    }
+
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -33,8 +38,15 @@ export default function SiteHeader({ navItems, settings, locale, dict, transpare
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
-  const logoImage = settings?.logoImage || "/brand/logo-horizontal-transparent.png";
-  const logoText = settings?.logoText || "4Relief";
+  const logoImage = isDestekol 
+    ? "/brand/destekol_logo.png" 
+    : (settings?.logoImage || "/brand/logo-horizontal-transparent.png");
+
+  const logoText = isDestekol 
+    ? "Destekol" 
+    : (settings?.logoText || "4Relief");
+
+  console.log("SiteHeader settings:", settings);
 
   const navLinkCls = `text-sm font-semibold transition-colors hover:opacity-80 ${
     isTransparent ? "text-white" : "text-ink/70 hover:text-brand"
