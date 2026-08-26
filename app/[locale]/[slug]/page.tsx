@@ -97,6 +97,63 @@ const LEGAL_TITLES: Record<string, Record<string, string>> = {
   },
 };
 
+const TRUST_TRANSLATIONS: Record<string, Record<string, string>> = {
+  verifiedTitle: {
+    ar: "معلومات الاعتماد والترخيص والشفافية الرسمية",
+    en: "Verified NGO Credentials & Transparency",
+    tr: "Doğrulanmış STK & Şeffaflık Bilgileri",
+    fr: "Accréditation ONG & Transparence",
+  },
+  verifiedSubtitle: {
+    ar: "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%",
+    en: "Registered Independent NGO | 100% Financial Governance",
+    tr: "Kayıtlı Bağımsız STK | %100 Mali Şeffaflık ve Denetim",
+    fr: "ONG Indépendante Enregistrée | Gouvernance Financière 100%",
+  },
+  foundedLabel: {
+    ar: "سنة التأسيس",
+    en: "Founded",
+    tr: "Kuruluş Yılı",
+    fr: "Fondée en",
+  },
+  legalLabel: {
+    ar: "الصفة القانونية",
+    en: "Legal Entity",
+    tr: "Yasal Statü",
+    fr: "Statut Juridique",
+  },
+  legalValue: {
+    ar: "منظمة غير ربحية (NGO)",
+    en: "Registered NGO",
+    tr: "Kayıtlı STK / Vakıf",
+    fr: "ONG Non Lucrative",
+  },
+  transparencyLabel: {
+    ar: "الشفافية المالية",
+    en: "Financial Transparency",
+    tr: "Mali Şeffaflık",
+    fr: "Transparence Financière",
+  },
+  transparencyValue: {
+    ar: "100% تقارير موثقة",
+    en: "100% Audited",
+    tr: "%100 Denetlenmiş",
+    fr: "100% Audité",
+  },
+  coverageLabel: {
+    ar: "النطاق الميداني",
+    en: "Coverage",
+    tr: "Saha Kapsamı",
+    fr: "Couverture Terrain",
+  },
+  coverageValue: {
+    ar: "12+ دولة ومتأثر",
+    en: "12+ Regions",
+    tr: "12+ Bölge ve Ülke",
+    fr: "12+ Régions",
+  },
+};
+
 function getLegalSubtitle(slug: string, locale: string, brandName: string): string | null {
   const subtitles: Record<string, Record<string, string>> = {
     privacy: {
@@ -277,9 +334,9 @@ export default async function DynamicPage({
   const schemaType = getSchemaType(slug);
 
   const isAr = locale === "ar";
-  const isEn = locale === "en";
-  const isTr = locale === "tr";
-  const isFr = locale === "fr";
+
+  const tTrust = (key: string) =>
+    TRUST_TRANSLATIONS[key]?.[locale] || TRUST_TRANSLATIONS[key]?.en || "";
 
   const dynamicPageSchema = {
     "@context": "https://schema.org",
@@ -406,18 +463,10 @@ export default async function DynamicPage({
             </div>
             <div className="flex-1">
               <span className="font-bold text-slate-900">
-                {isEn
-                  ? "Verified NGO Credentials & Transparency"
-                  : isTr
-                    ? "Doğrulanmış STK & Şeffaflık Bilgileri"
-                    : isFr
-                      ? "Accréditation ONG & Transparence"
-                      : "معلومات الاعتماد والترخيص والشفافية الرسمية"}
+                {tTrust("verifiedTitle")}
               </span>
               <p className="text-slate-500 text-xs">
-                {isEn
-                  ? "Registered Independent NGO | 100% Financial Governance"
-                  : "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%"}
+                {tTrust("verifiedSubtitle")}
               </p>
             </div>
           </div>
@@ -425,32 +474,32 @@ export default async function DynamicPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs sm:text-sm font-medium">
             <div>
               <span className="block text-slate-700 text-s font-medium">
-                {isEn ? "Founded" : "سنة التأسيس"}
+                {tTrust("foundedLabel")}
               </span>
               <strong className="text-slate-900">2026</strong>
             </div>
             <div>
               <span className="block text-slate-700 text-s font-medium">
-                {isEn ? "Legal Entity" : "الصفة القانونية"}
+                {tTrust("legalLabel")}
               </span>
               <strong className="text-slate-900">
-                {isEn ? "Registered NGO" : "منظمة غير ربحية (NGO)"}
+                {tTrust("legalValue")}
               </strong>
             </div>
             <div>
               <span className="block text-slate-700 text-s font-medium">
-                {isEn ? "Transparency" : "الشفافية المالية"}
+                {tTrust("transparencyLabel")}
               </span>
               <strong className="text-brand">
-                100% {isEn ? "Audited" : "تقارير موثقة"}
+                {tTrust("transparencyValue")}
               </strong>
             </div>
             <div>
               <span className="block text-slate-700 text-s font-medium">
-                {isEn ? "Coverage" : "النطاق الميداني"}
+                {tTrust("coverageLabel")}
               </span>
               <strong className="text-slate-900">
-                12+ {isEn ? "Regions" : "دولة ومتأثر"}
+                {tTrust("coverageValue")}
               </strong>
             </div>
           </div>
