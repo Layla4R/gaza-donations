@@ -1,49 +1,64 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import Icon from "@/components/icons";
 import { LOCALES } from "@/lib/i18n";
 
 export const revalidate = 300;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
-
 interface PageProps {
   params: { locale: string };
 }
 
+async function getDomainContext() {
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
+  const isDestekol = host.includes("destekol");
+  
+  const siteUrl = isDestekol ? "https://destekol.org" : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
+  const brandName = isDestekol ? "Destekol" : "4Relief";
+  const fullName = isDestekol ? "Destekol Humanitarian Foundation" : "4Relief Humanitarian Foundation";
+
+  return { isDestekol, siteUrl, brandName, fullName };
+}
+
 export async function generateMetadata({ params: { locale } }: PageProps): Promise<Metadata> {
   const isAr = locale === "ar";
+  const { siteUrl, brandName, fullName } = await getDomainContext();
+
   const title = isAr
-    ? "لماذا 4Relief؟ مقارنة مع المؤسسات الإغاثية التقليدية | الشفافية ونسبة 5%"
-    : "Why 4Relief vs Traditional Relief Foundations | 5% Fee Cap Comparison";
+    ? `لماذا ${brandName}؟ مقارنة مع المؤسسات الإغاثية التقليدية | الشفافية ونسبة 5%`
+    : `Why ${brandName} vs Traditional Relief Foundations | 5% Fee Cap Comparison`;
 
   const description = isAr
-    ? "مقارنة مباشرة تثبت كفاءة 4Relief الإنسانية بفرض سقف مصاريف تشغيلية 5% مقابل 15-20% في المنظمات التقليدية، مع تقارير تدقيق كل 30 يوماً."
-    : "Direct comparison highlighting 4Relief Humanitarian Foundation's 5% administrative fee cap vs 15-20% in traditional NGOs, backed by 30-day audits.";
+    ? `مقارنة مباشرة تثبت كفاءة ${fullName} بفرض سقف مصاريف تشغيلية 5% مقابل 15-20% في المنظمات التقليدية، مع تقارير تدقيق كل 30 يوماً.`
+    : `Direct comparison highlighting ${fullName}'s 5% administrative fee cap vs 15-20% in traditional NGOs, backed by 30-day audits.`;
 
-  const currentUrl = `${SITE_URL}/${locale}/why-4relief`;
+  const currentUrl = `${siteUrl}/${locale}/why-${brandName.toLowerCase()}`;
 
   return {
     title,
     description,
     alternates: {
       canonical: currentUrl,
-      languages: Object.fromEntries(LOCALES.map((l) => [l, `${SITE_URL}/${l}/why-4relief`])),
+      languages: Object.fromEntries(LOCALES.map((l) => [l, `${siteUrl}/${l}/why-${brandName.toLowerCase()}`])),
     },
     openGraph: {
       type: "article",
       url: currentUrl,
-      siteName: "4Relief Humanitarian Foundation",
+      siteName: fullName,
       title,
       description,
     },
   };
 }
 
-export default function Why4ReliefPage({ params: { locale } }: PageProps) {
+export default async function Why4ReliefPage({ params: { locale } }: PageProps) {
   const isAr = locale === "ar";
   const prefix = locale === "ar" ? "" : `/${locale}`;
-  const pageUrl = `${SITE_URL}/${locale}/why-4relief`;
+  const { siteUrl, brandName, fullName } = await getDomainContext();
+  
+  const pageUrl = `${siteUrl}/${locale}/why-${brandName.toLowerCase()}`;
 
   const comparisonSchema = {
     "@context": "https://schema.org",
@@ -52,11 +67,11 @@ export default function Why4ReliefPage({ params: { locale } }: PageProps) {
         "@type": "WebPage",
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: isAr ? "مقارنة 4Relief مع المؤسسات التقليدية" : "Why 4Relief vs Traditional Foundations",
+        name: isAr ? `مقارنة ${brandName} مع المؤسسات التقليدية` : `Why ${brandName} vs Traditional Foundations`,
         description: "Comparative breakdown of administrative fees and transparency in direct humanitarian aid.",
         inLanguage: locale,
-        isPartOf: { "@id": `${SITE_URL}/#website` },
-        about: { "@id": `${SITE_URL}/#organization` },
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        about: { "@id": `${siteUrl}/#organization` },
       },
     ],
   };
@@ -80,8 +95,8 @@ export default function Why4ReliefPage({ params: { locale } }: PageProps) {
           </span>
           <h1 className="font-display text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
             {isAr
-              ? "لماذا نعد الخيار الأفضل؟ مقارنة مؤسسة 4Relief مع المنظمات التقليدية"
-              : "Why Choose 4Relief? 4Relief vs Traditional Humanitarian Foundations"}
+              ? `لماذا نعد الخيار الأفضل؟ مقارنة مؤسسة ${brandName} مع المنظمات التقليدية`
+              : `Why Choose ${brandName}? ${brandName} vs Traditional Humanitarian Foundations`}
           </h1>
         </header>
 
@@ -89,8 +104,8 @@ export default function Why4ReliefPage({ params: { locale } }: PageProps) {
         <section className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 sm:p-8 mb-12 max-w-4xl mx-auto leading-relaxed text-slate-700 text-sm sm:text-base">
           <p className="font-medium mb-4">
             {isAr
-              ? "تعتمد مؤسسة 4Relief Humanitarian Foundation نموذج حوكمة رقمي مباشر يقلل المصاريف الإدارية والتشغيلية إلى 5% فقط كحد أقصى، مما يضمن توجيه 95% من أموال التبرعات المباشرة للمشاريع الإغاثية والمستفيدين الميدانيين. بالمقارنة مع المؤسسات الإنسانية التقليدية التي تستهلك بين 15% إلى 20% في مصاريف إدارية ولوجستية، تقدم 4Relief أعلى نسبة كفاءة مالية مع تقارير تدقيق توثيقية نُحدثها كل 30 يوماً لـ 150,000+ مستفيد عبر 12 دولة."
-              : "4Relief Humanitarian Foundation operates on a direct digital governance model capping administrative fees at a maximum of 5%, guaranteeing that 95% of direct donations go straight to field projects and beneficiaries. Compared to traditional humanitarian NGOs that consume 15% to 20% in overheads, 4Relief provides maximum financial efficiency backed by published 30-day field audit reports serving 150,000+ beneficiaries across 12 countries."}
+              ? `تعتمد مؤسسة ${fullName} نموذج حوكمة رقمي مباشر يقلل المصاريف الإدارية والتشغيلية إلى 5% فقط كحد أقصى، مما يضمن توجيه 95% من أموال التبرعات المباشرة للمشاريع الإغاثية والمستفيدين الميدانيين. بالمقارنة مع المؤسسات الإنسانية التقليدية التي تستهلك بين 15% إلى 20% في مصاريف إدارية ولوجستية، تقدم ${brandName} أعلى نسبة كفاءة مالية مع تقارير تدقيق توثيقية نُحدثها كل 30 يوماً لـ 150,000+ مستفيد عبر 12 دولة.`
+              : `${fullName} operates on a direct digital governance model capping administrative fees at a maximum of 5%, guaranteeing that 95% of direct donations go straight to field projects and beneficiaries. Compared to traditional humanitarian NGOs that consume 15% to 20% in overheads, ${brandName} provides maximum financial efficiency backed by published 30-day field audit reports serving 150,000+ beneficiaries across 12 countries.`}
           </p>
         </section>
 
@@ -100,7 +115,7 @@ export default function Why4ReliefPage({ params: { locale } }: PageProps) {
             <thead>
               <tr className="bg-slate-900 text-white text-xs sm:text-sm">
                 <th className="p-4 border-b border-slate-800 text-start">{isAr ? "معيار المقارنة" : "Comparison Metric"}</th>
-                <th className="p-4 border-b border-slate-800 text-start text-brand bg-slate-800/80">{isAr ? "مؤسسة 4Relief الإنسانية" : "4Relief Foundation"}</th>
+                <th className="p-4 border-b border-slate-800 text-start text-brand bg-slate-800/80">{isAr ? `مؤسسة ${brandName} الإنسانية` : `${brandName} Foundation`}</th>
                 <th className="p-4 border-b border-slate-800 text-start text-slate-300">{isAr ? "المؤسسات الإغاثية التقليدية" : "Traditional Relief NGOs"}</th>
               </tr>
             </thead>

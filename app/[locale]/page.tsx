@@ -184,7 +184,7 @@ export default async function HomePage({ params }: PageProps) {
           "@type": "ImageObject",
           url: `${SITE_URL}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
         },
-        foundingDate: "2024",
+        foundingDate: "2026",
         areaServed: [
           "Global",
           "United Arab Emirates",

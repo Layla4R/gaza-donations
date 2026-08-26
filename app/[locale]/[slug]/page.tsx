@@ -1,21 +1,38 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import Icon from "@/components/icons";
 
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import LegalPageContent from "@/components/site/LegalPageContent";
 
 import { getPageBySlug, getCampaignsLite } from "@/lib/pageData";
-
 import { LOCALES, loadTranslations } from "@/lib/i18n";
-
 import { PageSection } from "@/lib/blocks";
 import { getSupabaseOrNull } from "@/lib/supabase";
 
 export const revalidate = 300;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
+interface PageProps {
+  params: { slug: string; locale: string };
+}
+
+// دالة مساعدة لجلب معلومات الدومين
+async function getDomainContext() {
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
+  const isDestekol = host.includes("destekol");
+  
+  const siteUrl = isDestekol 
+    ? "https://destekol.org" 
+    : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
+
+  const brandName = isDestekol ? "Destekol" : "4Relief";
+  const fullName = isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation";
+
+  return { isDestekol, siteUrl, brandName, fullName };
+}
 
 const LEGAL_SLUGS = [
   "privacy",
@@ -80,47 +97,55 @@ const LEGAL_TITLES: Record<string, Record<string, string>> = {
   },
 };
 
-const LEGAL_SUBTITLES: Record<string, Record<string, string>> = {
-  privacy: {
-    ar: "حماية بياناتك وخصوصيتك أولوية بالنسبة لنا.",
-    en: "Protecting your personal data and privacy is our priority.",
-    fr: "La protection de vos données personnelles et de votre vie privée est notre priorité.",
-    tr: "Kişisel verilerinizi ve gizliliğinizi korumak önceliğimizdir.",
-  },
-  terms: {
-    ar: "الشروط والأحكام المنظمة لاستخدام منصة 4Relief.",
-    en: "The terms and conditions governing the use of the 4Relief platform.",
-    fr: "Les conditions générales régissant l'utilisation de la plateforme 4Relief.",
-    tr: "4Relief platformunun kullanımını düzenleyen hüküm ve koşullar.",
-  },
-};
+function getLegalSubtitle(slug: string, locale: string, brandName: string): string | null {
+  const subtitles: Record<string, Record<string, string>> = {
+    privacy: {
+      ar: "حماية بياناتك وخصوصيتك أولوية بالنسبة لنا.",
+      en: "Protecting your personal data and privacy is our priority.",
+      fr: "La protection de vos données personnelles et de votre vie privée est notre priorité.",
+      tr: "Kişisel verilerinizi ve gizliliğinizi korumak önceliğimizdir.",
+    },
+    terms: {
+      ar: `الشروط والأحكام المنظمة لاستخدام منصة ${brandName}.`,
+      en: `The terms and conditions governing the use of the ${brandName} platform.`,
+      fr: `Les conditions générales régissant l'utilisation de la plateforme ${brandName}.`,
+      tr: `${brandName} platformunun kullanımını düzenleyen hüküm ve koşullar.`,
+    },
+  };
 
-const COMMON_PAGE_TITLES: Record<string, Record<string, string>> = {
-  about: {
-    ar: "من نحن | 4Relief Humanitarian Foundation",
-    en: "About Us | 4Relief Humanitarian Foundation",
-    fr: "À Propos | Fondation 4Relief",
-    tr: "Hakkımızda | 4Relief İnsani Yardım",
-  },
-  "about-us": {
-    ar: "من نحن | 4Relief Humanitarian Foundation",
-    en: "About Us | 4Relief Humanitarian Foundation",
-    fr: "À Propos | Fondation 4Relief",
-    tr: "Hakkımızda | 4Relief İnsani Yardım",
-  },
-  transparency: {
-    ar: "الشفافية والتقارير المالية | 4Relief",
-    en: "Financial Transparency | 4Relief Humanitarian Foundation",
-    fr: "Transparence Financière | Fondation 4Relief",
-    tr: "Mali Şeffaflık | 4Relief",
-  },
-  contact: {
-    ar: "اتصل بنا | 4Relief Humanitarian Foundation",
-    en: "Contact Us | 4Relief Humanitarian Foundation",
-    fr: "Contactez-nous | Fondation 4Relief",
-    tr: "İletişim | 4Relief",
-  },
-};
+  return subtitles[slug]?.[locale] || subtitles[slug]?.en || null;
+}
+
+function getCommonPageTitle(slug: string, locale: string, fullName: string, brandName: string): string | null {
+  const titles: Record<string, Record<string, string>> = {
+    about: {
+      ar: `من نحن | ${fullName}`,
+      en: `About Us | ${fullName}`,
+      fr: `À Propos | ${fullName}`,
+      tr: `Hakkımızda | ${fullName}`,
+    },
+    "about-us": {
+      ar: `من نحن | ${fullName}`,
+      en: `About Us | ${fullName}`,
+      fr: `À Propos | ${fullName}`,
+      tr: `Hakkımızda | ${fullName}`,
+    },
+    transparency: {
+      ar: `الشفافية والتقارير المالية | ${brandName}`,
+      en: `Financial Transparency | ${fullName}`,
+      fr: `Transparence Financière | ${fullName}`,
+      tr: `Mali Şeffaflık | ${brandName}`,
+    },
+    contact: {
+      ar: `اتصل بنا | ${fullName}`,
+      en: `Contact Us | ${fullName}`,
+      fr: `Contactez-nous | ${fullName}`,
+      tr: `İletişim | ${brandName}`,
+    },
+  };
+
+  return titles[slug]?.[locale] || null;
+}
 
 function cleanText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -142,21 +167,24 @@ export async function generateMetadata({
   params: { slug: string; locale: string };
 }): Promise<Metadata> {
   const { slug, locale } = params;
+  const { siteUrl, brandName, fullName } = await getDomainContext();
   const page = await getPageBySlug(slug, locale);
 
   if (!page) return {};
 
   const isLegalPage = LEGAL_SLUGS.includes(slug);
+  const commonTitle = getCommonPageTitle(slug, locale, fullName, brandName);
+
   const baseTitle = isLegalPage
     ? LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.en || page.title
-    : COMMON_PAGE_TITLES[slug]?.[locale] || page.title;
+    : commonTitle || page.title;
 
-  const title = baseTitle.includes("4Relief")
+  const title = baseTitle.includes(brandName)
     ? baseTitle
-    : `${baseTitle} | 4Relief Humanitarian Foundation`;
+    : `${baseTitle} | ${fullName}`;
 
   const description = cleanText(page.description) || title;
-  const currentUrl = `${SITE_URL}/${locale}/${slug}`;
+  const currentUrl = `${siteUrl}/${locale}/${slug}`;
 
   return {
     title,
@@ -166,14 +194,14 @@ export async function generateMetadata({
       languages: Object.fromEntries(
         LOCALES.map((currentLocale) => [
           currentLocale,
-          `${SITE_URL}/${currentLocale}/${slug}`,
+          `${siteUrl}/${currentLocale}/${slug}`,
         ]),
       ),
     },
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: "4Relief Humanitarian Foundation",
+      siteName: fullName,
       title,
       description,
     },
@@ -191,6 +219,7 @@ export default async function DynamicPage({
   params: { slug: string; locale: string };
 }) {
   const { slug, locale } = params;
+  const { isDestekol, siteUrl, brandName, fullName } = await getDomainContext();
   const supabase = getSupabaseOrNull();
 
   const [appearanceResult, page, campaigns, dict] = await Promise.all([
@@ -232,18 +261,19 @@ export default async function DynamicPage({
 
   const hasCustomSections = !isLegalPage && sections.length > 0;
 
+  const commonTitle = getCommonPageTitle(slug, locale, fullName, brandName);
+
   const displayTitle = isLegalPage
     ? LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.en || page.title
-    : dict[`nav.${slug}`] || COMMON_PAGE_TITLES[slug]?.[locale] || page.title;
+    : dict[`nav.${slug}`] || commonTitle || page.title;
 
   const displaySubtitle = isLegalPage
-    ? LEGAL_SUBTITLES[slug]?.[locale] ||
-      LEGAL_SUBTITLES[slug]?.en ||
+    ? getLegalSubtitle(slug, locale, brandName) ||
       cleanText(page.description) ||
       null
     : cleanText(page.description) || null;
 
-  const pageUrl = `${SITE_URL}/${locale}/${slug}`;
+  const pageUrl = `${siteUrl}/${locale}/${slug}`;
   const schemaType = getSchemaType(slug);
 
   const isAr = locale === "ar";
@@ -258,29 +288,31 @@ export default async function DynamicPage({
         "@type": schemaType,
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: `${displayTitle} | 4Relief Humanitarian Foundation`,
+        name: `${displayTitle} | ${fullName}`,
         description: displaySubtitle || displayTitle,
         inLanguage: locale,
         datePublished: (page as any).createdAt || "2026-01-01T00:00:00Z",
         dateModified: (page as any).updatedAt || new Date().toISOString(),
-        isPartOf: { "@id": `${SITE_URL}/#website` },
-        about: { "@id": `${SITE_URL}/#organization` },
-        publisher: { "@id": `${SITE_URL}/#organization` },
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        about: { "@id": `${siteUrl}/#organization` },
+        publisher: { "@id": `${siteUrl}/#organization` },
         breadcrumb: { "@id": `${pageUrl}/#breadcrumb` },
       },
       ...(isTrustPage
         ? [
             {
               "@type": ["NGO", "Organization"],
-              "@id": `${SITE_URL}/#organization`,
-              name: "4Relief Humanitarian Foundation",
-              alternateName: [
-                "4Relief",
-                "4Relief NGO",
-                "4Relief International Humanitarian Foundation",
-              ],
-              url: SITE_URL,
-              logo: `${SITE_URL}/brand/logo.png`,
+              "@id": `${siteUrl}/#organization`,
+              name: fullName,
+              alternateName: isDestekol
+                ? ["Destekol", "Destekol NGO"]
+                : [
+                    "4Relief",
+                    "4Relief NGO",
+                    "4Relief International Humanitarian Foundation",
+                  ],
+              url: siteUrl,
+              logo: `${siteUrl}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
               foundingDate: "2026",
               knowsAbout: [
                 "Humanitarian Aid",
@@ -311,7 +343,7 @@ export default async function DynamicPage({
         "@type": "ListItem",
         position: 1,
         name: dict["nav.home"] || (isAr ? "الرئيسية" : "Home"),
-        item: `${SITE_URL}/${locale}`,
+        item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
@@ -350,8 +382,8 @@ export default async function DynamicPage({
           >
             <span className="inline-block h-px w-6 bg-white/40" />
             {isAr
-              ? "مؤسسة 4Relief الإنسانية"
-              : "4Relief Humanitarian Foundation"}
+              ? `مؤسسة ${brandName} الإنسانية`
+              : `${brandName} Humanitarian Foundation`}
           </span>
 
           <h1 className="font-display text-2xl font-extrabold text-white sm:text-4xl md:text-5xl">

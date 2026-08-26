@@ -16,8 +16,8 @@ export default function AboutOverviewSection({ data, locale = "ar" }: Props) {
 
   // 🌟 صياغة فقرة مستقلة (Self-Contained Passage) تشتمل على كثافة إحصائية صريحة
   const defaultQuote = isAr
-    ? "تلتزم مؤسسة 4Relief Humanitarian Foundation بتقديم الإغاثة الإنسانية المباشرة بأعلى معايير الحوكمة المالية، حيث نطبق نسبة مصاريف تشغيلية لا تتجاوز 5% لضمان وصول 95% من التبرعات لمستحقيها. نجحت المنصة منذ تأسيسها عام 2024 في دعم 150,000+ مستفيد وتغطية 12+ دولة متأثرة بالأزمات بتمويل تجاوز $482,300."
-    : "4Relief Humanitarian Foundation is dedicated to delivering direct emergency relief with maximum financial transparency, maintaining a strict 5% administrative fee cap to ensure 95% of donations reach the field. Since 2024, the foundation has supported 150,000+ beneficiaries across 12 crisis-affected regions with over $482,300 in aid.";
+    ? "تلتزم مؤسسة 4Relief Humanitarian Foundation بتقديم الإغاثة الإنسانية المباشرة بأعلى معايير الحوكمة المالية، حيث نطبق نسبة مصاريف تشغيلية لا تتجاوز 5% لضمان وصول 95% من التبرعات لمستحقيها. نجحت المنصة منذ تأسيسها عام 2026 في دعم 150,000+ مستفيد وتغطية 12+ دولة متأثرة بالأزمات بتمويل تجاوز $482,300."
+    : "4Relief Humanitarian Foundation is dedicated to delivering direct emergency relief with maximum financial transparency, maintaining a strict 5% administrative fee cap to ensure 95% of donations reach the field. Since 2026, the foundation has supported 150,000+ beneficiaries across 12 crisis-affected regions with over $482,300 in aid.";
 
   const quote = isAr
     ? data?.quote_ar || defaultQuote
