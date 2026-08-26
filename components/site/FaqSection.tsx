@@ -23,10 +23,29 @@ export default function FaqSection({
 
   if (!title && items.length === 0) return null;
 
+  // توليد Schema.org JSON-LD آلياً لفهرسة الذكاء الاصطناعي
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": items.map((item: any) => ({
+      "@type": "Question",
+      "name": item.q || item.question || item.title,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.a || item.answer || item.content || item.body,
+      },
+    })),
+  };
+
   return (
     <section className="py-6 bg-slate-50/50 border-t border-slate-100">
+      {/* حقن JSON-LD Schema للذكاء الاصطناعي ومحركات البحث */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+
       <div className="max-w-screen-xl mx-auto px-6">
-        
         {/* Header */}
         {(title || subtitle) && (
           <header className="text-center max-w-2xl mx-auto mb-16">
@@ -37,7 +56,7 @@ export default function FaqSection({
                 "أسئلة المتبرعين",
                 "Donor Questions",
                 "Questions des Donateurs",
-                "Bağışçı Soruları",
+                "Bağışçı Soruları"
               )}
             </span>
 
@@ -55,7 +74,7 @@ export default function FaqSection({
           </header>
         )}
 
-        {/* Semantic Description List (<dl>) Container for Perfect LLM Crawling */}
+        {/* Semantic Description List (<dl>) */}
         {items.length > 0 && (
           <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-100 shadow-xl shadow-slate-200/40 w-full mb-10">
             <dl className="divide-y divide-slate-100 m-0 p-0">
@@ -63,6 +82,7 @@ export default function FaqSection({
                 const isOpen = open === i;
                 const questionText = item.q || item.question || item.title;
                 const answerText = item.a || item.answer || item.content || item.body;
+                const faqId = `faq-answer-${i}`;
 
                 return (
                   <div
@@ -73,6 +93,7 @@ export default function FaqSection({
                       <button
                         onClick={() => setOpen(isOpen ? null : i)}
                         aria-expanded={isOpen}
+                        aria-controls={faqId}
                         className="w-full flex items-center justify-between gap-4 py-3 text-start transition-colors group"
                       >
                         <span
@@ -107,14 +128,17 @@ export default function FaqSection({
                       </button>
                     </dt>
 
-                    {/* Collapsible Answer wrapped in <dd> */}
-                    {isOpen && (
-                      <dd className="pt-2 pb-3 text-slate-600 text-sm sm:text-base leading-relaxed m-0">
-                        <p className="text-slate-500 leading-loose">
-                          {answerText}
-                        </p>
-                      </dd>
-                    )}
+                    {/* الإجابة موجودة دائمًا في DOM لزواحف البحث وتخفى بصريًا فقط */}
+                    <dd
+                      id={faqId}
+                      className={`pt-2 pb-3 text-slate-600 text-sm sm:text-base leading-relaxed m-0 ${
+                        isOpen ? "block" : "hidden"
+                      }`}
+                    >
+                      <p className="text-slate-500 leading-loose">
+                        {answerText}
+                      </p>
+                    </dd>
                   </div>
                 );
               })}
@@ -122,7 +146,7 @@ export default function FaqSection({
           </div>
         )}
 
-        {/* Bottom Help Banner wrapped in <aside> */}
+        {/* Bottom Help Banner */}
         <aside 
           aria-label="Contact support" 
           className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 w-full"
@@ -134,7 +158,7 @@ export default function FaqSection({
                 "لديك سؤال آخر؟",
                 "Have another question?",
                 "Vous avez une autre question ?",
-                "Başka sorunuz mu var?",
+                "Başka sorunuz mu var?"
               )}
             </h4>
             <p className="text-slate-500 text-xs sm:text-sm">
@@ -143,7 +167,7 @@ export default function FaqSection({
                 "فريقنا يرد خلال 24 ساعة على أي استفسارات أو استشارات",
                 "Our team responds within 24 hours to any inquiry",
                 "Notre équipe répond sous 24 heures",
-                "Ekibimiz 24 saat içinde yanıt verir",
+                "Ekibimiz 24 saat içinde yanıt verir"
               )}
             </p>
           </div>
@@ -159,7 +183,7 @@ export default function FaqSection({
               "تواصل معنا",
               "Contact Us",
               "Nous Contacter",
-              "Bize Ulaşın",
+              "Bize Ulaşın"
             )}
           </a>
         </aside>
