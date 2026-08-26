@@ -47,6 +47,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const headerList = await headers();
   const host = headerList.get("host") || "";
   const isDestekol = host.includes("destekol"); 
+
   const [dict, data] = await Promise.all([
     loadTranslations(locale),
     getHomeData(locale),
@@ -54,9 +55,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const settings: any = data?.settings || {};
 
-  const siteTitle =
-    OPTIMIZED_HOME_TITLES[locale] ||
-    OPTIMIZED_HOME_TITLES.en;
+  const siteTitle = isDestekol
+    ? "Destekol | Uluslararası İnsani Yardım Vakfı"
+    : (OPTIMIZED_HOME_TITLES[locale] || OPTIMIZED_HOME_TITLES.en);
 
   const description =
     cleanSchemaText(settings?.footerDescription) ||
@@ -77,7 +78,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: "4Relief Humanitarian Foundation",
+      siteName: isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation",
       title: siteTitle,
       description,
     },
@@ -92,6 +93,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function HomePage({ params }: PageProps) {
   const { locale } = params;
+
+  // 🌟 استخراج الدومين داخل دالة HomePage لتحديد المتغير isDestekol
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
+  const isDestekol = host.includes("destekol");
 
   const [dict, homeData] = await Promise.all([
     loadTranslations(locale),
@@ -150,7 +156,7 @@ export default async function HomePage({ params }: PageProps) {
   const updatedDateISO = new Date().toISOString();
 
   /*
-   * 🌟 Schema.org Graph الموحدة (محققة 100% في فحص Rich Results)
+   * 🌟 Schema.org Graph الموحدة
    */
   const homeSchema = {
     "@context": "https://schema.org",
@@ -159,7 +165,7 @@ export default async function HomePage({ params }: PageProps) {
         "@type": "WebPage",
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: "4Relief | International Humanitarian Foundation & Emergency Relief",
+        name: isDestekol ? "Destekol | Uluslararası İnsani Yardım Vakfı" : "4Relief | International Humanitarian Foundation & Emergency Relief",
         description,
         inLanguage: locale,
         datePublished: publishedDateISO,
@@ -169,42 +175,42 @@ export default async function HomePage({ params }: PageProps) {
         publisher: { "@id": `${SITE_URL}/#organization` },
       },
       {
-  "@type": ["NGO", "Organization"],
-  "@id": `${SITE_URL}/#organization`,
-  name: "4Relief Humanitarian Foundation",
-  alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
-  url: SITE_URL,
-  logo: {
-    "@type": "ImageObject",
-    url: `${SITE_URL}/brand/logo.png`,
-  },
-  foundingDate: "2024",
-  areaServed: [
-      "Global",
-      "United Arab Emirates",
-      "Middle East",
-      "Saudi Arabia",
-      "Qatar",
-      "Kuwait",
-      "Germany",
-      "France",
-      "United Kingdom",
-      "United States",
-      "Türkiye"
-    ],
-  knowsAbout: [
-    "Humanitarian Relief",
-    "Emergency Aid",
-    "Financial Governance",
-    "Zakat Inquiries",
-  ],
-  contactPoint: {
-    "@type": "ContactPoint",
-    email: settings?.contactEmail || "info@forrelief.org",
-    contactType: "customer support",
-    availableLanguage: ["Arabic", "English", "French", "Turkish"],
-  },
-},
+        "@type": ["NGO", "Organization"],
+        "@id": `${SITE_URL}/#organization`,
+        name: isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation",
+        alternateName: isDestekol ? ["Destekol", "Destekol NGO"] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+        url: SITE_URL,
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
+        },
+        foundingDate: "2024",
+        areaServed: [
+          "Global",
+          "United Arab Emirates",
+          "Middle East",
+          "Saudi Arabia",
+          "Qatar",
+          "Kuwait",
+          "Germany",
+          "France",
+          "United Kingdom",
+          "United States",
+          "Türkiye"
+        ],
+        knowsAbout: [
+          "Humanitarian Relief",
+          "Emergency Aid",
+          "Financial Governance",
+          "Zakat Inquiries",
+        ],
+        contactPoint: {
+          "@type": "ContactPoint",
+          email: settings?.contactEmail || (isDestekol ? "info@destekol.org" : "info@forrelief.org"),
+          contactType: "customer support",
+          availableLanguage: ["Arabic", "English", "French", "Turkish"],
+        },
+      },
       ...(faqItems.length > 0
         ? [
             {
