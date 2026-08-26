@@ -18,6 +18,11 @@ async function verifyAdminToken(token: string): Promise<boolean> {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const host = req.headers.get("host") || "";
+
+  // ── تحديد اللغة الافتراضية حسب الدومين ─────────────────────
+  const isDestekol = host.includes("destekol");
+  const defaultLocale = isDestekol ? "tr" : "ar";
 
   // ── 1. Admin route protection ──────────────────────────────
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login") && !pathname.startsWith("/admin/accept-invite")) {
@@ -46,20 +51,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── 3. Root URL handling (Pass directly to app/page.tsx) ──
-  if (pathname === "/") {
-    return NextResponse.next();
-  }
-
-  // ── 4. i18n — Check locale prefix ───────────────────────────
+  // ── 3. i18n — Check if path already has a locale prefix ─────
   const hasLocale = LOCALES.some(
     (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`)
   );
   if (hasLocale) return NextResponse.next();
 
-  // ── 5. Unprefixed URLs -> Rewrite internally to default locale (/ar) ──
+  // ── 4. Unprefixed URLs -> Rewrite internally to domain default locale ──
   const url = req.nextUrl.clone();
-  url.pathname = `/ar${pathname}`;
+  url.pathname = `/${defaultLocale}${pathname === "/" ? "" : pathname}`;
   return NextResponse.rewrite(url);
 }
 

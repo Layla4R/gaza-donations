@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 import SiteHeader from "@/components/site/SiteHeader";
 import SiteFooter from "@/components/site/SiteFooter";
@@ -17,8 +18,6 @@ import {
 
 export const revalidate = 300;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
-
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({
     locale,
@@ -28,39 +27,54 @@ export function generateStaticParams() {
 const LOCALE_METADATA: Record<
   string,
   {
-    title: string;
+    title: (brand: string) => string;
     description: string;
     ogLocale: string;
   }
 > = {
   ar: {
-    title: "4Relief | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)",
+    title: (brand) => `${brand} | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)`,
     description:
       "نبني جسور العطاء ونحوّل التعاطف الإنساني إلى أثر مستدام من خلال حملات ومشاريع إنسانية شفافة.",
     ogLocale: "ar_AR",
   },
 
   en: {
-    title: "4Relief | International Humanitarian Foundation & Emergency Relief",
+    title: (brand) => `${brand} | International Humanitarian Foundation & Emergency Relief`,
     description:
-      "4Relief connects donors with transparent humanitarian campaigns and sustainable relief projects worldwide.",
+      "Connects donors with transparent humanitarian campaigns and sustainable relief projects worldwide.",
     ogLocale: "en_US",
   },
 
   fr: {
-    title: "4Relief | Fondation Humanitaire Internationale & Secours d'Urgence",
+    title: (brand) => `${brand} | Fondation Humanitaire Internationale & Secours d'Urgence`,
     description:
-      "4Relief relie les donateurs à des campagnes humanitaires transparentes et à des projets durables.",
+      "Relie les donateurs à des campagnes humanitaires transparentes et à des projets durables.",
     ogLocale: "fr_FR",
   },
 
   tr: {
-    title: "4Relief | Uluslararası İnsani Yardım Vakfı",
+    title: (brand) => `${brand} | Uluslararası İnsani Yardım Vakfı`,
     description:
-      "4Relief, bağışçıları şeffaf insani yardım kampanyaları ve sürdürülebilir projelerle buluşturur.",
+      "Bağışçıları şeffaf insani yardım kampanyaları ve sürdürülebilir projelerle buluşturur.",
     ogLocale: "tr_TR",
   },
 };
+
+async function getDomainInfo() {
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
+  const isDestekol = host.includes("destekol");
+  
+  const siteUrl = isDestekol
+    ? "https://destekol.org"
+    : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
+
+  const brandName = isDestekol ? "Destekol" : "4Relief";
+  const fullName = isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation";
+
+  return { isDestekol, siteUrl, brandName, fullName };
+}
 
 export async function generateMetadata({
   params,
@@ -68,17 +82,19 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const { locale } = params;
+  const { siteUrl, brandName, fullName } = await getDomainInfo();
 
   const localeData =
     LOCALE_METADATA[locale] ||
     LOCALE_METADATA.en;
 
-  const currentUrl = `${SITE_URL}/${locale}`;
+  const currentUrl = `${siteUrl}/${locale}`;
+  const titleText = localeData.title(brandName);
 
   return {
     title: {
-      default: localeData.title,
-      template: `%s | 4Relief Humanitarian Foundation`,
+      default: titleText,
+      template: `%s | ${fullName}`,
     },
 
     description: localeData.description,
@@ -87,26 +103,26 @@ export async function generateMetadata({
       canonical: currentUrl,
 
       languages: {
-        ar: `${SITE_URL}/ar`,
-        en: `${SITE_URL}/en`,
-        fr: `${SITE_URL}/fr`,
-        tr: `${SITE_URL}/tr`,
-        "x-default": `${SITE_URL}/en`,
+        ar: `${siteUrl}/ar`,
+        en: `${siteUrl}/en`,
+        fr: `${siteUrl}/fr`,
+        tr: `${siteUrl}/tr`,
+        "x-default": `${siteUrl}/en`,
       },
     },
 
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: "4Relief Humanitarian Foundation",
-      title: localeData.title,
+      siteName: fullName,
+      title: titleText,
       description: localeData.description,
       locale: localeData.ogLocale,
     },
 
     twitter: {
       card: "summary_large_image",
-      title: localeData.title,
+      title: titleText,
       description: localeData.description,
     },
   };
@@ -120,7 +136,7 @@ const SLUG_TO_NAV_LABEL: Record<
   "about-us": { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
   contact: { ar: "اتصل بنا", en: "Contact", fr: "Contact", tr: "İletişim" },
   transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
-  "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+  "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffاflık" },
   "how-we-work": { ar: "كيف نعمل", en: "How We Work", fr: "Comment ça marche", tr: "Nasıl Çalışırız" },
 };
 
@@ -196,17 +212,25 @@ function safeJsonLd(data: unknown) {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }
 
-function buildSiteSchemas(locale: string, settings: any, localeData: { title: string; description: string }) {
+function buildSiteSchemas(
+  locale: string, 
+  settings: any, 
+  localeData: { description: string }, 
+  siteUrl: string, 
+  fullName: string, 
+  brandName: string,
+  isDestekol: boolean
+) {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": ["NGO", "Organization"],
-    "@id": `${SITE_URL}/#organization`,
-    name: "4Relief Humanitarian Foundation",
-    alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
-    url: SITE_URL,
+    "@id": `${siteUrl}/#organization`,
+    name: fullName,
+    alternateName: isDestekol ? ["Destekol", "Destekol NGO"] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+    url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/brand/logo.png`,
+      url: `${siteUrl}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
     },
     description: localeData.description,
     areaServed: [
@@ -235,11 +259,11 @@ function buildSiteSchemas(locale: string, settings: any, localeData: { title: st
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${SITE_URL}/#website`,
-    url: SITE_URL,
-    name: "4Relief Humanitarian Foundation",
+    "@id": `${siteUrl}/#website`,
+    url: siteUrl,
+    name: fullName,
     inLanguage: locale,
-    publisher: { "@id": `${SITE_URL}/#organization` },
+    publisher: { "@id": `${siteUrl}/#organization` },
   };
 
   return { organizationSchema, websiteSchema };
@@ -256,9 +280,20 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  const { isDestekol, siteUrl, brandName, fullName } = await getDomainInfo();
   const { pages, settings, dict } = await getSiteData(locale);
   const localeData = LOCALE_METADATA[locale] || LOCALE_METADATA.en;
-  const { organizationSchema, websiteSchema } = buildSiteSchemas(locale, settings, localeData);
+  
+  const { organizationSchema, websiteSchema } = buildSiteSchemas(
+    locale, 
+    settings, 
+    localeData, 
+    siteUrl, 
+    fullName, 
+    brandName, 
+    isDestekol
+  );
+
   const pixelId = settings?.facebookPixelId;
   const gaId = settings?.gaMeasurementId;
 
