@@ -36,6 +36,7 @@ interface Props {
   primaryColor?: string | null;
 
   data?: any;
+  isDestekol?: boolean;
 }
 
 const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
@@ -109,7 +110,18 @@ export default function HeroSection({
   accentColor,
   primaryColor,
   data,
+  isDestekol: isDestekolProp,
 }: Props) {
+  const [isDestekol, setIsDestekol] = useState(false);
+
+  useEffect(() => {
+    if (typeof isDestekolProp === "boolean") {
+      setIsDestekol(isDestekolProp);
+    } else if (typeof window !== "undefined" && window.location.hostname.includes("destekol")) {
+      setIsDestekol(true);
+    }
+  }, [isDestekolProp]);
+
   const accent = accentColor || "#F00F5A";
   const primary = primaryColor || "#0069D2";
 
@@ -574,10 +586,10 @@ export default function HeroSection({
               <span className="text-xs font-medium uppercase tracking-wider text-white/90">
                 {t(
                   "hero.eyebrow",
-                  "مؤسسة 4Relief الإنسانية",
-                  "4Relief Humanitarian Foundation",
-                  "Fondation Humanitaire 4Relief",
-                  "4Relief İnsani Yardım Vakfı"
+                  isDestekol ? "مؤسسة Destekol الإنسانية" : "مؤسسة 4Relief الإنسانية",
+                  isDestekol ? "Destekol Humanitarian Foundation" : "4Relief Humanitarian Foundation",
+                  isDestekol ? "Fondation Humanitaire Destekol" : "Fondation Humanitaire 4Relief",
+                  isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief İnsani Yardım Vakfı"
                 )}
               </span>
             </div>

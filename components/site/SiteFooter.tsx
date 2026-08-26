@@ -1,3 +1,5 @@
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/icons";
@@ -35,6 +37,14 @@ export default function SiteFooter({
   locale?: string; 
   dict?: Record<string, string>;
 }) {
+  const [isDestekol, setIsDestekol] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hostname.includes("destekol")) {
+      setIsDestekol(true);
+    }
+  }, []);
+
   const p = locale === "ar" ? "" : `/${locale}`;
   const loc: "ar" | "en" | "fr" | "tr" = (["ar","en","fr","tr"].includes(locale) ? locale : "ar") as any;
   
@@ -45,7 +55,22 @@ export default function SiteFooter({
     .filter(([key]) => settings?.[key])
     .map(([key, meta]) => ({ url: settings[key] as string, ...meta }));
 
-  const logoSrc = settings?.logoImage || "/brand/logo-horizontal-transparent.png";
+  const logoSrc = isDestekol 
+    ? "/brand/destekol_logo.png" 
+    : (settings?.logoImage || "/brand/logo-horizontal-transparent.png");
+
+  const logoText = isDestekol 
+    ? "Destekol" 
+    : (settings?.logoText || "4Relief");
+
+  const siteName = isDestekol 
+    ? "Destekol" 
+    : (settings?.siteName || "4Relief");
+
+  const defaultEmail = isDestekol 
+    ? "info@destekol.org" 
+    : "info@forrelief.org";
+
   const safeNavItems = Array.isArray(navItems) ? navItems : [];
 
   return (
@@ -59,8 +84,8 @@ export default function SiteFooter({
 
         {/* Brand Column */}
         <div className="lg:col-span-1">
-          <Link href={`${p}/`} aria-label="4Relief Home">
-            <Image src={logoSrc} alt={settings?.logoText || "4Relief"} width={175} height={70}
+          <Link href={`${p}/`} aria-label={`${logoText} Home`}>
+            <Image src={logoSrc} alt={logoText} width={175} height={70}
               className="h-11 w-auto object-contain mb-4" />
           </Link>
           {settings?.footerTagline && (
@@ -74,7 +99,7 @@ export default function SiteFooter({
                  fr: "Une plateforme de dons humanitaires indépendante avec transparence totale.",
                  tr: "Güvenilir ortaklarla tam şeffaflıkla bağımsız insani yardım platformu.",
                })
-             || "4Relief Humanitarian Foundation"}
+             || `${siteName} Humanitarian Foundation`}
           </p>
 
           {socialLinks.length > 0 && (
@@ -110,7 +135,12 @@ export default function SiteFooter({
             <li>
               <Link href={`${p}/why-4relief`} className="flex items-center gap-2 hover:text-white transition group font-semibold text-emerald-300">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 group-hover:bg-white transition" aria-hidden="true" />
-                {d("footer.why_4relief", { ar: "لماذا 4Relief؟ (مقارنة)", en: "Why 4Relief? (Comparison)", fr: "Pourquoi 4Relief ?", tr: "Neden 4Relief?" })}
+                {d("footer.why_4relief", { 
+                  ar: `لماذا ${siteName}؟ (مقارنة)`, 
+                  en: `Why ${siteName}? (Comparison)`, 
+                  fr: `Pourquoi ${siteName} ?`, 
+                  tr: `Neden ${siteName}?` 
+                })}
               </Link>
             </li>
 
@@ -207,7 +237,7 @@ export default function SiteFooter({
               {!settings?.contactEmail && !settings?.contactPhone && (
                 <li className="flex items-center gap-2">
                   <Icon name="mail" size={15} className="text-white/80 shrink-0" />
-                  info@forrelief.org
+                  {defaultEmail}
                 </li>
               )}
             </ul>
@@ -232,7 +262,7 @@ export default function SiteFooter({
         </div>
 
         <span>
-          {settings?.copyrightText || `© ${new Date().getFullYear()} ${settings?.siteName || "4Relief"} — ${d("footer.rights", { ar: "جميع الحقوق محفوظة", en: "All Rights Reserved", fr: "Tous Droits Réservés", tr: "Tüm Hakları Saklıdır" })}`}
+          {settings?.copyrightText || `© ${new Date().getFullYear()} ${siteName} — ${d("footer.rights", { ar: "جميع الحقوق محفوظة", en: "All Rights Reserved", fr: "Tous Droits Réservés", tr: "Tüm Hakları Saklıdır" })}`}
         </span>
       </div>
     </footer>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { loadTranslations } from "@/lib/i18n";
 import { getHomeData } from "@/lib/services/home.service";
-
+import { headers } from "next/headers";
 import HeroSection from "@/components/site/HeroSection";
 import CampaignsCarousel from "@/components/site/CampaignsCarousel";
 import NewsSection from "@/components/site/NewsSection";
@@ -44,7 +44,9 @@ function cleanSchemaText(value: unknown): string {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = params;
-
+  const headerList = await headers();
+  const host = headerList.get("host") || "";
+  const isDestekol = host.includes("destekol"); 
   const [dict, data] = await Promise.all([
     loadTranslations(locale),
     getHomeData(locale),
@@ -265,6 +267,7 @@ export default async function HomePage({ params }: PageProps) {
                 accentColor={accentColor}
                 primaryColor={primaryColor}
                 data={sectionData}
+                isDestekol={isDestekol}
               />
             );
           }
