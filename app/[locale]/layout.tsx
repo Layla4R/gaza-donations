@@ -136,7 +136,7 @@ const SLUG_TO_NAV_LABEL: Record<
   "about-us": { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
   contact: { ar: "اتصل بنا", en: "Contact", fr: "Contact", tr: "İletişim" },
   transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
-  "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffاflık" },
+  "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
   "how-we-work": { ar: "كيف نعمل", en: "How We Work", fr: "Comment ça marche", tr: "Nasıl Çalışırız" },
 };
 
@@ -230,7 +230,7 @@ function buildSiteSchemas(
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: `${siteUrl}${isDestekol ? "/brand/desekol_logo.png" : "/brand/logo.png"}`,
+      url: `${siteUrl}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
     },
     description: localeData.description,
     areaServed: [
@@ -297,8 +297,11 @@ export default async function LocaleLayout({
   const pixelId = settings?.facebookPixelId;
   const gaId = settings?.gaMeasurementId;
 
+  // تحديد الاتجاه تلقائياً بناءً على اللغة
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col" dir={dir} lang={locale}>
       {pixelId && (
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
