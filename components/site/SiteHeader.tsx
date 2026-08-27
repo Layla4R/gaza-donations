@@ -100,7 +100,7 @@ export default function SiteHeader({
             width={175}
             height={70}
             className={`${
-              isDestekol ? "h-9 sm:h-8" : "h-9 sm:h-11"
+              "h-[2.5rem] md:h-[6.5rem]" 
             } w-auto object-contain`}
             priority
           />
