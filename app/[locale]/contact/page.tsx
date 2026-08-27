@@ -72,16 +72,16 @@ export default async function ContactPage({
   ]);
 
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
+  const contactEmail = settings?.contactEmail || "info@forrelief.org";
+  const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "+44 20 1234 5678";
 
   const t = (ar: string, en: string, fr: string, tr: string) =>
     locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
 
-  const officeAddress =
-    "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, United Kingdom";
   const mapEmbedUrl = `https://maps.google.com/maps?q=71-75%20Shelton%20Street,%20Covent%20Garden,%20London,%20WC2H%209JQ,%20UK&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const pageUrl = `${SITE_URL}/${locale}/contact`;
 
-  // 🌟 Schema متقدمة للتواصل ودعم العملاء (ContactPoint Schema)
+  // 🌟 Schema محسّنة ومطابقة للأنواع المعيارية القياسية (Organization + ContactPoint)
   const contactSchema = {
     "@context": "https://schema.org",
     "@graph": [
@@ -100,12 +100,14 @@ export default async function ContactPage({
         mainEntity: { "@id": `${SITE_URL}/#organization` },
       },
       {
-        "@type": "NGO",
+        "@type": ["Organization", "NGO"],
         "@id": `${SITE_URL}/#organization`,
         name: "4Relief Humanitarian Foundation",
         alternateName: "4Relief",
         url: SITE_URL,
         logo: `${SITE_URL}/brand/logo.png`,
+        email: contactEmail,
+        telephone: contactPhone,
         address: {
           "@type": "PostalAddress",
           streetAddress: "71-75 Shelton Street, Covent Garden",
@@ -116,11 +118,11 @@ export default async function ContactPage({
         contactPoint: [
           {
             "@type": "ContactPoint",
-            telephone: settings?.contactPhone || settings?.whatsappNumber || "",
-            email: settings?.contactEmail || "info@forrelief.org",
-            contactType: "customer support",
+            telephone: contactPhone,
+            email: contactEmail,
+            contactType: "customer service",
             availableLanguage: ["Arabic", "English", "French", "Turkish"],
-            areaServed: "WorldWide",
+            areaServed: "Worldwide",
           },
         ],
         sameAs: [
@@ -154,7 +156,7 @@ export default async function ContactPage({
         <div className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-screen-xl mx-auto px-6">
-          <span className="inline-flex items-center gap-2 text-white/80 font-semibold text-s tracking-widest uppercase mb-3 px-3 py-1 bg-white/15 border border-white/20 rounded-full backdrop-blur-md">
+          <span className="inline-flex items-center gap-2 text-white/80 font-semibold text-xs tracking-widest uppercase mb-3 px-3 py-1 bg-white/15 border border-white/20 rounded-full backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             4Relief
           </span>
@@ -175,11 +177,15 @@ export default async function ContactPage({
       </div>
 
       <div className="max-w-screen-xl mx-auto px-6 pt-8 pb-12">
-        {/* 🌟 Direct Answer Block for AI Crawlers */}
+        {/* 🌟 Direct Answer Block & Microdata wrapper for AI/SEO Crawlers */}
         <section
           aria-label="Direct Contact Summary"
+          itemScope
+          itemType="http://schema.org/Organization"
           className="mb-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm"
         >
+          <meta itemProp="name" content="4Relief Humanitarian Foundation" />
+          
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
               <Icon name="shield-check" size={18} />
@@ -193,7 +199,7 @@ export default async function ContactPage({
                   "Doğrudan Destek ve Resmi Kanallar"
                 )}
               </h2>
-              <p className="text-s text-slate-700">
+              <p className="text-xs text-slate-700">
                 {t(
                   "استجابة سريعة واستفسارات شفافة للتبرعات",
                   "Fast response & transparent donation inquiries",
@@ -204,29 +210,29 @@ export default async function ContactPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-s sm:text-sm font-medium bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-medium bg-slate-50 p-3.5 rounded-xl border border-slate-100">
             <div>
               <span className="block text-slate-700 mb-0.5">
                 {t("البريد الرسمي", "Official Email", "Email Officiel", "Resmi E-posta")}
               </span>
-              <strong className="text-slate-900 truncate block">
-                {settings?.contactEmail || "info@forrelief.org"}
-              </strong>
+              <a href={`mailto:${contactEmail}`} itemProp="email" className="text-slate-900 font-bold truncate block hover:text-brand">
+                {contactEmail}
+              </a>
             </div>
             <div>
               <span className="block text-slate-700 mb-0.5">
                 {t("الهاتف والواتساب", "Phone / WhatsApp", "Téléphone / WhatsApp", "Telefon / WhatsApp")}
               </span>
-              <strong className="text-slate-900 block">
-                {settings?.contactPhone || settings?.whatsappNumber || "+44 20 1234 5678"}
-              </strong>
+              <a href={`tel:${contactPhone}`} itemProp="telephone" className="text-slate-900 font-bold block hover:text-brand">
+                {contactPhone}
+              </a>
             </div>
             <div>
-              <span className="block text-slate-700  mb-0.5">
+              <span className="block text-slate-700 mb-0.5">
                 {t("المقر الرئيسي", "Headquarters", "Siège Social", "Genel Merkez")}
               </span>
-              <strong className="text-slate-900 block truncate">
-                London, United Kingdom
+              <strong className="text-slate-900 block truncate" itemProp="address" itemScope itemType="http://schema.org/PostalAddress">
+                <span itemProp="addressLocality">London</span>, <span itemProp="addressCountry">United Kingdom</span>
               </strong>
             </div>
           </div>
@@ -256,33 +262,31 @@ export default async function ContactPage({
                     <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-1">
                       {t("العنوان المسجل", "Registered Address", "Adresse Enregistrée", "Kayıtlı Adres")}
                     </div>
-                    <address className="not-italic text-slate-800 font-bold text-s sm:text-sm group-hover:text-brand transition whitespace-normal leading-relaxed">
-                      71-75 Shelton Street<br />
-                      Covent Garden, London<br />
-                      WC2H 9JQ, United Kingdom
+                    <address itemScope itemType="http://schema.org/PostalAddress" className="not-italic text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition whitespace-normal leading-relaxed">
+                      <span itemProp="streetAddress">71-75 Shelton Street, Covent Garden</span><br />
+                      <span itemProp="addressLocality">London</span>, <span itemProp="postalCode">WC2H 9JQ</span><br />
+                      <span itemProp="addressCountry">United Kingdom</span>
                     </address>
                   </div>
                 </div>
 
-                {settings?.contactEmail && (
-                  <a
-                    href={`mailto:${settings.contactEmail}`}
-                    aria-label={settings.contactEmail}
-                    className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition"
-                  >
-                    <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition">
-                      <Icon name="mail" size={20} />
+                <a
+                  href={`mailto:${contactEmail}`}
+                  aria-label={contactEmail}
+                  className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition"
+                >
+                  <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition">
+                    <Icon name="mail" size={20} />
+                  </div>
+                  <div className="overflow-hidden">
+                    <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
+                      {t("البريد الإلكتروني", "Email", "Email", "E-posta")}
                     </div>
-                    <div className="overflow-hidden">
-                      <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
-                        {t("البريد الإلكتروني", "Email", "Email", "E-posta")}
-                      </div>
-                      <div className="text-slate-800 font-bold text-s sm:text-sm group-hover:text-brand transition truncate">
-                        {settings.contactEmail}
-                      </div>
+                    <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition truncate">
+                      {contactEmail}
                     </div>
-                  </a>
-                )}
+                  </div>
+                </a>
 
                 {settings?.contactPhone && (
                   <a
@@ -297,7 +301,7 @@ export default async function ContactPage({
                       <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
                         {t("الهاتف", "Phone", "Téléphone", "Telefon")}
                       </div>
-                      <div className="text-slate-800 font-bold text-s sm:text-sm group-hover:text-brand transition">
+                      <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition">
                         {settings.contactPhone}
                       </div>
                     </div>
@@ -319,7 +323,7 @@ export default async function ContactPage({
                       <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
                         WhatsApp
                       </div>
-                      <div className="text-slate-800 font-bold text-s sm:text-sm group-hover:text-emerald-600 transition">
+                      <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-emerald-600 transition">
                         {t(
                           "راسلنا على واتساب",
                           "Message us on WhatsApp",
@@ -337,11 +341,11 @@ export default async function ContactPage({
             <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
               <div className="flex items-center gap-2.5 mb-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-s font-extrabold text-slate-900 uppercase tracking-wider">
+                <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
                   {t("وقت الاستجابة", "Response Time", "Délai de Réponse", "Yanıt Süresi")}
                 </span>
               </div>
-              <p className="text-s sm:text-sm text-slate-600 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
                 {t(
                   "نرد على جميع الاستفسارات خلال 24-48 ساعة في أيام العمل.",
                   "We respond to all inquiries within 24-48 hours on business days.",
@@ -366,7 +370,7 @@ export default async function ContactPage({
               <ContactForm
                 locale={locale}
                 dict={dict}
-                email={settings?.contactEmail || "info@forrelief.org"}
+                email={contactEmail}
               />
             </div>
           </div>
