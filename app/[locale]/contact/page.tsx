@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { loadTranslations, LOCALES } from "@/lib/i18n";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import ContactForm from "@/components/blocks/ContactForm";
+import BlockRenderer from "@/components/blocks/BlockRenderer";
 import Icon from "@/components/icons";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
 
@@ -56,7 +57,11 @@ export default async function ContactPage({
   const dict = await loadTranslations(locale);
   const supabase = getSupabaseOrNull();
 
-  const [{ data: settings }, { data: appearance }] = await Promise.all([
+  // --- كود كشف الخطأ (احذفه بعد معرفة السبب) ---
+  const { data: allPages, error: allError } = await supabase?.from("Page").select("slug") || {};
+  const { data: contactPage, error: contactError } = await supabase?.from("Page").select("slug").eq("slug", "contact").maybeSingle() || {};
+  // ----------------------------------------------
+  const [{ data: settings }, { data: appearance }, { data: pageData }] = await Promise.all([
     supabase
       ?.from("SiteSettings")
       .select(
@@ -69,20 +74,36 @@ export default async function ContactPage({
       .select("primaryColor,accentColor")
       .eq("id", "default")
       .maybeSingle() || { data: null },
+    supabase
+      ?.from("Page")
+      .select("sections")
+      .eq("slug", "contact")
+      .maybeSingle() || { data: null },
   ]);
-
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
+  const accentColor = appearance?.accentColor || "var(--color-accent, #F00F5A)";
   const contactEmail = settings?.contactEmail || "info@forrelief.org";
   const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "+44 20 1234 5678";
 
   const t = (ar: string, en: string, fr: string, tr: string) =>
     locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
 
+  // 🌟 جلب أقسام الأدمن الحقيقية
+  const sections: any[] = Array.isArray(pageData?.sections)
+    ? pageData.sections
+    : [];
+
   const mapEmbedUrl = `https://maps.google.com/maps?q=71-75%20Shelton%20Street,%20Covent%20Garden,%20London,%20WC2H%209JQ,%20UK&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const pageUrl = `${SITE_URL}/${locale}/contact`;
 
-  // 🌟 Schema محسّنة ومطابقة للأنواع المعيارية القياسية (Organization + ContactPoint)
-  const contactSchema = {
+  // 🌟 استخراج أسئلة الـ FAQ من الأدمن لبناء الـ Schema
+  const faqSection = sections.find(
+    (s: any) => s.type?.toLowerCase() === "faq" || Boolean(s.props?.items) || Boolean(s.data?.items)
+  );
+  const faqItems: Array<{ question?: string; q?: string; title?: string; answer?: string; a?: string; body?: string }> =
+    faqSection?.props?.items || faqSection?.data?.items || faqSection?.items || [];
+
+  const contactSchema: any = {
     "@context": "https://schema.org",
     "@graph": [
       {
@@ -136,12 +157,27 @@ export default async function ContactPage({
     ],
   };
 
+  if (faqItems.length > 0) {
+    contactSchema["@graph"].push({
+      "@type": "FAQPage",
+      mainEntity: faqItems.map((item) => ({
+        "@type": "Question",
+        name: item.question || item.q || item.title || "",
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.answer || item.a || item.body || "",
+        },
+      })),
+    });
+  }
+
   const safeJsonLd = (data: unknown) =>
     JSON.stringify(data).replace(/</g, "\\u003c");
 
+  const rendererContext = { locale, dict, primaryColor, accentColor };
+
   return (
     <div className="bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100">
-      {/* 🌟 Structured Data Schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(contactSchema) }}
@@ -176,8 +212,8 @@ export default async function ContactPage({
         </div>
       </div>
 
-      <div className="max-w-screen-xl mx-auto px-6 pt-8 pb-12">
-        {/* 🌟 Direct Answer Block & Microdata wrapper for AI/SEO Crawlers */}
+      <div className="max-w-screen-xl mx-auto px-6 pt-8 pb-4">
+        {/* Direct Summary Block (SEO / E-E-A-T) */}
         <section
           aria-label="Direct Contact Summary"
           itemScope
@@ -237,148 +273,71 @@ export default async function ContactPage({
             </div>
           </div>
         </section>
+      </div>
 
-        {/* Main Contact Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Contact Info Sidebar */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
-              <h2 className="font-display text-xl font-extrabold text-slate-900 border-b border-slate-100 pb-4">
-                {t(
-                  "معلومات التواصل",
-                  "Contact Information",
-                  "Informations de Contact",
-                  "İletişim Bilgileri"
-                )}
-              </h2>
-
-              <div className="space-y-4">
-                {/* Registered Address */}
-                <div className="flex items-start gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
-                  <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition mt-1">
-                    <Icon name="map-pin" size={20} />
-                  </div>
-                  <div className="overflow-hidden">
-                    <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-1">
-                      {t("العنوان المسجل", "Registered Address", "Adresse Enregistrée", "Kayıtlı Adres")}
+      {/* 🌟 عرض أقسام الأدمن عبر BlockRenderer */}
+      {sections.length > 0 ? (
+        <div className="space-y-4">
+          {sections.map((section: any, idx: number) => (
+            <BlockRenderer
+              key={section.id || idx}
+              section={section}
+              context={rendererContext}
+            />
+          ))}
+        </div>
+      ) : (
+        /* Fallback Layout */
+        <div className="max-w-screen-xl mx-auto px-6 pb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="lg:col-span-5 space-y-6">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
+                <h2 className="font-display text-xl font-extrabold text-slate-900 border-b border-slate-100 pb-4">
+                  {t("معلومات التواصل", "Contact Information", "Informations de Contact", "İletişim Bilgileri")}
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
+                    <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition mt-1">
+                      <Icon name="map-pin" size={20} />
                     </div>
-                    <address itemScope itemType="http://schema.org/PostalAddress" className="not-italic text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition whitespace-normal leading-relaxed">
-                      <span itemProp="streetAddress">71-75 Shelton Street, Covent Garden</span><br />
-                      <span itemProp="addressLocality">London</span>, <span itemProp="postalCode">WC2H 9JQ</span><br />
-                      <span itemProp="addressCountry">United Kingdom</span>
-                    </address>
-                  </div>
-                </div>
-
-                <a
-                  href={`mailto:${contactEmail}`}
-                  aria-label={contactEmail}
-                  className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition"
-                >
-                  <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition">
-                    <Icon name="mail" size={20} />
-                  </div>
-                  <div className="overflow-hidden">
-                    <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
-                      {t("البريد الإلكتروني", "Email", "Email", "E-posta")}
-                    </div>
-                    <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition truncate">
-                      {contactEmail}
+                    <div className="overflow-hidden">
+                      <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-1">
+                        {t("العنوان المسجل", "Registered Address", "Adresse Enregistrée", "Kayıtlı Adres")}
+                      </div>
+                      <address itemScope itemType="http://schema.org/PostalAddress" className="not-italic text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition whitespace-normal leading-relaxed">
+                        <span itemProp="streetAddress">71-75 Shelton Street, Covent Garden</span><br />
+                        <span itemProp="addressLocality">London</span>, <span itemProp="postalCode">WC2H 9JQ</span><br />
+                        <span itemProp="addressCountry">United Kingdom</span>
+                      </address>
                     </div>
                   </div>
-                </a>
-
-                {settings?.contactPhone && (
-                  <a
-                    href={`tel:${settings.contactPhone}`}
-                    aria-label={settings.contactPhone}
-                    className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition"
-                  >
+                  <a href={`mailto:${contactEmail}`} aria-label={contactEmail} className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition">
                     <div className="w-11 h-11 rounded-2xl bg-brand/10 text-brand flex items-center justify-center shrink-0 group-hover:bg-brand group-hover:text-white transition">
-                      <Icon name="phone" size={20} />
+                      <Icon name="mail" size={20} />
                     </div>
-                    <div>
+                    <div className="overflow-hidden">
                       <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
-                        {t("الهاتف", "Phone", "Téléphone", "Telefon")}
+                        {t("البريد الإلكتروني", "Email", "Email", "E-posta")}
                       </div>
-                      <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition">
-                        {settings.contactPhone}
+                      <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition truncate">
+                        {contactEmail}
                       </div>
                     </div>
                   </a>
-                )}
-
-                {settings?.whatsappNumber && (
-                  <a
-                    href={`https://wa.me/${settings.whatsappNumber}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Contact on WhatsApp"
-                    className="flex items-center gap-4 group p-3 rounded-2xl hover:bg-slate-50 transition"
-                  >
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition">
-                      <Icon name="message-circle" size={20} />
-                    </div>
-                    <div>
-                      <div className="text-[11px] text-slate-700 font-semibold uppercase tracking-wider mb-0.5">
-                        WhatsApp
-                      </div>
-                      <div className="text-slate-800 font-bold text-xs sm:text-sm group-hover:text-emerald-600 transition">
-                        {t(
-                          "راسلنا على واتساب",
-                          "Message us on WhatsApp",
-                          "Écrivez-nous sur WhatsApp",
-                          "WhatsApp'tan yazın"
-                        )}
-                      </div>
-                    </div>
-                  </a>
-                )}
+                </div>
               </div>
             </div>
-
-            {/* Response Time Badge */}
-            <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
-                  {t("وقت الاستجابة", "Response Time", "Délai de Réponse", "Yanıt Süresi")}
-                </span>
+            <div className="lg:col-span-7">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                <ContactForm locale={locale} dict={dict} email={contactEmail} />
               </div>
-              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-                {t(
-                  "نرد على جميع الاستفسارات خلال 24-48 ساعة في أيام العمل.",
-                  "We respond to all inquiries within 24-48 hours on business days.",
-                  "Nous répondons à toutes les demandes sous 24-48 heures les jours ouvrés.",
-                  "İş günlerinde 24-48 saat içinde tüm sorulara yanıt veriyoruz."
-                )}
-              </p>
-            </div>
-          </div>
-
-          {/* Form Column */}
-          <div className="lg:col-span-7">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-              <h2 className="font-display text-xl sm:text-2xl font-extrabold text-slate-900 mb-6 border-b border-slate-100 pb-4">
-                {t(
-                  "أرسل لنا رسالة",
-                  "Send Us a Message",
-                  "Envoyez-nous un Message",
-                  "Bize Mesaj Gönderin"
-                )}
-              </h2>
-              <ContactForm
-                locale={locale}
-                dict={dict}
-                email={contactEmail}
-              />
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Google Maps Section */}
-      <div className="max-w-screen-xl mx-auto px-6 pb-10">
+      <div className="max-w-screen-xl mx-auto px-6 pt-8 pb-10">
         <div className="bg-white p-2 sm:p-3 rounded-[2rem] border border-slate-100 shadow-sm">
           <iframe
             src={mapEmbedUrl}
@@ -389,7 +348,7 @@ export default async function ContactPage({
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             title="4Relief Foundation Location in London"
-          ></iframe>
+          />
         </div>
       </div>
     </div>

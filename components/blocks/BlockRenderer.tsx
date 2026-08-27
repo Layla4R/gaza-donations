@@ -10,6 +10,7 @@ import Icon from "@/components/icons";
 import CountUp from "@/components/blocks/CountUp";
 import AboutOverviewSection from "./AboutOverviewSection";
 import type { CampaignLite } from "@/lib/pageData";
+import FaqSection from "../site/FaqSection";
 
 interface RendererContext {
   campaigns?: CampaignLite[];
@@ -36,7 +37,7 @@ export default function BlockRenderer({
   section: PageSection;
   context?: RendererContext;
 }) {
-  const p = section.props || {};
+  const p = section.props || (section as any).data || {};
 
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
@@ -448,30 +449,15 @@ export default function BlockRenderer({
         </section>
       );
 
-    case "faq":
+   case "faq": {
       return (
-        <section className="py-20 sm:py-24 bg-slate-50/50 border-t border-slate-100">
-          <div className="max-w-screen-xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <Eyebrow className="justify-center">الأسئلة الشائعة</Eyebrow>
-              {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{p.title}</h2>}
-            </div>
-            <div className="divide-y divide-slate-100 border border-slate-100 rounded-3xl overflow-hidden bg-white shadow-sm max-w-3xl mx-auto">
-              {(p.items || []).map((item: any, i: number) => (
-                <details key={i} className="group p-6">
-                  <summary className="font-display font-bold text-slate-900 text-base sm:text-lg cursor-pointer flex justify-between items-center gap-4 list-none">
-                    {item.title}
-                    <span className="shrink-0 w-7 h-7 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 group-open:rotate-180 transition-transform">
-                      <Icon name="chevron-down" size={16} />
-                    </span>
-                  </summary>
-                  <p className="text-slate-600 text-xs sm:text-sm mt-4 leading-relaxed">{item.body}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
+        <FaqSection
+          locale={context?.locale || "ar"}
+          dict={context?.dict || {}}
+          data={p}
+        />
       );
+    }
 
     case "cta":
       return (
