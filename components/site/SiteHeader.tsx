@@ -87,7 +87,7 @@ export default function SiteHeader({
         />
       )}
 
-      <div className="max-w-screen-xl mx-auto px-2 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-1.5 sm:gap-4">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
         {/* Logo */}
         <Link
           href={`${p}/`}
@@ -100,7 +100,7 @@ export default function SiteHeader({
             width={175}
             height={70}
             className={`${
-              isDestekol ? "h-6.5 max-h-7 sm:h-11" : "h-9 sm:h-11"
+              isDestekol ? "h-9 sm:h-8" : "h-9 sm:h-11"
             } w-auto object-contain`}
             priority
           />
