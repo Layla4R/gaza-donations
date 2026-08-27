@@ -87,7 +87,7 @@ export default function SiteHeader({
         />
       )}
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
+      <div className="max-w-screen-xl mx-auto px-2 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-1.5 sm:gap-4">
         {/* Logo */}
         <Link
           href={`${p}/`}
@@ -99,7 +99,9 @@ export default function SiteHeader({
             alt={logoText}
             width={175}
             height={70}
-            className="h-9 sm:h-11 w-auto object-contain"
+            className={`${
+              isDestekol ? "h-6.5 max-h-7 sm:h-11" : "h-9 sm:h-11"
+            } w-auto object-contain`}
             priority
           />
         </Link>
@@ -173,7 +175,7 @@ export default function SiteHeader({
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <LanguageSwitcher
             currentLocale={locale}
             transparent={isTransparent}
@@ -212,25 +214,25 @@ export default function SiteHeader({
             </span>
           </Link>
 
-         {/* Donate */}
-<Link
-  href={`${p}/donate`}
-  className="font-bold rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm shadow-lg transition-all hover:-translate-y-0.5 hover:opacity-90 shrink-0 whitespace-nowrap"
-  style={{
-    background: settings?.accentColor
-      ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)`
-      : "linear-gradient(135deg,#F00F5A,#FF4D88)",
-    color: "white",
-  }}
->
-  {t(
-    "nav.donate",
-    "تبرع الآن",
-    "Donate Now",
-    "Faire un Don",
-    "Bağış Yap",
-  )}
-</Link>
+          {/* Donate */}
+          <Link
+            href={`${p}/donate`}
+            className="font-bold rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm shadow-lg transition-all hover:-translate-y-0.5 hover:opacity-90 shrink-0 whitespace-nowrap"
+            style={{
+              background: settings?.accentColor
+                ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)`
+                : "linear-gradient(135deg,#F00F5A,#FF4D88)",
+              color: "white",
+            }}
+          >
+            {t(
+              "nav.donate",
+              "تبرع الآن",
+              "Donate Now",
+              "Faire un Don",
+              "Bağış Yap",
+            )}
+          </Link>
 
           {/* Mobile hamburger */}
           <button
@@ -239,7 +241,11 @@ export default function SiteHeader({
             aria-label="Toggle mobile menu"
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
-            className={`md:hidden p-2 rounded-xl transition ${isTransparent ? "text-white hover:bg-white/15" : "text-ink/70 hover:text-brand"}`}
+            className={`md:hidden p-1.5 sm:p-2 rounded-xl transition ${
+              isTransparent
+                ? "text-white hover:bg-white/15"
+                : "text-ink/70 hover:text-brand"
+            }`}
           >
             <svg
               width="22"
