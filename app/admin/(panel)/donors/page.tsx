@@ -9,7 +9,7 @@ interface Donor {
   totalDonated: number; donationCount: number;
   createdAt: string; emailVerified: boolean;
 }
-
+export const dynamic = "force-dynamic";
 export default function DonorsPage() {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [loading, setLoading] = useState(true);

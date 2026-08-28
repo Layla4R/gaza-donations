@@ -13,7 +13,7 @@ interface Campaign {
   donorCount: number; isActive: boolean; isFeatured: boolean;
   isZakatable?: boolean; country?: string; defaultAmount?: number;
 }
-
+export const dynamic = "force-dynamic";
 export default function AdminCampaignsList() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);

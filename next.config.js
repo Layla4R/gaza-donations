@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
-
+  staticPageGenerationTimeout: 180,
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 31536000,
