@@ -57,10 +57,7 @@ export default async function ContactPage({
   const dict = await loadTranslations(locale);
   const supabase = getSupabaseOrNull();
 
-  // --- كود كشف الخطأ (احذفه بعد معرفة السبب) ---
-  const { data: allPages, error: allError } = await supabase?.from("Page").select("slug") || {};
-  const { data: contactPage, error: contactError } = await supabase?.from("Page").select("slug").eq("slug", "contact").maybeSingle() || {};
-  // ----------------------------------------------
+  // 1. جلب الإعدادات الأساسية والصفحة الرئيسية
   const [{ data: settings }, { data: appearance }, { data: pageData }] = await Promise.all([
     supabase
       ?.from("SiteSettings")
@@ -76,10 +73,27 @@ export default async function ContactPage({
       .maybeSingle() || { data: null },
     supabase
       ?.from("Page")
-      .select("sections")
+      .select("id, sections")
       .eq("slug", "contact")
       .maybeSingle() || { data: null },
   ]);
+
+  // 2. جلب الأقسام المترجمة من جدول PageTranslation إذا كانت اللغة ليست العربية
+  let sections: any[] = Array.isArray(pageData?.sections) ? pageData.sections : [];
+
+  if (pageData?.id && locale !== "ar" && supabase) {
+    const { data: translation } = await supabase
+      .from("PageTranslation")
+      .select("sections")
+      .eq("pageId", pageData.id)
+      .eq("locale", locale)
+      .maybeSingle();
+
+    if (translation?.sections && Array.isArray(translation.sections) && translation.sections.length > 0) {
+      sections = translation.sections;
+    }
+  }
+
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
   const accentColor = appearance?.accentColor || "var(--color-accent, #F00F5A)";
   const contactEmail = settings?.contactEmail || "info@forrelief.org";
@@ -88,15 +102,10 @@ export default async function ContactPage({
   const t = (ar: string, en: string, fr: string, tr: string) =>
     locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
 
-  // 🌟 جلب أقسام الأدمن الحقيقية
-  const sections: any[] = Array.isArray(pageData?.sections)
-    ? pageData.sections
-    : [];
-
   const mapEmbedUrl = `https://maps.google.com/maps?q=71-75%20Shelton%20Street,%20Covent%20Garden,%20London,%20WC2H%209JQ,%20UK&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const pageUrl = `${SITE_URL}/${locale}/contact`;
 
-  // 🌟 استخراج أسئلة الـ FAQ من الأدمن لبناء الـ Schema
+  // استخراج أسئلة الـ FAQ المترجمة لبناء الـ Schema
   const faqSection = sections.find(
     (s: any) => s.type?.toLowerCase() === "faq" || Boolean(s.props?.items) || Boolean(s.data?.items)
   );
@@ -275,7 +284,7 @@ export default async function ContactPage({
         </section>
       </div>
 
-      {/* 🌟 عرض أقسام الأدمن عبر BlockRenderer */}
+      {/* عرض الأقسام المترجمة عبر BlockRenderer */}
       {sections.length > 0 ? (
         <div className="space-y-4">
           {sections.map((section: any, idx: number) => (
