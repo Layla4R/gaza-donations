@@ -126,7 +126,7 @@ export default function BlockRenderer({
         />
       );
 
-    case "stats":
+     case "stats":
       return (
         <section 
           className="relative py-16 sm:py-20 text-white overflow-hidden bg-brand transition-colors"
@@ -142,10 +142,12 @@ export default function BlockRenderer({
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
               {(p.items || []).map((item: any, i: number) => (
                 <div key={i} className="text-center bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/15 shadow-sm">
-                  <CountUp
-                    value={item.value}
-                    className="font-display text-3xl sm:text-5xl font-black text-white mb-2 tracking-tight"
-                  />
+                  <div className="font-display text-3xl sm:text-5xl font-black text-white mb-2 tracking-tight">
+                    <span className="sr-only">{item.value} {item.title}</span>
+                    <CountUp
+                      value={item.value}
+                    />
+                  </div>
                   <div className="text-xs sm:text-sm text-white/80 font-bold uppercase tracking-wider">{item.title}</div>
                 </div>
               ))}
@@ -153,7 +155,6 @@ export default function BlockRenderer({
           </div>
         </section>
       );
-
     case "text": {
       const align = p.align || "right";
       return (

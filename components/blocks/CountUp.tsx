@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 
 // Parses "12,540" or "$482,300" or "+3" or "أقل من 5%" into a numeric value
-// and returns prefix/suffix for re-formatting.
 function parseValue(raw: string): { prefix: string; suffix: string; num: number } {
   const str = String(raw).trim();
   let prefix = "";
@@ -12,7 +11,10 @@ function parseValue(raw: string): { prefix: string; suffix: string; num: number 
 
   // Extract leading non-numeric prefix (like $, +)
   const prefixMatch = core.match(/^([^0-9\u0660-\u0669]*)/);
-  if (prefixMatch) { prefix = prefixMatch[1]; core = core.slice(prefix.length); }
+  if (prefixMatch) {
+    prefix = prefixMatch[1];
+    core = core.slice(prefix.length);
+  }
 
   // Extract trailing non-numeric suffix
   const numMatch = core.match(/^([\d,،.]+)/);
@@ -30,16 +32,30 @@ function formatNum(n: number, originalHadCommas: boolean): string {
   return Math.round(n).toLocaleString("en-US");
 }
 
-export default function CountUp({ value, className = "" }: { value: string; className?: string }) {
+export default function CountUp({
+  value,
+  className = "",
+}: {
+  value: string;
+  className?: string;
+}) {
   const { prefix, suffix, num } = parseValue(value);
   const hasCommas = /[,،]/.test(value);
+  
   const [current, setCurrent] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
   const rafRef = useRef<number | null>(null);
   const startRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -54,7 +70,7 @@ export default function CountUp({ value, className = "" }: { value: string; clas
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isHydrated]);
 
   useEffect(() => {
     if (!started || num === 0) return;
@@ -67,18 +83,26 @@ export default function CountUp({ value, className = "" }: { value: string; clas
       // Ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setCurrent(Math.round(eased * num));
+
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(animate);
       }
     };
 
     rafRef.current = requestAnimationFrame(animate);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, [started, num]);
 
   return (
-    <div ref={containerRef} className={className}>
-      {prefix}{formatNum(current, hasCommas)}{suffix}
+    <div ref={containerRef} className={`inline-block ${className}`}>
+      <span className="sr-only">{value}</span>
+      <span aria-hidden="true">
+        {started
+          ? `${prefix}${formatNum(current, hasCommas)}${suffix}`
+          : value}
+      </span>
     </div>
   );
 }
