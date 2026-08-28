@@ -44,8 +44,8 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
   const [hovered, setHovered] = useState(false);
 
   const formatCount = (n: number) => {
-    if (item.value >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-    if (item.value >= 1000) return (n / 1000).toFixed(0) + "K";
+    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (n >= 1000) return (n / 1000).toFixed(0) + "K";
     return String(n);
   };
 
@@ -70,7 +70,13 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
         <Icon name={item.icon || "heart"} size={22} />
       </div>
 
-      <div className="flex items-baseline justify-center gap-0.5 mb-2" dir="ltr">
+      {/* 🌟 1. نص موجه ومباشر لمحركات البحث والذكاء الاصطناعي (SSR) */}
+      <span className="sr-only">
+        {item.value.toLocaleString()} {item.suffix} {label}
+      </span>
+
+      {/* 🌟 2. العرض البصري المتحرك للمستخدم */}
+      <div className="flex items-baseline justify-center gap-0.5 mb-2" dir="ltr" aria-hidden="true">
         {(item.suffix === "%" || item.suffix === "+") && (
           <span className="font-display text-2xl lg:text-3xl font-extrabold" style={{ color: primaryColor }}>{item.suffix}</span>
         )}
@@ -80,7 +86,7 @@ function StatCard({ item, locale, started, primaryColor }: { item: Achievement; 
           style={{ color: hovered ? primaryColor : undefined }}
           suppressHydrationWarning
         >
-          {mounted ? formatCount(count) : formatCount(0)}
+          {mounted ? formatCount(count) : formatCount(item.value)}
         </span>
         
         {item.suffix !== "%" && item.suffix !== "+" && item.suffix !== "" && (
