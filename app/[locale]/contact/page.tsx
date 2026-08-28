@@ -14,16 +14,46 @@ export async function generateMetadata({
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const supabase = getSupabaseOrNull();
+
+  // جلب اسم الموقع/البراند ديناميكياً من إعدادات المنصة
+  const { data: settings } = (await supabase
+    ?.from("SiteSettings")
+    .select("siteName")
+    .eq("id", "default")
+    .maybeSingle()) || { data: null };
+
   const url = `${SITE_URL}/${locale}/contact`;
-  const isAr = locale === "ar";
 
-  const title = isAr
-    ? "اتصل بنا | مؤسسة فور ريليف الإنسانية"
-    : "Contact Us | 4Relief Humanitarian Foundation";
+  // تحديد اسم البراند حسب اللغة الممررة أو من الإعدادات
+  const brandName =
+    settings?.siteName ||
+    (locale === "ar"
+      ? "مؤسسة 4Relief الإنسانية"
+      : locale === "fr"
+      ? "Fondation Humanitaire 4Relief"
+      : locale === "tr"
+      ? "4Relief İnsani Yardım Vakfı"
+      : "4Relief Humanitarian Foundation");
 
-  const description = isAr
-    ? "تواصل مع فريق مؤسسة 4Relief الإنسانية عبر البريد الإلكتروني، الهاتف، أو الواتساب. نحن هنا للإجابة عن جميع استفسارات التبرع والدعم."
-    : "Get in touch with 4Relief Humanitarian Foundation team via email, phone, or WhatsApp for donation inquiries and support.";
+  // العناوين المترجمة (Title)
+  const titles: Record<string, string> = {
+    ar: `اتصل بنا | ${brandName}`,
+    en: `Contact Us | ${brandName}`,
+    fr: `Nous Contacter | ${brandName}`,
+    tr: `Bize Ulaşın | ${brandName}`,
+  };
+
+  // الأوصاف المترجمة (Description)
+  const descriptions: Record<string, string> = {
+    ar: `تواصل مع فريق ${brandName} عبر البريد الإلكتروني، الهاتف، أو الواتساب. نحن هنا للإجابة عن جميع استفسارات التبرع والدعم.`,
+    en: `Get in touch with ${brandName} team via email, phone, or WhatsApp for donation inquiries and support.`,
+    fr: `Contactez l'équipe de ${brandName} par e-mail, téléphone ou WhatsApp pour toutes vos demandes de dons et d'assistance.`,
+    tr: `${brandName} ekibiyle e-posta, telefon veya WhatsApp üzerinden iletişime geçin. Bağış ve destek sorularınız için buradayız.`,
+  };
+
+  const title = titles[locale] || titles.en;
+  const description = descriptions[locale] || descriptions.en;
 
   return {
     title,
@@ -37,7 +67,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       url,
-      siteName: "4Relief",
+      siteName: brandName,
       title,
       description,
     },
