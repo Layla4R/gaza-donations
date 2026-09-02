@@ -85,7 +85,7 @@ export default function MediaUpload({
               mode === "upload" ? "bg-white text-ink shadow-sm" : "text-muted hover:text-ink"
             }`}
           >
-            <Icon name="upload" size={13} />
+            <Icon name={"file-text"} size={13} />
             Upload
           </button>
           <button
@@ -107,7 +107,7 @@ export default function MediaUpload({
           {isVideo ? (
             value.includes("youtube") || value.includes("youtu.be") ? (
               <div className="w-full h-full flex flex-col items-center justify-center text-white text-xs p-4 text-center gap-2">
-                <Icon name="film" size={28} className="text-brand" />
+                <Icon name={"file-text"} size={28} className="text-brand" />
                 <span className="font-semibold truncate max-w-full">{value}</span>
               </div>
             ) : (
@@ -145,7 +145,7 @@ export default function MediaUpload({
                 className="hidden"
               />
               <div className="w-10 h-10 rounded-2xl bg-white border border-line flex items-center justify-center text-muted group-hover:text-brand group-hover:scale-110 transition shadow-sm">
-                <Icon name={type === "video" ? "film" : "image"} size={20} />
+                <Icon name={"file-text"} size={20} />
               </div>
               <div className="text-xs font-bold text-ink">
                 {uploading ? "Uploading..." : `Click to upload ${type}`}
