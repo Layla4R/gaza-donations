@@ -15,11 +15,20 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
-  const { postId, locale, title, excerpt, body } = await req.json();
+  const { postId, locale, title, excerpt, body, body2, videoUrl } = await req.json();
   if (!postId || !locale || !title) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   const supabase = getSupabase();
   const { data, error } = await supabase.from("NewsPostTranslation").upsert(
-    { postId, locale, title, excerpt: excerpt || "", body: body || "", updatedAt: new Date().toISOString() },
+    { 
+      postId, 
+      locale, 
+      title, 
+      excerpt: excerpt || "", 
+      body: body || "", 
+      body2: body2 || "", 
+      videoUrl: videoUrl || "", 
+      updatedAt: new Date().toISOString() 
+    },
     { onConflict: "postId,locale" }
   ).select("*").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

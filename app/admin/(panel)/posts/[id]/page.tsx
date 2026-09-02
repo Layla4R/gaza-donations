@@ -12,6 +12,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
   const supabase = getSupabase();
   const { data: post } = await supabase.from("NewsPost").select("*").eq("id", params.id).maybeSingle();
   if (!post) notFound();
+
   return (
     <div className="p-6 sm:p-8 w-full space-y-8">
       <PostForm initial={post} />
@@ -21,6 +22,8 @@ export default async function EditPostPage({ params }: { params: { id: string } 
           baseTitle={post.title}
           baseExcerpt={post.excerpt}
           baseBody={post.body}
+          baseBody2={post.body2}
+          baseVideoUrl={post.videoUrl}
         />
       </div>
     </div>

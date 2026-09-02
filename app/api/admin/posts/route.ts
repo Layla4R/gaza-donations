@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
   const PAGE_SIZE = 50;
   const from = (page - 1) * PAGE_SIZE;
-  const status = url.searchParams.get("status") || ""; // "published" | "draft" | ""
+  const status = url.searchParams.get("status") || "";
   const q = url.searchParams.get("q")?.trim() || "";
   const supabase = getSupabase();
   let query = supabase.from("NewsPost").select("*", { count: "exact" }).order("createdAt", { ascending: false });
@@ -23,8 +23,12 @@ export async function GET(req: Request) {
 export async function POST(req: NextRequest) {
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
   const body = await req.json();
-  const { title, slug, excerpt, body: content, coverImage, isPublished, publishedAt: rawPublishedAt } = body;
-  // Only set publishedAt if actually published
+  const { 
+    title, slug, excerpt, body: content, body2, 
+    coverImage, secondaryImage, gallery, videoUrl, 
+    isPublished, publishedAt: rawPublishedAt 
+  } = body;
+
   const publishedAt = isPublished ? (rawPublishedAt || new Date().toISOString()) : null;
   if (!title || !slug || !excerpt || !content) return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
 
@@ -33,7 +37,21 @@ export async function POST(req: NextRequest) {
   if (existing) return NextResponse.json({ error: "A post with this slug already exists" }, { status: 400 });
 
   const effectivePublishedAt = publishedAt ? new Date(publishedAt).toISOString() : (isPublished ? new Date().toISOString() : null);
-  const { data: post, error } = await supabase.from("NewsPost").insert({ title, slug, excerpt, body: content, coverImage: coverImage || null, isPublished: !!isPublished, publishedAt: effectivePublishedAt }).select("*").single();
+  
+  const { data: post, error } = await supabase.from("NewsPost").insert({ 
+    title, 
+    slug, 
+    excerpt, 
+    body: content, 
+    body2: body2 || null, 
+    coverImage: coverImage || null, 
+    secondaryImage: secondaryImage || null, 
+    gallery: Array.isArray(gallery) ? gallery : [], 
+    videoUrl: videoUrl || null, 
+    isPublished: !!isPublished, 
+    publishedAt: effectivePublishedAt 
+  }).select("*").single();
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ post });
 }

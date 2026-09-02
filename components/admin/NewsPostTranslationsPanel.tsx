@@ -14,11 +14,13 @@ interface Props {
   baseTitle: string;
   baseExcerpt: string;
   baseBody: string;
+  baseBody2?: string;
+  baseVideoUrl?: string;
 }
 
-export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcerpt, baseBody }: Props) {
+export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcerpt, baseBody, baseBody2 = "", baseVideoUrl = "" }: Props) {
   const [activeLocale, setActiveLocale] = useState("en");
-  const [form, setForm] = useState({ title: "", excerpt: "", body: "" });
+  const [form, setForm] = useState({ title: "", excerpt: "", body: "", body2: "", videoUrl: "" });
   const [loading, setLoading] = useState(false);
   const [loadingLocale, setLoadingLocale] = useState(false);
   const [translating, setTranslating] = useState(false);
@@ -32,14 +34,20 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
       const res = await adminFetch(`/api/admin/news/translations?postId=${postId}&locale=${locale}`);
       const d = await res.json();
       if (d.translation) {
-        setForm({ title: d.translation.title, excerpt: d.translation.excerpt, body: d.translation.body });
+        setForm({
+          title: d.translation.title || "",
+          excerpt: d.translation.excerpt || "",
+          body: d.translation.body || "",
+          body2: d.translation.body2 || "",
+          videoUrl: d.translation.videoUrl || "",
+        });
         setHasTranslation(true);
       } else {
-        setForm({ title: baseTitle, excerpt: baseExcerpt, body: baseBody });
+        setForm({ title: baseTitle, excerpt: baseExcerpt, body: baseBody, body2: baseBody2, videoUrl: baseVideoUrl });
         setHasTranslation(false);
       }
     } catch {
-      setForm({ title: baseTitle, excerpt: baseExcerpt, body: baseBody });
+      setForm({ title: baseTitle, excerpt: baseExcerpt, body: baseBody, body2: baseBody2, videoUrl: baseVideoUrl });
     } finally {
       setLoadingLocale(false);
       setIsDirty(false);
@@ -48,7 +56,6 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
 
   useEffect(() => { loadTranslation(activeLocale); }, [activeLocale, postId]);
 
-  // 🌟 دالة الترجمة التلقائية
   async function autoTranslate() {
     setTranslating(true); setStatus(null);
     try {
@@ -56,28 +63,24 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sections: [baseTitle, baseExcerpt, baseBody],
+          sections: [baseTitle, baseExcerpt, baseBody, baseBody2],
           targetLang: activeLocale,
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Translation failed");
-      }
-
+      if (!res.ok) throw new Error("Translation failed");
       const d = await res.json();
 
       if (d.sections && Array.isArray(d.sections)) {
-        setForm({
+        setForm(f => ({
+          ...f,
           title: d.sections[0] || baseTitle,
           excerpt: d.sections[1] || baseExcerpt,
           body: d.sections[2] || baseBody,
-        });
+          body2: d.sections[3] || baseBody2,
+        }));
         setIsDirty(true);
         setStatus({ ok: true, msg: "✨ Translated automatically! Click 'Save Translation' to confirm." });
-      } else {
-        throw new Error("Failed to parse translated text");
       }
     } catch (err: any) {
       setStatus({ ok: false, msg: err.message || "Auto-translation failed." });
@@ -99,23 +102,6 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
     setLoading(false);
   }
 
-  async function deleteTranslation() {
-    if (!confirm("Delete this translation?")) return;
-    await adminFetch("/api/admin/news/translations", {
-      method: "DELETE", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ postId, locale: activeLocale }),
-    });
-    setForm({ title: baseTitle, excerpt: baseExcerpt, body: baseBody });
-    setHasTranslation(false);
-    setStatus({ ok: true, msg: "Deleted. Falls back to Arabic." });
-  }
-
-  useEffect(() => {
-    function onBeforeUnload(e: BeforeUnloadEvent) { if (isDirty) { e.preventDefault(); e.returnValue = ""; } }
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [isDirty]);
-
   const inp = "w-full rounded-xl border border-line bg-white py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand/30";
 
   return (
@@ -125,10 +111,9 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
           <h2 className="font-display font-bold text-ink flex items-center gap-2">
             <Icon name="globe" size={18} className="text-brand" /> Content Translations
           </h2>
-          <p className="text-muted text-xs">Translate this article for each language.</p>
+          <p className="text-muted text-xs">Translate article text blocks for each language.</p>
         </div>
 
-        {/* 🌟 زر الترجمة التلقائية */}
         <button
           type="button"
           onClick={autoTranslate}
@@ -149,13 +134,6 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
         ))}
       </div>
 
-      {loadingLocale && <div className="w-5 h-5 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />}
-
-      <div className={`inline-flex items-center gap-1.5 text-xs font-bold rounded-full px-3 py-1 mb-4 ${hasTranslation ? "bg-success/10 text-success" : "bg-warning/10 text-warning"}`}>
-        <Icon name={hasTranslation ? "check" : "help-circle"} size={12} />
-        {hasTranslation ? "Translated" : "No translation — showing Arabic to visitors"}
-      </div>
-
       <div className="space-y-4">
         <div>
           <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-1.5">Title *</label>
@@ -163,11 +141,19 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
         </div>
         <div>
           <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-1.5">Excerpt</label>
-          <textarea value={form.excerpt} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, excerpt: e.target.value })); }} rows={3} className={`${inp} resize-none`} />
+          <textarea value={form.excerpt} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, excerpt: e.target.value })); }} rows={2} className={`${inp} resize-none`} />
         </div>
         <div>
-          <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-1.5">Body (HTML supported)</label>
-          <textarea value={form.body} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, body: e.target.value })); }} rows={8} className={`${inp} resize-y font-mono text-xs`} />
+          <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-1.5">Body Paragraph 1</label>
+          <textarea value={form.body} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, body: e.target.value })); }} rows={6} className={`${inp} resize-y font-mono text-xs`} />
+        </div>
+        <div>
+          <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-1.5">Body Paragraph 2</label>
+          <textarea value={form.body2} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, body2: e.target.value })); }} rows={5} className={`${inp} resize-y font-mono text-xs`} />
+        </div>
+        <div>
+          <label className="block text-xs text-muted font-bold uppercase tracking-wider mb-1.5">Sidebar Video URL (If localized)</label>
+          <input value={form.videoUrl} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, videoUrl: e.target.value })); }} className={inp} />
         </div>
       </div>
 
@@ -182,12 +168,6 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
           className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl px-6 py-2.5 text-sm transition disabled:opacity-50 shadow-sm">
           <Icon name="check" size={14} />{loading ? "Saving..." : "Save Translation"}
         </button>
-        {hasTranslation && (
-          <button onClick={deleteTranslation}
-            className="flex items-center gap-2 border border-danger/30 text-danger hover:bg-danger/5 font-semibold rounded-xl px-4 py-2.5 text-sm transition">
-            <Icon name="trash" size={14} /> Delete
-          </button>
-        )}
       </div>
     </div>
   );
