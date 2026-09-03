@@ -641,16 +641,15 @@ export default function HeroSection({
               </Link>
 
               <Link
-                href={`${prefix}/campaigns`}
+                href={`${prefix}/projects`}
                 className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-7 py-3.5 font-semibold text-white backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20"
               >
                 {t(
-                  "hero.cta_campaigns",
-                  "تصفح الحملات",
-                  "Browse Campaigns",
-                  "Voir les Campagnes",
-                  "Kampanyaları İncele"
-                )}
+                   "hero.cta_projects",
+                   "استعرض مشاريعنا",
+                   "Browse Our Projects",
+                   "Découvrez Nos Projets",
+                   "Projelerimizi İnceleyin")}
               </Link>
             </div>
 
