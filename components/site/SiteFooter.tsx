@@ -266,6 +266,25 @@ export default function SiteFooter({
                 })}
               </Link>
             </li>
+            
+            {/* تمت إضافة رابط الشراكات المؤسسية هنا */}
+            <li>
+              <Link
+                href={`${p}/institutional-partnerships`}
+                className="flex items-center gap-2 hover:text-white transition group font-semibold text-amber-300"
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:bg-white transition"
+                  aria-hidden="true"
+                />
+                {d("footer.institutional_partnerships", {
+                  ar: "الشراكات المؤسسية",
+                  en: "Institutional Partnerships",
+                  fr: "Partenariats Institutionnels",
+                  tr: "Kurumsal Ortaklıklar",
+                })}
+              </Link>
+            </li>
 
             {safeNavItems.map((item) => {
               const navKey = `nav.${item.slug}`;
