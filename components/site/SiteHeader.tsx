@@ -31,7 +31,6 @@ export default function SiteHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDestekol, setIsDestekol] = useState(false);
 
-  // Only show transparent on homepage
   const isHomePage =
     pathname === "/" || pathname === `/${locale}` || pathname === `/${locale}/`;
   const canBeTransparent = transparent && isHomePage;
@@ -50,7 +49,6 @@ export default function SiteHeader({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Transparent only when: homepage + transparent prop + not scrolled + mobile menu closed
   const isTransparent = canBeTransparent && !scrolled && !mobileOpen;
 
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
@@ -99,9 +97,7 @@ export default function SiteHeader({
             alt={logoText}
             width={175}
             height={70}
-            className={`${
-              "h-[2.5rem] md:h-[6.5rem]" 
-            } w-auto object-contain`}
+            className="h-[2.5rem] md:h-[6.5rem] w-auto object-contain"
             priority
           />
         </Link>
@@ -119,30 +115,16 @@ export default function SiteHeader({
                 (item.slug === "home"
                   ? t("nav.home", "الرئيسية", "Home", "Accueil", "Ana Sayfa")
                   : item.slug === "about" || item.slug === "about-us"
-                    ? t(
-                        "nav.about",
-                        "من نحن",
-                        "About Us",
-                        "À Propos",
-                        "Hakkımızda",
-                      )
-                    : item.slug === "transparency"
-                      ? t(
-                          "nav.transparency",
-                          "الشفافية",
-                          "Transparency",
-                          "Transparence",
-                          "Şeffaflık",
-                        )
-                      : item.slug === "contact"
-                        ? t(
-                            "nav.contact",
-                            "اتصل بنا",
-                            "Contact",
-                            "Contact",
-                            "İletişim",
-                          )
-                        : item.title);
+                  ? t("nav.about", "من نحن", "About Us", "À Propos", "Hakkımızda")
+                  : item.slug === "our-work" || item.slug === "sectors"
+                  ? t("nav.our_work", "مجالات عملنا", "Our Work", "Nos Domaines", "Faaliyetlerimiz")
+                  : item.slug === "projects"
+                  ? t("nav.projects", "المشاريع الإنسانية", "Projects", "Projets", "Projelerimiz")
+                  : item.slug === "transparency" || item.slug === "financial-transparency"
+                  ? t("nav.transparency", "الشفافية", "Transparency", "Transparence", "Şeffaflık")
+                  : item.slug === "contact"
+                  ? t("nav.contact", "اتصل بنا", "Contact", "Contact", "İletişim")
+                  : item.title);
 
               return (
                 <li key={item.slug}>
@@ -157,13 +139,7 @@ export default function SiteHeader({
             })}
             <li>
               <Link href={`${p}/campaigns`} className={navLinkCls}>
-                {t(
-                  "nav.campaigns",
-                  "الحملات",
-                  "Campaigns",
-                  "Campagnes",
-                  "Kampanyalar",
-                )}
+                {t("nav.campaigns", "الحملات", "Campaigns", "Campagnes", "Kampanyalar")}
               </Link>
             </li>
             <li>
@@ -176,15 +152,9 @@ export default function SiteHeader({
 
         {/* Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <LanguageSwitcher
-            currentLocale={locale}
-            transparent={isTransparent}
-          />
-
-          {/* Cart */}
+          <LanguageSwitcher currentLocale={locale} transparent={isTransparent} />
           <CartIcon prefix={p} transparent={isTransparent} />
 
-          {/* Account */}
           <Link
             href={`${p}/account`}
             aria-label="User Account"
@@ -203,7 +173,6 @@ export default function SiteHeader({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              aria-hidden="true"
               className="shrink-0"
             >
               <circle cx="12" cy="8" r="4" />
@@ -214,7 +183,6 @@ export default function SiteHeader({
             </span>
           </Link>
 
-          {/* Donate */}
           <Link
             href={`${p}/donate`}
             className="font-bold rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm shadow-lg transition-all hover:-translate-y-0.5 hover:opacity-90 shrink-0 whitespace-nowrap"
@@ -225,40 +193,19 @@ export default function SiteHeader({
               color: "white",
             }}
           >
-            {t(
-              "nav.donate",
-              "تبرع الآن",
-              "Donate Now",
-              "Faire un Don",
-              "Bağış Yap",
-            )}
+            {t("nav.donate", "تبرع الآن", "Donate Now", "Faire un Don", "Bağış Yap")}
           </Link>
 
-          {/* Mobile hamburger */}
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle mobile menu"
-            aria-expanded={mobileOpen}
-            aria-controls="mobile-navigation"
             className={`md:hidden p-1.5 sm:p-2 rounded-xl transition ${
-              isTransparent
-                ? "text-white hover:bg-white/15"
-                : "text-ink/70 hover:text-brand"
+              isTransparent ? "text-white hover:bg-white/15" : "text-ink/70 hover:text-brand"
             }`}
           >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              {mobileOpen ? (
-                <path d="M18 6 6 18M6 6l12 12" />
-              ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {mobileOpen ? <path d="M18 6 6 18M6 6l12 12" /> : (
                 <>
                   <line x1="3" y1="6" x2="21" y2="6" />
                   <line x1="3" y1="12" x2="21" y2="12" />
@@ -269,95 +216,6 @@ export default function SiteHeader({
           </button>
         </div>
       </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <nav
-          id="mobile-navigation"
-          className="md:hidden bg-white border-t border-line shadow-xl px-6 py-4"
-          aria-label="Mobile Navigation"
-        >
-          <ul className="space-y-1">
-            {navItems.map((item) => {
-              const navKey = `nav.${item.slug}`;
-              const translatedTitle =
-                dict[navKey] ||
-                (item.slug === "home"
-                  ? t("nav.home", "الرئيسية", "Home", "Accueil", "Ana Sayfa")
-                  : item.slug === "about" || item.slug === "about-us"
-                    ? t(
-                        "nav.about",
-                        "من نحن",
-                        "About Us",
-                        "À Propos",
-                        "Hakkımızda",
-                      )
-                    : item.slug === "transparency"
-                      ? t(
-                          "nav.transparency",
-                          "الشفافية",
-                          "Transparency",
-                          "Transparence",
-                          "Şeffaflık",
-                        )
-                      : item.slug === "contact"
-                        ? t(
-                            "nav.contact",
-                            "اتصل بنا",
-                            "Contact",
-                            "Contact",
-                            "İletişim",
-                          )
-                        : item.title);
-
-              return (
-                <li key={item.slug}>
-                  <Link
-                    href={item.slug === "home" ? `${p}/` : `${p}/${item.slug}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 last:border-0 transition"
-                  >
-                    {translatedTitle}
-                  </Link>
-                </li>
-              );
-            })}
-            <li>
-              <Link
-                href={`${p}/campaigns`}
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition"
-              >
-                {t(
-                  "nav.campaigns",
-                  "الحملات",
-                  "Campaigns",
-                  "Campagnes",
-                  "Kampanyalar",
-                )}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={`${p}/news`}
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand border-b border-line/40 transition"
-              >
-                {t("nav.news", "الأخبار", "News", "Actualités", "Haberler")}
-              </Link>
-            </li>
-            <li>
-              <Link
-                href={`${p}/contact`}
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm font-semibold text-ink/70 hover:text-brand transition"
-              >
-                {t("nav.contact", "اتصل بنا", "Contact", "Contact", "İletişim")}
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      )}
     </header>
   );
 }
