@@ -44,6 +44,25 @@ export default function BlockRenderer({
   const isRTL = context?.locale === "ar";
   const locale = context?.locale || "ar";
 
+  // دالة ذكية لمعالجة الروابط وإضافة لغة الزائر الحالية ديناميكياً
+  const getLocalizedLink = (url?: string, defaultFallback = "/") => {
+    if (!url) return locale === "ar" ? defaultFallback : `/${locale}${defaultFallback}`;
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    
+    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+    const langPrefix = `/${locale}`;
+
+    // إذا كانت اللغة عربية (اللغة الافتراضية)، لا نضيف بادئة
+    if (locale === "ar") return cleanUrl;
+    
+    // منع تكرار البادئة (مثلاً /en/en/projects)
+    if (cleanUrl.startsWith(`${langPrefix}/`) || cleanUrl === langPrefix) {
+      return cleanUrl;
+    }
+    
+    return `${langPrefix}${cleanUrl}`;
+  };
+
   switch (section.type) {
     case "hero": {
       const heroSchema = {
@@ -107,7 +126,7 @@ export default function BlockRenderer({
               <div className="flex flex-wrap items-center gap-4 mb-12">
                 {p.buttonText && (
                   <Link
-                    href={p.buttonLink || "/donate"}
+                    href={getLocalizedLink(p.buttonLink, "/donate")}
                     className="inline-flex items-center gap-2.5 hover:opacity-90 active:scale-98 text-white font-bold text-sm sm:text-base rounded-2xl px-8 py-3.5 shadow-lg transition-all bg-accent"
                     style={{ backgroundColor: accent }}
                   >
@@ -116,7 +135,7 @@ export default function BlockRenderer({
                   </Link>
                 )}
                 <Link
-                  href="/campaigns"
+                  href={getLocalizedLink("/campaigns")}
                   className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/15 backdrop-blur-md text-white font-semibold rounded-2xl px-7 py-3.5 text-sm sm:text-base transition-all"
                 >
                   تصفح الحملات
@@ -435,7 +454,7 @@ export default function BlockRenderer({
 
                   <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-0">
                     <Link
-                      href={item.buttonLink || "/campaigns"}
+                      href={getLocalizedLink(item.buttonLink, "/campaigns")}
                       className="inline-flex items-center justify-center gap-2 w-full border border-slate-200 text-slate-800 hover:bg-brand hover:text-white hover:border-brand font-bold rounded-2xl py-3 px-4 text-sm transition-all shadow-sm"
                     >
                       {item.buttonText || (locale === "ar" ? "استعرض المشروع" : "View Details")}
@@ -644,7 +663,7 @@ export default function BlockRenderer({
             {campaigns.length > 0 && (
               <div className="text-center mt-12">
                 <Link
-                  href={locale === "ar" ? "/campaigns" : `/${locale}/campaigns`}
+                  href={getLocalizedLink("/campaigns")}
                   className="inline-flex items-center gap-2 border border-slate-200 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 font-bold rounded-2xl px-8 py-3.5 text-sm transition-all shadow-sm"
                 >
                   {viewAllText}
@@ -839,7 +858,7 @@ export default function BlockRenderer({
             {p.subtitle && <p className="text-white/80 mb-8 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">{p.subtitle}</p>}
             {p.buttonText && (
               <Link
-                href={p.buttonLink || "/donate"}
+                href={getLocalizedLink(p.buttonLink, "/donate")}
                 className="inline-flex items-center gap-2 hover:opacity-90 active:scale-98 text-white font-bold rounded-2xl px-9 py-4 text-sm shadow-xl transition-all bg-accent"
                 style={{ backgroundColor: accent }}
               >
