@@ -141,6 +141,159 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     ]
   },
   {
+    type: "our_work",
+    label: "مجالات عملنا (Sectors)",
+    description: "تغطية كافة قطاعات العمل الإنساني والتنمية المستدامة",
+    icon: "layers",
+    category: "content",
+    defaultProps: {
+      eyebrow: "مجالات عملنا",
+      title: "من الاستجابة العاجلة إلى الحلول التنموية المستدامة",
+      subtitle: "نستجيب اليوم للاحتياجات الطارئة للمتضررين من الأزمات والكوارث، ونؤسس معهم غداً لبيئة تمكينية تساعدهم على استعادة كرامتهم وإعادة بناء مستقبلهم.",
+      items: [
+        {
+          title: "الغذاء العاجل والاحتياجات الأساسية",
+          description: "تقديم السلال الغذائية والوجبات الساخنة للأسر الأكثر هشاشة في بؤر النزوح والفقر.",
+          icon: "utensils"
+        },
+        {
+          title: "المأوى ودعم الحياة العاجل",
+          description: "توفير الخيام العازلة، تجهيزات التدفئة، والمستلزمات المعيشية الطارئة للعائلات المتضررة.",
+          icon: "home"
+        },
+        {
+          title: "الصحة والمساعدة الطبية",
+          description: "إمداد النقاط الطبية بالأدوية والمستلزمات، ودعم رعاية المرضى والجرحى في المناطق الحرجة.",
+          icon: "heart-pulse"
+        },
+        {
+          title: "المياه النظيفة والنظافة الصحية (WASH)",
+          description: "نقل مياه الشرب المعقمة عبر الصهاريج، وإنشاء وحدات التنقية والإصحاح البيئي.",
+          icon: "droplet"
+        },
+        {
+          title: "الأمن الغذائي والزراعة المستدامة",
+          description: "دعم المشاريع الزراعية المصغرة والمطابخ المجتمعية لتوفير مصادر غذاء دائم.",
+          icon: "sprout"
+        },
+        {
+          title: "سبل العيش والتمكين الاقتصادي",
+          description: "تمويل المشاريع الصغيرة وتدريب الأفراد على مهن إنتاجية تحقق لهم الاستقلال المالي.",
+          icon: "briefcase"
+        },
+        {
+          title: "تمكين المرأة",
+          description: "إطلاق برامج تدريبية وإنتاجية تعزز دور المرأة القيادي والاقتصادي داخل معيل الأسرة.",
+          icon: "user-check"
+        },
+        {
+          title: "حماية الطفل",
+          description: "توفير بيئات آمنة للأطفال في مناطق النزوح وحمايتهم من الاستغلال والإهمال.",
+          icon: "shield"
+        },
+        {
+          title: "الدعم النفسي والاجتماعي",
+          description: "تقديم جلسات الدعم النفسي وتجاوز الصدمات للأطفال والنساء المتأثرين بالحروب.",
+          icon: "smile"
+        },
+        {
+          title: "برنامج دعم التعليم",
+          description: "توزيع الحقائب المدرسية وتأمين مساحات تعليمية بديلة للأطفال الانقطاع عن الدراسة.",
+          icon: "book-open"
+        },
+        {
+          title: "الطاقة المتجددة",
+          description: "تزويد المرافق الإغاثية ومحطات المياه بأنظمة الطاقة الشمسية لضمان استمرارية الخدمات.",
+          icon: "sun"
+        },
+        {
+          title: "الشراكات المحلية وبناء القدرات",
+          description: "التنسيق المباشر مع المنظمات الميدانية لتطوير آليات الاستجابة وتأهيل الكوادر.",
+          icon: "users"
+        }
+      ]
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow Text / Tag", type: "text" },
+      { key: "title", label: "Section Title", type: "text" },
+      { key: "subtitle", label: "Section Subtitle", type: "textarea" },
+      {
+        key: "items",
+        label: "Sectors List",
+        type: "list",
+        itemFields: [
+          { key: "title", label: "Sector Title", type: "text" },
+          { key: "description", label: "Sector Description", type: "textarea" },
+          { key: "icon", label: "Icon Name", type: "text" }
+        ]
+      }
+    ]
+  },
+  {
+    type: "projects",
+    label: "مشاريعنا الميدانية (Projects)",
+    description: "عرض كروت المشاريع التنفيذية مع الصور والتفاصيل والحالة",
+    icon: "layers",
+    category: "fundraising",
+    defaultProps: {
+      eyebrow: "مشاريعنا الميدانية",
+      title: "نُحوّل العطاء إلى أثرٍ تنموي ملموس",
+      subtitle: "أعدّت محفظة مشاريعنا الاستراتيجية لتلبية الاحتياجات الأساسية وإعادة بناء المجتمعات المتأثرة بالأزمات بكرامة وشفافية.",
+      items: [
+        {
+          title: "مشروع صهاريج مياه الشرب المعقمة",
+          category: "الإصحاح المائي (WASH)",
+          location: "المناطق الحرجة والبؤر الأشد احتياجاً",
+          status: "قيد التنفيذ المستمر",
+          image: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=800&q=80",
+          description: "نقل وتوزيع آلاف اللترات من مياه الشرب المعقمة يومياً على الأسر النازحة للوقاية من تلوث المياه والأمراض.",
+          buttonText: "استعرض تفاصيل المشروع",
+          buttonLink: "/campaigns"
+        },
+        {
+          title: "المخبز الآلي المجتمعي للوجبات اليومية",
+          category: "الأمن الغذائي",
+          location: "المناطق الحرجة والبؤر الأشد احتياجاً",
+          status: "استجابة عاجلة",
+          image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80",
+          description: "تشغيل مخبز مجتمعي لإنتاج وتوزيع ربطات الخبز الطازج مجاناً للأسر التي تعاني من المجاعة والجوع الحاد.",
+          buttonText: "استعرض تفاصيل المشروع",
+          buttonLink: "/campaigns"
+        },
+        {
+          title: "النقاط الطبية والمستشفيات الميدانية",
+          category: "الرعاية الصحية",
+          location: "المناطق الحرجة والبؤر الأشد احتياجاً",
+          status: "دعم مباشر",
+          image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
+          description: "تزويد المراكز الصحية والأطباء بالمستلزمات والأدوية الطبية العاجلة لإسعاف الجرحى وتأمين الرعاية.",
+          buttonText: "استعرض تفاصيل المشروع",
+          buttonLink: "/campaigns"
+        }
+      ]
+    },
+    fields: [
+      { key: "eyebrow", label: "Eyebrow Text / Tag", type: "text" },
+      { key: "title", label: "Section Title", type: "text" },
+      { key: "subtitle", label: "Section Subtitle", type: "textarea" },
+      {
+        key: "items",
+        label: "Projects List",
+        type: "list",
+        itemFields: [
+          { key: "title", label: "Project Title", type: "text" },
+          { key: "category", label: "Category", type: "text" },
+          { key: "location", label: "Location", type: "text" },
+          { key: "status", label: "Status Badge", type: "text" },
+          { key: "image", label: "Project Image", type: "image" },
+          { key: "description", label: "Description", type: "textarea" },
+          { key: "buttonText", label: "Button Label", type: "text" },
+          { key: "buttonLink", label: "Button Link", type: "text" }
+        ]
+      }
+    ]
+  },
+  {
     type: "stats",
     label: "Statistics",
     description: "Display key numbers and impact metrics",
@@ -280,7 +433,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       },
     ],
   },
- {
+  {
     type: "stories",
     label: "Success Stories",
     description: "Testimonials and impact stories from beneficiaries",

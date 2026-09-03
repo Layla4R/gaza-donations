@@ -26,6 +26,93 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
       </div>
     );
 
+    case "about_overview": return (
+      <div className="bg-white px-10 py-10 text-center border-t border-slate-100">
+        <h2 className="font-bold text-2xl text-slate-900 mb-2">
+          {p.heading_ar || p.heading_en || "مؤسسة 4Relief الإنسانية"}
+        </h2>
+        {(p.quote_ar || p.quote_en) && (
+          <p className="text-xs text-slate-500 italic max-w-xl mx-auto mb-6">
+            "{p.quote_ar || p.quote_en}"
+          </p>
+        )}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-start">
+          {(p.cards || []).map((c: any, i: number) => (
+            <div key={i} className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <div className="font-bold text-xs text-slate-900 mb-1">{c.title_ar || c.title_en}</div>
+              <p className="text-[11px] text-slate-500 line-clamp-3">{c.desc_ar || c.desc_en}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    case "our_work":
+    case "sectors": return (
+      <div className="bg-slate-50 px-10 py-10 border-t border-slate-100">
+        <div className="text-center max-w-xl mx-auto mb-8">
+          <span className="inline-block text-xs font-semibold uppercase text-[#0069D2] tracking-widest bg-blue-50 px-3 py-1 rounded-full mb-2">
+            {p.eyebrow || "مجالات عملنا"}
+          </span>
+          <h2 className="font-bold text-2xl text-slate-900 mb-2">
+            {p.title || "من الاستجابة العاجلة إلى الحلول التنموية المستدامة"}
+          </h2>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            {p.subtitle || "نستجيب اليوم للاحتياجات الطارئة للمتضررين من الأزمات والكوارث، ونؤسس معهم غداً لبيئة تمكينية."}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-start">
+          {(p.items || []).map((item: any, i: number) => (
+            <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="font-bold text-sm text-slate-900 mb-1">{item.title}</div>
+              <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
+                {item.description || item.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    case "projects": return (
+      <div className="bg-white px-10 py-10 border-t border-slate-100">
+        <div className="text-center max-w-xl mx-auto mb-8">
+          <span className="inline-block text-xs font-semibold uppercase text-[#0069D2] tracking-widest bg-blue-50 px-3 py-1 rounded-full mb-2">
+            {p.eyebrow || "مشاريعنا الميدانية"}
+          </span>
+          <h2 className="font-bold text-2xl text-slate-900 mb-2">
+            {p.title || "نُحوّل العطاء إلى أثرٍ تنموي ملموس"}
+          </h2>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            {p.subtitle || "أعدّت محفظة مشاريعنا الاستراتيجية لتلبية الاحتياجات الأساسية وإعادة بناء المجتمعات."}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-start">
+          {(p.items || []).map((item: any, i: number) => (
+            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div>
+                {item.image ? (
+                  <img src={item.image} alt="" className="w-full h-32 object-cover" />
+                ) : (
+                  <div className="w-full h-32 bg-slate-100 flex items-center justify-center text-xs text-slate-400">لا توجد صورة</div>
+                )}
+                <div className="p-4">
+                  <div className="text-[10px] text-[#0069D2] font-bold mb-1">{item.category} • {item.location}</div>
+                  <div className="font-bold text-sm text-slate-900 mb-1">{item.title}</div>
+                  <p className="text-xs text-slate-500 line-clamp-2">{item.description}</p>
+                </div>
+              </div>
+              <div className="p-4 pt-0">
+                <span className="inline-block w-full text-center text-[11px] font-bold text-slate-700 bg-slate-100 py-2 rounded-xl border border-slate-200">
+                  {item.buttonText || "استعرض المشروع"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
     case "stats": return (
       <div className="bg-white px-10 py-10">
         {p.title && <h2 className="font-bold text-xl text-center mb-6" style={{ color: "#111" }}>{p.title}</h2>}
@@ -120,37 +207,41 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
         </div>
       </div>
     );
-case "chat_widget":
-  return (
-    <div className="p-5 bg-[#0F172A] text-white rounded-xl flex items-center justify-between border border-slate-700 my-2 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-[#6366F1] text-white flex items-center justify-center font-bold">
-          🤖
-        </div>
-        <div>
-          <div className="font-bold text-xs">
-            {section.props?.title || "المساعد الذكي (AI Chatbot)"}
+
+    case "chat_widget": return (
+      <div className="p-5 bg-[#0F172A] text-white rounded-xl flex items-center justify-between border border-slate-700 my-2 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-[#6366F1] text-white flex items-center justify-center font-bold">
+            🤖
           </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            عنصر عائم يظهر بأسفل الصفحة في الموقع الحي
+          <div>
+            <div className="font-bold text-xs">
+              {section.props?.title || "المساعد الذكي (AI Chatbot)"}
+            </div>
+            <div className="text-[11px] text-slate-400 mt-0.5">
+              عنصر عائم يظهر بأسفل الصفحة في الموقع الحي
+            </div>
           </div>
         </div>
+        <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+          مفعّل
+        </span>
       </div>
-      <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full">
-        مفعّل
-      </span>
-    </div>
-  );
+    );
+
     case "gallery": return (
       <div className="bg-white px-10 py-10">
         {p.title && <h2 className="font-bold text-xl mb-5" style={{ color: "#111" }}>{p.title}</h2>}
         <div className="grid grid-cols-3 gap-3">
-          {(p.images || []).slice(0, 6).map((img: any, i: number) => (
-            <div key={i} className="h-28 rounded-xl overflow-hidden" style={{ background: "#F3F4F6" }}>
-              {img.url && <img src={img.url} alt="" className="w-full h-full object-cover" />}
-            </div>
-          ))}
-          {(p.images || []).length === 0 && [1,2,3].map(i => (
+          {(p.images || p.items || []).slice(0, 6).map((img: any, i: number) => {
+            const url = typeof img === "string" ? img : img.url || img.src;
+            return (
+              <div key={i} className="h-28 rounded-xl overflow-hidden" style={{ background: "#F3F4F6" }}>
+                {url && <img src={url} alt="" className="w-full h-full object-cover" />}
+              </div>
+            );
+          })}
+          {(p.images || p.items || []).length === 0 && [1,2,3].map(i => (
             <div key={i} className="h-28 rounded-xl" style={{ background: "#F3F4F6" }} />
           ))}
         </div>
@@ -162,7 +253,7 @@ case "chat_widget":
         {p.title && <h2 className="font-bold text-xl mb-5" style={{ color: "#111" }}>{p.title}</h2>}
         <div className="grid grid-cols-2 gap-4">
           {(p.items || []).map((item: any, i: number) => (
-            <div key={i} className="bg-white rounded-xl overflow-hidden" style={{ border: "1px solid #E5E7EB" }}>
+            <div key={i} className="bg-white rounded-xl overflow-hidden text-start" style={{ border: "1px solid #E5E7EB" }}>
               {item.image && <img src={item.image} alt="" className="w-full h-28 object-cover" />}
               <div className="p-3">
                 <div className="font-bold text-sm mb-1" style={{ color: "#111" }}>{item.title}</div>
@@ -206,7 +297,7 @@ case "chat_widget":
     );
 
     case "contact_form": return (
-      <div className="bg-white px-10 py-10">
+      <div className="bg-white px-10 py-10 text-start">
         {p.title && <h2 className="font-bold text-xl mb-2" style={{ color: "#111" }}>{p.title}</h2>}
         {p.subtitle && <p className="text-sm mb-5" style={{ color: "#6B7280" }}>{p.subtitle}</p>}
         <div className="space-y-3 max-w-md">
@@ -238,6 +329,7 @@ case "chat_widget":
         {p.caption && <p className="text-center text-xs py-2" style={{ color: "#9CA3AF" }}>{p.caption}</p>}
       </div>
     );
+
     default: return (
       <div className="bg-white px-10 py-8 text-center text-sm" style={{ color: "#9CA3AF", border: "1px dashed #E5E7EB" }}>
         {section.type} block

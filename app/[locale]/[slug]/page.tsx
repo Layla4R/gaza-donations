@@ -187,6 +187,36 @@ function getCommonPageTitle(slug: string, locale: string, fullName: string, bran
       fr: `À Propos | ${fullName}`,
       tr: `Hakkımızda | ${fullName}`,
     },
+    "our-work": {
+      ar: `مجالات عملنا | ${brandName}`,
+      en: `Our Sectors & Work | ${brandName}`,
+      fr: `Nos Domaines d'Action | ${brandName}`,
+      tr: `Faaliyet Alanlarımız | ${brandName}`,
+    },
+    sectors: {
+      ar: `مجالات عملنا | ${brandName}`,
+      en: `Our Sectors | ${brandName}`,
+      fr: `Nos Secteurs | ${brandName}`,
+      tr: `Faaliyet Alanlarımız | ${brandName}`,
+    },
+    projects: {
+      ar: `مشاريعنا | ${brandName}`,
+      en: `Our Projects | ${brandName}`,
+      fr: `Nos Projets | ${brandName}`,
+      tr: `Projelerimiz | ${brandName}`,
+    },
+    gaza: {
+      ar: `استجابة غزة | ${brandName}`,
+      en: `Gaza Relief & Response | ${brandName}`,
+      fr: `Urgence Gazah | ${brandName}`,
+      tr: `Gazze İnsani Yardım | ${brandName}`,
+    },
+    partnerships: {
+      ar: `الشراكات المؤسسية | ${fullName}`,
+      en: `Corporate Partnerships | ${fullName}`,
+      fr: `Partenariats Corporate | ${fullName}`,
+      tr: `Kurumsal Ortaklıklar | ${fullName}`,
+    },
     transparency: {
       ar: `الشفافية والتقارير المالية | ${brandName}`,
       en: `Financial Transparency | ${fullName}`,
@@ -215,6 +245,7 @@ function cleanText(value: unknown): string {
 function getSchemaType(slug: string) {
   if (slug === "about" || slug === "about-us") return "AboutPage";
   if (slug === "contact") return "ContactPage";
+  if (slug === "our-work" || slug === "sectors" || slug === "projects") return "CollectionPage";
   return "WebPage";
 }
 
@@ -313,6 +344,8 @@ export default async function DynamicPage({
   const isTrustPage =
     slug === "about" ||
     slug === "about-us" ||
+    slug === "our-work" ||
+    slug === "sectors" ||
     slug === "transparency" ||
     slug === "financial-transparency";
 
@@ -375,6 +408,8 @@ export default async function DynamicPage({
                 "Humanitarian Aid",
                 "Emergency Relief",
                 "Financial Transparency",
+                "Sustainable Development",
+                "WASH Projects",
                 "Zakat",
               ],
               sameAs: [

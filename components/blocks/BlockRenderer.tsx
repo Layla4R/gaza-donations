@@ -42,14 +42,36 @@ export default function BlockRenderer({
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
   const isRTL = context?.locale === "ar";
+  const locale = context?.locale || "ar";
 
   switch (section.type) {
-    case "hero":
+    case "hero": {
+      const heroSchema = {
+        "@context": "https://schema.org",
+        "@type": "NGO",
+        "@id": "https://forrelief.org/#organization",
+        "name": "4Relief",
+        "url": "https://forrelief.org",
+        "logo": "https://forrelief.org/logo.png",
+        "slogan": p.title || "معاً نصنع الأمل",
+        "description": p.subtitle || "مؤسسة إنسانية وتنموية مستقلة تقدم الاستجابة الطارئة وندعم التنمية المستدامة.",
+        "knowsAbout": [
+          "Humanitarian Relief",
+          "Crisis Response",
+          "Sustainable Development",
+          "Emergency Food and Health Support"
+        ]
+      };
+
       return (
         <section 
           className="relative min-h-[480px] sm:min-h-[560px] flex items-center overflow-hidden text-white bg-brand transition-colors"
           style={{ backgroundColor: primary }}
         >
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(heroSchema) }}
+          />
           <div className="absolute inset-0">
             {p.backgroundImage && (
               <Image 
@@ -104,29 +126,331 @@ export default function BlockRenderer({
 
               <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-white/15 text-white/80 text-xs font-medium">
                 <span className="flex items-center gap-2">
-                  <Icon name="shield-check" size={16} /> دفع آمن 100%
+                  <Icon name="shield-check" size={16} /> عملية شفافة
                 </span>
                 <span className="flex items-center gap-2">
-                  <Icon name="hand-heart" size={16} /> أثر مباشر وشفاف
+                  <Icon name="hand-heart" size={16} /> حضور ميداني مع شركاء محليين
                 </span>
                 <span className="flex items-center gap-2">
-                  <Icon name="globe" size={16} /> دعم موثوق حول العالم
+                  <Icon name="globe" size={16} /> دعم قائم على الاحتياج
                 </span>
               </div>
             </div>
           </div>
         </section>
       );
+    }
 
     case "about_overview":
       return (
         <AboutOverviewSection 
           data={p} 
-          locale={context?.locale || "ar"} 
+          locale={locale} 
         />
       );
 
-     case "stats":
+    case "our_work":
+    case "sectors": {
+      const defaultSectors = [
+        {
+          id: "food",
+          title: locale === "ar" ? "الغذاء العاجل والاحتياجات الأساسية" : "Emergency Food & Essential Needs",
+          description: locale === "ar" ? "تقديم السلال الغذائية والوجبات الساخنة للأسر الأكثر هشاشة في بؤر النزوح والفقر." : "Providing emergency food parcels and hot meals to vulnerable families in crisis areas.",
+          icon: "utensils"
+        },
+        {
+          id: "shelter",
+          title: locale === "ar" ? "المأوى ودعم الحياة العاجل" : "Emergency Shelter & Life Support",
+          description: locale === "ar" ? "توفير الخيام العازلة، تجهيزات التدفئة، والمستلزمات المعيشية الطارئة للعائلات المتضررة." : "Providing weather-proof tents, heating equipment, and essential living supplies.",
+          icon: "home"
+        },
+        {
+          id: "health",
+          title: locale === "ar" ? "الصحة والمساعدة الطبية" : "Health & Medical Aid",
+          description: locale === "ar" ? "إمداد النقاط الطبية بالأدوية والمستلزمات، ودعم رعاية المرضى والجرحى في المناطق الحرجة." : "Supplying medical points with pharmaceuticals and supporting patient care in critical zones.",
+          icon: "heart-pulse"
+        },
+        {
+          id: "wash",
+          title: locale === "ar" ? "المياه النظيفة والنظافة الصحية (WASH)" : "Clean Water & Sanitation (WASH)",
+          description: locale === "ar" ? "نقل مياه الشرب المعقمة عبر الصهاريج، وإنشاء وحدات التنقية والإصحاح البيئي." : "Delivering purified drinking water via tankers, and installing filtration and sanitation units.",
+          icon: "droplet"
+        },
+        {
+          id: "agriculture",
+          title: locale === "ar" ? "الأمن الغذائي والزراعة المستدامة" : "Food Security & Sustainable Agriculture",
+          description: locale === "ar" ? "دعم المشاريع الزراعية المصغرة والمطابخ المجتمعية لتوفير مصادر غذاء دائم." : "Supporting micro-farming initiatives and community kitchens for sustainable food sources.",
+          icon: "sprout"
+        },
+        {
+          id: "livelihood",
+          title: locale === "ar" ? "سبل العيش والتمكين الاقتصادي" : "Livelihoods & Economic Empowerment",
+          description: locale === "ar" ? "تمويل المشاريع الصغيرة وتدريب الأفراد على مهن إنتاجية تحقق لهم الاستقلال المالي." : "Funding small businesses and vocational training to build financial independence.",
+          icon: "briefcase"
+        },
+        {
+          id: "women",
+          title: locale === "ar" ? "تمكين المرأة" : "Women's Empowerment",
+          description: locale === "ar" ? "إطلاق برامج تدريبية وإنتاجية تعزز دور المرأة القيادي والاقتصادي داخل معيل الأسرة." : "Launching vocational and productive programs to enhance women's economic role.",
+          icon: "user-check"
+        },
+        {
+          id: "child_protection",
+          title: locale === "ar" ? "حماية الطفل" : "Child Protection",
+          description: locale === "ar" ? "توفير بيئات آمنة للأطفال في مناطق النزوح وحمايتهم من الاستغلال والإهمال." : "Creating safe spaces for children in displacement zones and protecting them from vulnerability.",
+          icon: "shield"
+        },
+        {
+          id: "psychosocial",
+          title: locale === "ar" ? "الدعم النفسي والاجتماعي" : "Psychosocial Support",
+          description: locale === "ar" ? "تقديم جلسات الدعم النفسي وتجاوز الصدمات للأطفال والنساء المتأثرين بالحروب." : "Providing trauma healing and mental health support sessions for affected children and women.",
+          icon: "smile"
+        },
+        {
+          id: "education",
+          title: locale === "ar" ? "برنامج دعم التعليم" : "Education Support Program",
+          description: locale === "ar" ? "توزيع الحقائب المدرسية وتأمين مساحات تعليمية بديلة للأطفال الانقطاع عن الدراسة." : "Providing school supplies and alternative learning spaces for out-of-school children.",
+          icon: "book-open"
+        },
+        {
+          id: "energy",
+          title: locale === "ar" ? "الطاقة المتجددة" : "Renewable Energy",
+          description: locale === "ar" ? "تزويد المرافق الإغاثية ومحطات المياه بأنظمة الطاقة الشمسية لضمان استمرارية الخدمات." : "Equipping relief facilities and water stations with solar energy systems.",
+          icon: "sun"
+        },
+        {
+          id: "partnerships",
+          title: locale === "ar" ? "الشراكات المحلية وبناء القدرات" : "Local Partnerships & Capacity Building",
+          description: locale === "ar" ? "التنسيق المباشر مع المنظمات الميدانية لتطوير آليات الاستجابة وتأهيل الكوادر." : "Collaborating directly with field organizations to elevate response mechanisms.",
+          icon: "users"
+        }
+      ];
+
+      const sectors = p.items && p.items.length > 0 ? p.items : defaultSectors;
+      const title = p.title || (locale === "ar" ? "من الاستجابة العاجلة إلى الحلول التنموية المستدامة" : "From Emergency Response to Sustainable Solutions");
+      const subtitle = p.subtitle || (locale === "ar" ? "نستجيب اليوم للاحتياجات الطارئة للمتضررين من الأزمات والكوارث، ونؤسس معهم غداً لبيئة تمكينية تساعدهم على استعادة كرامتهم وإعادة بناء مستقبلهم." : "Responding to immediate emergency needs while laying the groundwork for sustainable community recovery.");
+      const eyebrow = p.eyebrow || (locale === "ar" ? "مجالات عملنا" : "Our Sectors");
+
+      const sectorsSchema = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "NGO",
+            "@id": "https://forrelief.org/#organization",
+            "name": "4Relief",
+            "url": "https://forrelief.org"
+          },
+          {
+            "@type": "ItemList",
+            "name": title,
+            "description": subtitle,
+            "itemListElement": sectors.map((item: any, index: number) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "Service",
+                "name": item.title,
+                "description": item.description || item.body,
+                "provider": { "@id": "https://forrelief.org/#organization" }
+              }
+            }))
+          }
+        ]
+      };
+
+      return (
+        <section className="py-20 sm:py-24 bg-slate-50/60 border-t border-slate-100">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(sectorsSchema) }}
+          />
+          <div className="max-w-screen-xl mx-auto px-6">
+            <div className="text-center max-w-3xl mx-auto mb-14">
+              <Eyebrow className="justify-center">{eyebrow}</Eyebrow>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-4 leading-tight">
+                {title}
+              </h2>
+              <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+                {subtitle}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sectors.map((item: any, index: number) => (
+                <div
+                  key={index}
+                  className="group relative bg-white rounded-3xl p-8 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-brand/30 transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-brand/10 text-brand flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-brand group-hover:text-white transition-all duration-300">
+                      <Icon name={item.icon || "layers"} size={22} />
+                    </div>
+                    <h3 className="font-display text-xl font-bold text-slate-900 mb-3 group-hover:text-brand transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">
+                      {item.description || item.body}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    case "projects": {
+      const defaultProjects = [
+        {
+          title: locale === "ar" ? "مشروع صهاريج مياه الشرب المعقمة" : "Clean Water Tankers Project",
+          category: locale === "ar" ? "الإصحاح المائي (WASH)" : "Water & Sanitation",
+          location: locale === "ar" ? "غزة — المخيمات ومراكز الإيواء" : "Gaza — Shelter Camps",
+          status: locale === "ar" ? "قيد التنفيذ المستمر" : "Active Field Operation",
+          image: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=800&q=80",
+          description: locale === "ar" ? "نقل وتوزيع آلاف اللترات من مياه الشرب المعقمة يومياً على الأسر النازحة للوقاية من تلوث المياه والأمراض." : "Daily distribution of purified drinking water via mobile tankers to displaced families.",
+          buttonText: locale === "ar" ? "استعرض تفاصيل المشروع" : "View Project Details",
+          buttonLink: "/campaigns"
+        },
+        {
+          title: locale === "ar" ? "المخبز الآلي المجتمعي للوجبات اليومية" : "Community Automatic Bakery Project",
+          category: locale === "ar" ? "الأمن الغذائي" : "Food Security",
+          location: locale === "ar" ? "شمال قطاع غزة" : "North Gaza",
+          status: locale === "ar" ? "استجابة عاجلة" : "Emergency Response",
+          image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80",
+          description: locale === "ar" ? "تشغيل مخبز مجتمعي لإنتاج وتوزيع ربطات الخبز الطازج مجاناً للأسر التي تعاني من المجاعة والجوع الحاد." : "Operating a local bakery to produce and distribute free fresh bread parcels daily.",
+          buttonText: locale === "ar" ? "استعرض تفاصيل المشروع" : "View Project Details",
+          buttonLink: "/campaigns"
+        },
+        {
+          title: locale === "ar" ? "النقاط الطبية والمستشفيات الميدانية" : "Mobile Clinics & Field Hospitals",
+          category: locale === "ar" ? "الرعاية الصحية" : "Health & Medical",
+          location: locale === "ar" ? "المناطق الحرجة والبؤر الأشد احتياجاً" : "Critical Emergency Zones",
+          status: locale === "ar" ? "دعم مباشر" : "Direct Support",
+          image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
+          description: locale === "ar" ? "تزويد المراكز الصحية والأطباء بالمستلزمات والأدوية الطبية العاجلة لإسعاف الجرحى وتأمين الرعاية." : "Supplying field clinics with vital pharmaceuticals and medical supplies.",
+          buttonText: locale === "ar" ? "استعرض تفاصيل المشروع" : "View Project Details",
+          buttonLink: "/campaigns"
+        }
+      ];
+
+      const projects = p.items && p.items.length > 0 ? p.items : defaultProjects;
+      const title = p.title || (locale === "ar" ? "نُحوّل العطاء إلى أثرٍ تنموي ملموس" : "Transforming Support into Tangible Field Impact");
+      const subtitle = p.subtitle || (locale === "ar" ? "أعدّت محفظة مشاريعنا الاستراتيجية لتلبية الاحتياجات الأساسية وإعادة بناء المجتمعات المتأثرة بالأزمات بكرامة وشفافية." : "Strategic projects designed to meet urgent needs and empower vulnerable communities.");
+      const eyebrow = p.eyebrow || (locale === "ar" ? "مشاريعنا الميدانية" : "Our Field Projects");
+
+      const projectsSchema = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "NGO",
+            "@id": "https://forrelief.org/#organization",
+            "name": "4Relief",
+            "url": "https://forrelief.org"
+          },
+          {
+            "@type": "ItemList",
+            "name": title,
+            "description": subtitle,
+            "itemListElement": projects.map((item: any, index: number) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "item": {
+                "@type": "Project",
+                "name": item.title,
+                "description": item.description,
+                "image": item.image,
+                "location": {
+                  "@type": "Place",
+                  "name": item.location || "Gaza"
+                },
+                "keywords": item.category,
+                "fundraiser": { "@id": "https://forrelief.org/#organization" }
+              }
+            }))
+          }
+        ]
+      };
+
+      return (
+        <section className="py-20 sm:py-24 bg-white border-t border-slate-100">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(projectsSchema) }}
+          />
+          <div className="max-w-screen-xl mx-auto px-6">
+            <div className="text-center max-w-3xl mx-auto mb-14">
+              <Eyebrow className="justify-center">{eyebrow}</Eyebrow>
+              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-4 leading-tight">
+                {title}
+              </h2>
+              <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
+                {subtitle}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {projects.map((item: any, index: number) => (
+                <div
+                  key={index}
+                  className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-brand/30 transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div>
+                    {item.image && (
+                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute top-4 right-4 flex flex-wrap gap-2">
+                          {item.category && (
+                            <span className="px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold">
+                              {item.category}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-6 sm:p-8">
+                      {item.location && (
+                        <div className="flex items-center gap-1.5 text-xs text-brand font-bold mb-3">
+                          <Icon name="globe" size={14} />
+                          <span>{item.location}</span>
+                        </div>
+                      )}
+
+                      <h3 className="font-display text-xl font-bold text-slate-900 mb-3 group-hover:text-brand transition-colors leading-snug">
+                        {item.title}
+                      </h3>
+
+                      <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                        {item.description || item.body}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="px-6 sm:px-8 pb-6 sm:pb-8 pt-0">
+                    <Link
+                      href={item.buttonLink || "/campaigns"}
+                      className="inline-flex items-center justify-center gap-2 w-full border border-slate-200 text-slate-800 hover:bg-brand hover:text-white hover:border-brand font-bold rounded-2xl py-3 px-4 text-sm transition-all shadow-sm"
+                    >
+                      {item.buttonText || (locale === "ar" ? "استعرض المشروع" : "View Details")}
+                      <Icon name={isRTL ? "arrow-left" : "arrow-down"} size={16} className={isRTL ? "" : "-rotate-90"} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    case "stats":
       return (
         <section 
           className="relative py-16 sm:py-20 text-white overflow-hidden bg-brand transition-colors"
@@ -155,6 +479,7 @@ export default function BlockRenderer({
           </div>
         </section>
       );
+
     case "text": {
       const align = p.align || "right";
       return (
@@ -225,7 +550,7 @@ export default function BlockRenderer({
     case "donation_buttons":
       return (
         <DonationWidget
-          locale={context?.locale || "ar"}
+          locale={locale}
           dict={context?.dict || {}}
           primaryColor={context?.primaryColor}
           accentColor={context?.accentColor}
@@ -238,7 +563,6 @@ export default function BlockRenderer({
       if (p.onlyFeatured) campaigns = campaigns.filter((c) => c.isFeatured);
       campaigns = campaigns.slice(0, p.limit || 6);
 
-      const locale = context?.locale || "ar";
       const isEnglish = locale === "en";
       const isTurkish = locale === "tr";
       const isFrench = locale === "fr";
@@ -267,8 +591,29 @@ export default function BlockRenderer({
         ? "Aucune campagne disponible."
         : "لا توجد حملات حالياً.";
 
+      const campaignsListSchema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": p.title || "4Relief Campaigns",
+        "itemListElement": campaigns.map((c, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "item": {
+            "@type": "MonetaryGrant",
+            "name": c.title,
+            "description": c.summary,
+            "image": c.coverImage,
+            "url": `https://forrelief.org/${locale}/campaigns/${c.slug}`
+          }
+        }))
+      };
+
       return (
         <section className="py-20 sm:py-24 bg-white">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(campaignsListSchema) }}
+          />
           <div className="max-w-screen-xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <Eyebrow className="justify-center">{eyebrowText}</Eyebrow>
@@ -342,11 +687,11 @@ export default function BlockRenderer({
               <div className="text-center max-w-2xl mx-auto mb-10">
                 <span className="inline-flex items-center gap-2 text-brand font-semibold text-xs tracking-widest uppercase mb-2 px-3 py-1 bg-brand/5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-                  {context?.locale === "en"
+                  {locale === "en"
                     ? "Gallery & Impact"
-                    : context?.locale === "tr"
+                    : locale === "tr"
                     ? "Başarı Galerisi"
-                    : context?.locale === "fr"
+                    : locale === "fr"
                     ? "Galerie de Réalisations"
                     : "معرض الإنجازات"}
                 </span>
@@ -450,13 +795,35 @@ export default function BlockRenderer({
         </section>
       );
 
-   case "faq": {
+    case "faq": {
+      const faqItems = p.items || [];
+      const faqSchema = faqItems.length > 0 ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map((item: any) => ({
+          "@type": "Question",
+          "name": item.question || item.title || "",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer || item.body || ""
+          }
+        }))
+      } : null;
+
       return (
-        <FaqSection
-          locale={context?.locale || "ar"}
-          dict={context?.dict || {}}
-          data={p}
-        />
+        <>
+          {faqSchema && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+            />
+          )}
+          <FaqSection
+            locale={locale}
+            dict={context?.dict || {}}
+            data={p}
+          />
+        </>
       );
     }
 
@@ -484,19 +851,38 @@ export default function BlockRenderer({
         </section>
       );
 
-    case "contact_form":
+    case "contact_form": {
+      const contactSchema = {
+        "@context": "https://schema.org",
+        "@type": "NGO",
+        "@id": "https://forrelief.org/#organization",
+        "name": "4Relief",
+        "url": "https://forrelief.org",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": p.email || "info@forrelief.org",
+          "contactType": "customer service",
+          "availableLanguage": ["Arabic", "English", "Turkish", "French"]
+        }
+      };
+
       return (
         <section className="py-20 sm:py-24 bg-white">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(contactSchema) }}
+          />
           <div className="max-w-screen-xl mx-auto px-6 text-center mb-10">
             <Eyebrow className="justify-center">تواصل معنا</Eyebrow>
             {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">{p.title}</h2>}
             {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
           </div>
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-            <ContactForm locale={context?.locale || "ar"} dict={context?.dict || {}} email={p.email || "info@forrelief.org"} />
+            <ContactForm locale={locale} dict={context?.dict || {}} email={p.email || "info@forrelief.org"} />
           </div>
         </section>
       );
+    }
 
     case "newsletter":
       return (
