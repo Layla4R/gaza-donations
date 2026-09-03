@@ -657,24 +657,24 @@ export default function HeroSection({
               {[
                 {
                   icon: "shield-check" as const,
-                  ar: "دفع 100% آمن",
-                  en: "100% Secure",
-                  fr: "100% Sécurisé",
-                  tr: "100% Güvenli",
+                  ar: "عملية شفافة",
+                  en: "Transparent Process",
+                  fr: "Processus Transparent",
+                  tr: "Şeffaf Süreç",
                 },
                 {
                   icon: "hand-heart" as const,
-                  ar: "أثر مباشر وشفاف",
-                  en: "Direct Impact",
-                  fr: "Impact Direct",
-                  tr: "Doğrudan Etki",
+                  ar: "حضور ميداني مع شركاء محليين",
+                  en: "Field Presence with Local Partners",
+                  fr: "Présence sur le Terrain avec des Partenaires Locaux",
+                  tr: "Yerel Ortaklarla Sahada Bulunma",
                 },
                 {
                   icon: "globe" as const,
-                  ar: "دعم موثوق حول العالم",
-                  en: "Verified Global",
-                  fr: "Mondial Vérifié",
-                  tr: "Küresel Destek",
+                  ar: "دعم قائم على الاحتياج",
+                  en: "Needs-Based Support",
+                  fr: "Soutien Basé sur les Besoins",
+                  tr: "İhtiyaç Odaklı Destek",
                 },
               ].map(
                 (item, index) => (
