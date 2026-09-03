@@ -281,7 +281,7 @@ export default function SiteFooter({
                   ar: "الشراكات المؤسسية",
                   en: "Institutional Partnerships",
                   fr: "Partenariats Institutionnels",
-                  tr: "Kurumsal Ortaklıklar",
+                  tr: "Kurumsal İş Birlikleri",
                 })}
               </Link>
             </li>
