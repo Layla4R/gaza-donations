@@ -5,27 +5,34 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
   const p = section.props || {};
 
   switch (section.type) {
-    case "hero": return (
-      <div className="relative overflow-hidden" style={{ minHeight: 300, background: p.backgroundImage ? "none" : "#1a3a6b" }}>
-        {p.backgroundImage && (
-          <>
-            <img src={p.backgroundImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black" style={{ opacity: parseFloat(p.overlayOpacity) || 0.45 }} />
-          </>
-        )}
-        <div className="relative z-10 px-12 py-16 text-white" style={{ maxWidth: 640 }}>
-          <p className="text-white/80 text-xs font-semibold tracking-widest uppercase mb-3">4Relief Humanitarian Foundation</p>
-          <h1 className="font-bold text-4xl leading-tight mb-4" style={{ fontFamily: "serif" }}>{p.title || "Hero Title"}</h1>
-          <p className="text-white/75 text-sm leading-relaxed mb-8">{p.subtitle}</p>
-          {p.buttonText && (
-            <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white" style={{ background: "linear-gradient(135deg,#F00F5A,#FF4D88)" }}>
-              ♥ {p.buttonText}
-            </span>
-          )}
-        </div>
-      </div>
-    );
+   case "hero": {
+      const slide = (p.items && p.items.length > 0) ? p.items[0] : p;
+      const bgImage = slide.backgroundImage || slide.image || p.backgroundImage;
+      const title = slide.headline || slide.title_ar || slide.title || p.title || "Hero Title";
+      const subtitle = slide.subheading || slide.subtitle_ar || slide.subtitle || p.subtitle;
+      const btnText = slide.buttonLabel || slide.buttonText || p.buttonText;
 
+      return (
+        <div className="relative overflow-hidden flex flex-col justify-center text-start" style={{ minHeight: 350, background: bgImage ? "none" : "#1a3a6b" }}>
+          {bgImage && (
+            <>
+              <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+            </>
+          )}
+          <div className="relative z-10 px-12 py-16 text-white" style={{ maxWidth: 640 }}>
+            <p className="text-white/80 text-xs font-semibold tracking-widest uppercase mb-3">4Relief Humanitarian Foundation</p>
+            <h1 className="font-bold text-4xl leading-tight mb-4" style={{ fontFamily: "serif" }}>{title}</h1>
+            <p className="text-white/75 text-sm leading-relaxed mb-8">{subtitle}</p>
+            {btnText && (
+              <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white" style={{ background: "linear-gradient(135deg,#F00F5A,#FF4D88)" }}>
+                ♥ {btnText}
+              </span>
+            )}
+          </div>
+        </div>
+      );
+    }
     case "about_overview": return (
       <div className="bg-white px-10 py-10 text-center border-t border-slate-100">
         <h2 className="font-bold text-2xl text-slate-900 mb-2">

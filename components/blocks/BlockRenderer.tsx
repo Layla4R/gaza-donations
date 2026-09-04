@@ -9,6 +9,8 @@ import CampaignCard from "@/components/blocks/CampaignCard";
 import Icon from "@/components/icons";
 import CountUp from "@/components/blocks/CountUp";
 import AboutOverviewSection from "./AboutOverviewSection";
+import HeroSection from "@/components/site/HeroSection"; 
+import NewsSection from "@/components/site/NewsSection"; // 🌟 تم استيراد مكون الأخبار/القصص
 import type { CampaignLite } from "@/lib/pageData";
 import FaqSection from "../site/FaqSection";
 
@@ -19,6 +21,10 @@ interface RendererContext {
   dict?: Record<string, string>;
   primaryColor?: string | null;
   accentColor?: string | null;
+  posts?: any[];
+  stats?: any;
+  settings?: any;
+  isDestekol?: boolean;
 }
 
 function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -44,7 +50,6 @@ export default function BlockRenderer({
   const isRTL = context?.locale === "ar";
   const locale = context?.locale || "ar";
 
-  // دالة ذكية لمعالجة الروابط وإضافة لغة الزائر الحالية ديناميكياً
   const getLocalizedLink = (url?: string, defaultFallback = "/") => {
     if (!url) return locale === "ar" ? defaultFallback : `/${locale}${defaultFallback}`;
     if (url.startsWith("http://") || url.startsWith("https://")) return url;
@@ -52,10 +57,8 @@ export default function BlockRenderer({
     const cleanUrl = url.startsWith("/") ? url : `/${url}`;
     const langPrefix = `/${locale}`;
 
-    // إذا كانت اللغة عربية (اللغة الافتراضية)، لا نضيف بادئة
     if (locale === "ar") return cleanUrl;
     
-    // منع تكرار البادئة (مثلاً /en/en/projects)
     if (cleanUrl.startsWith(`${langPrefix}/`) || cleanUrl === langPrefix) {
       return cleanUrl;
     }
@@ -64,101 +67,17 @@ export default function BlockRenderer({
   };
 
   switch (section.type) {
-    case "hero": {
-      const heroSchema = {
-        "@context": "https://schema.org",
-        "@type": "NGO",
-        "@id": "https://forrelief.org/#organization",
-        "name": "4Relief",
-        "url": "https://forrelief.org",
-        "logo": "https://forrelief.org/logo.png",
-        "slogan": p.title || "معاً نصنع الأمل",
-        "description": p.subtitle || "مؤسسة إنسانية وتنموية مستقلة تقدم الاستجابة الطارئة وندعم التنمية المستدامة.",
-        "knowsAbout": [
-          "Humanitarian Relief",
-          "Crisis Response",
-          "Sustainable Development",
-          "Emergency Food and Health Support"
-        ]
-      };
-
+    case "hero":
       return (
-        <section 
-          className="relative min-h-[480px] sm:min-h-[560px] flex items-center overflow-hidden text-white bg-brand transition-colors"
-          style={{ backgroundColor: primary }}
-        >
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(heroSchema) }}
-          />
-          <div className="absolute inset-0">
-            {p.backgroundImage && (
-              <Image 
-                src={p.backgroundImage} 
-                alt="Hero background" 
-                fill 
-                priority 
-                sizes="100vw"
-                className="object-cover" 
-              />
-            )}
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" />
-          </div>
-
-          <div className="absolute -left-20 -bottom-20 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-          <div className="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-screen-xl mx-auto px-6 py-16 sm:py-24 w-full">
-            <div className="max-w-2xl text-start">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 mb-6 text-white text-xs font-semibold uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                مؤسسة 4Relief الإنسانية
-              </span>
-
-              <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight drop-shadow-sm">
-                {p.title}
-              </h1>
-              
-              <p className="text-white/85 text-base sm:text-lg mb-8 leading-relaxed max-w-xl font-normal">
-                {p.subtitle}
-              </p>
-
-              <div className="flex flex-wrap items-center gap-4 mb-12">
-                {p.buttonText && (
-                  <Link
-                    href={getLocalizedLink(p.buttonLink, "/donate")}
-                    className="inline-flex items-center gap-2.5 hover:opacity-90 active:scale-98 text-white font-bold text-sm sm:text-base rounded-2xl px-8 py-3.5 shadow-lg transition-all bg-accent"
-                    style={{ backgroundColor: accent }}
-                  >
-                    <Icon name="heart" size={18} />
-                    {p.buttonText}
-                  </Link>
-                )}
-                <Link
-                  href={getLocalizedLink("/campaigns")}
-                  className="inline-flex items-center gap-2 border border-white/30 hover:bg-white/15 backdrop-blur-md text-white font-semibold rounded-2xl px-7 py-3.5 text-sm sm:text-base transition-all"
-                >
-                  تصفح الحملات
-                  <Icon name={isRTL ? "arrow-left" : "arrow-down"} size={16} className={isRTL ? "" : "-rotate-90"} />
-                </Link>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-white/15 text-white/80 text-xs font-medium">
-                <span className="flex items-center gap-2">
-                  <Icon name="shield-check" size={16} /> عملية شفافة
-                </span>
-                <span className="flex items-center gap-2">
-                  <Icon name="hand-heart" size={16} /> حضور ميداني مع شركاء محليين
-                </span>
-                <span className="flex items-center gap-2">
-                  <Icon name="globe" size={16} /> دعم قائم على الاحتياج
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection
+          locale={locale}
+          dict={context?.dict || {}}
+          primaryColor={primary}
+          accentColor={accent}
+          data={p}
+          isDestekol={context?.isDestekol}
+        />
       );
-    }
 
     case "about_overview":
       return (
@@ -781,38 +700,21 @@ export default function BlockRenderer({
         </section>
       );
 
-    case "stories":
+    // 🌟 التعديل الخاص بقسم القصص والأخبار (stories / news)
+    case "stories": {
+      const posts = context?.posts || [];
+      if (!posts || posts.length === 0) return null;
+
       return (
-        <section className="py-20 sm:py-24 bg-white">
-          <div className="max-w-screen-xl mx-auto px-6">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <Eyebrow className="justify-center">قصص حقيقية</Eyebrow>
-              {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">{p.title}</h2>}
-            </div>
-            <div className="grid sm:grid-cols-2 gap-8">
-              {(p.items || []).map((item: any, i: number) => (
-                <div key={i} className="relative aspect-[16/10] rounded-3xl overflow-hidden shadow-lg group border border-slate-100">
-                  {item.image && (
-                    <Image
-                      src={item.image}
-                      alt={item.title || "Story image"}
-                      fill
-                      sizes="(max-width: 640px) 100vw, 50vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
-                  <div className="absolute bottom-0 right-0 p-6 sm:p-8 text-start">
-                    <Icon name="message-square" size={24} className="text-white/80 mb-2" />
-                    <h3 className="font-display text-xl font-bold text-white mb-2">{item.title}</h3>
-                    <p className="text-white/80 text-xs sm:text-sm leading-relaxed">{item.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <NewsSection
+          key={section.id}
+          posts={posts}
+          locale={locale}
+          dict={context?.dict || {}}
+          data={p}
+        />
       );
+    }
 
     case "faq": {
       const faqItems = p.items || [];
