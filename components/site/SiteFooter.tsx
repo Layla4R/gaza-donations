@@ -187,10 +187,10 @@ export default function SiteFooter({
           <p className="text-white/80 text-sm leading-relaxed mb-6">
             {settings?.footerDescription ||
               d("footer.description", {
-                ar: "مؤسسة إنسانية عالمية، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها الميدانية.",
-                en: "An independent humanitarian donation platform operating with full transparency.",
-                fr: "Une plateforme de dons humanitaires indépendante fonctionnant en toute transparence.",
-                tr: "Tam şeffaflıkla faaliyet gösteren bağımsız bir insani yardım bağış platformu.",
+                ar: "مؤسسة إنسانية عالمية مسجلة، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها الميدانية.",
+                en: "A registered independent humanitarian donation platform operating with full transparency.",
+                fr: "Une plateforme de dons humanitaires indépendante enregistrée fonctionnant en toute transparence.",
+                tr: "Tam şeffaflıkla faaliyet gösteren kayıtlı bağımsız bir insani yardım bağış platformu.",
               }) ||
               `${siteName} Humanitarian Foundation`}
           </p>
@@ -267,7 +267,6 @@ export default function SiteFooter({
               </Link>
             </li>
             
-            {/* تمت إضافة رابط الشراكات المؤسسية هنا */}
             <li>
               <Link
                 href={`${p}/institutional-partnerships`}
@@ -329,11 +328,14 @@ export default function SiteFooter({
                   : item.slug === "contact"
                   ? d("nav.contact", {
                       ar: "اتصل بنا",
-                      en: "Contact",
+                      en: "Contact Us",
                       fr: "Contact",
                       tr: "İletişim",
                     })
                   : item.title);
+
+              // إخفاء عنصر الاتصال هنا لمنع التكرار (سنضيفه يدوياً في الأسفل)
+              if (item.slug === "contact") return null;
 
               return (
                 <li key={item.slug}>
@@ -384,6 +386,25 @@ export default function SiteFooter({
                 })}
               </Link>
             </li>
+            
+            {/* 🌟 إضافة رابط "اتصل بنا" هنا بشكل صريح */}
+            <li>
+              <Link
+                href={`${p}/contact`}
+                className="flex items-center gap-2 hover:text-white transition group"
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition"
+                  aria-hidden="true"
+                />
+                {d("nav.contact", {
+                  ar: "اتصل بنا",
+                  en: "Contact Us",
+                  fr: "Contactez-nous",
+                  tr: "Bize Ulaşın",
+                })}
+              </Link>
+            </li>
           </ul>
         </nav>
 
@@ -419,10 +440,10 @@ export default function SiteFooter({
         <div>
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
             {d("footer.contact_us", {
-              ar: "تواصل معنا",
-              en: "Contact Us",
-              fr: "Nous Contacter",
-              tr: "Bize Ulaşın",
+              ar: "معلومات التواصل",
+              en: "Contact Info",
+              fr: "Coordonnées",
+              tr: "İletişim Bilgileri",
             })}
           </h2>
           <address className="not-italic">
@@ -492,28 +513,29 @@ export default function SiteFooter({
         </div>
       </div>
 
-      {/* Registered Entity & Verification Bar */}
-      <div className="border-t border-white/10 py-4 px-6 flex flex-wrap items-center justify-between gap-4 text-xs text-white/70">
-        <div className="flex items-center gap-4 flex-wrap">
-          <span className="font-semibold text-white/90">
+      {/* 🌟 Registered Entity & Verification Bar */}
+      <div className="border-t border-white/10 py-5 px-6 flex flex-wrap items-center justify-between gap-6 text-sm text-white/70 bg-slate-900/20">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="font-bold text-white/90">
             {d("footer.verified_on", {
-              ar: "جهة مسجلة وموثقة:",
-              en: "Verified Entity:",
-              fr: "Entité Vérifiée:",
-              tr: "Doğrulanmış Kurum:",
+              ar: "جهة رسمية مسجلة وموثقة:",
+              en: "Officially Registered Entity:",
+              fr: "Entité Officiellement Enregistrée :",
+              tr: "Resmi Kayıtlı Kurum:",
             })}
           </span>
           <a
-            href="https://find-and-update.company-information.service.gov.uk/"
+            href="https://find-and-update.company-information.service.gov.uk/company/17306194"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 hover:text-white transition font-medium underline underline-offset-4"
+            className="inline-flex items-center gap-2 hover:bg-white/20 hover:text-white transition font-bold text-sm sm:text-base bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-sm"
           >
-            🏛 GOV.UK Official Register
+            <Icon name="shield-check" size={18} className="text-emerald-400" />
+            GOV.UK Register (No. 17306194)
           </a>
         </div>
 
-        <span>
+        <span className="font-medium">
           {settings?.copyrightText ||
             `© ${new Date().getFullYear()} ${siteName} — ${d("footer.rights", {
               ar: "جميع الحقوق محفوظة",
