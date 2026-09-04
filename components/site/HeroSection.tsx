@@ -23,6 +23,9 @@ interface Slide {
   subtitle_en: string;
   subtitle_fr: string;
   subtitle_tr: string;
+
+  buttonLabel?: string;
+  buttonUrl?: string;
 }
 
 interface Props {
@@ -142,63 +145,66 @@ export default function HeroSection({
       ? adminSlides
           .map((slide: any) => ({
             image:
-              slide?.image ||
               slide?.backgroundImage ||
+              slide?.image ||
               slide?.photo ||
               heroImage ||
               "",
 
             title_ar:
+              slide?.headline ||
               slide?.title_ar ||
               slide?.title ||
-              slide?.headline ||
               "",
 
             title_en:
+              slide?.headline ||
               slide?.title_en ||
               slide?.title ||
-              slide?.headline ||
               "",
 
             title_fr:
+              slide?.headline ||
               slide?.title_fr ||
               slide?.title ||
-              slide?.headline ||
               "",
 
             title_tr:
+              slide?.headline ||
               slide?.title_tr ||
               slide?.title ||
-              slide?.headline ||
               "",
 
             subtitle_ar:
+              slide?.subheading ||
               slide?.subtitle_ar ||
               slide?.subtitle ||
-              slide?.subheading ||
               slide?.description ||
               "",
 
             subtitle_en:
+              slide?.subheading ||
               slide?.subtitle_en ||
               slide?.subtitle ||
-              slide?.subheading ||
               slide?.description ||
               "",
 
             subtitle_fr:
+              slide?.subheading ||
               slide?.subtitle_fr ||
               slide?.subtitle ||
-              slide?.subheading ||
               slide?.description ||
               "",
 
             subtitle_tr:
+              slide?.subheading ||
               slide?.subtitle_tr ||
               slide?.subtitle ||
-              slide?.subheading ||
               slide?.description ||
               "",
+            
+            buttonLabel: slide?.buttonLabel || slide?.buttonText || "",
+            buttonUrl: slide?.buttonUrl || slide?.buttonLink || "",
           }))
           .filter((slide: Slide) => slide.image)
       : heroSlides && heroSlides.length > 0
@@ -515,6 +521,23 @@ export default function HeroSection({
     }
   }
 
+  // دالة لمعالجة الروابط
+  const getLocalizedLink = (url?: string, defaultFallback = "/") => {
+    if (!url) return locale === "ar" ? defaultFallback : `/${locale}${defaultFallback}`;
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    
+    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+    const langPrefix = `/${locale}`;
+
+    if (locale === "ar") return cleanUrl;
+    
+    if (cleanUrl.startsWith(`${langPrefix}/`) || cleanUrl === langPrefix) {
+      return cleanUrl;
+    }
+    
+    return `${langPrefix}${cleanUrl}`;
+  };
+
   if (!slide) {
     return null;
   }
@@ -620,7 +643,7 @@ export default function HeroSection({
 
             <div className="mb-10 flex flex-wrap items-center gap-4">
               <Link
-                href={`${prefix}/donate`}
+                href={getLocalizedLink(slide.buttonUrl, "/donate")}
                 className="inline-flex items-center gap-2.5 rounded-2xl px-8 py-3.5 font-bold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95"
                 style={{
                   background: accent,
@@ -631,7 +654,7 @@ export default function HeroSection({
                   size={18}
                 />
 
-                {t(
+                {slide.buttonLabel || t(
                   "hero.cta_donate",
                   "تبرع الآن",
                   "Donate Now",
