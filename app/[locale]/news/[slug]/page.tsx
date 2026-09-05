@@ -45,7 +45,6 @@ function getYouTubeEmbedUrl(url?: string | null): string | null {
   return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}` : null;
 }
 
-// 🌟 تحويل صريح ومعالج لجميع صيغ الصور والمعرض القادمة من قاعدة البيانات
 function parseGalleryImages(galleryData: any): string[] {
   if (!galleryData) return [];
   if (Array.isArray(galleryData)) {
