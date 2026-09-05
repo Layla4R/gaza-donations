@@ -244,7 +244,6 @@ export default async function NewsPostPage({
   };
 
   const imagesArray = [post.coverImage, secondaryImage, ...gallery].filter(Boolean);
-
   const articleSchema: any = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -265,14 +264,21 @@ export default async function NewsPostPage({
       url: `${SITE_URL}/${locale}/about`,
     },
     publisher: {
-      "@type": "NGO",
+      "@type": "Organization",
       "@id": `${SITE_URL}/#organization`,
       name: "4Relief Humanitarian Foundation",
+      legalName: "FOR RELIEF LTD",
+      iso6523Code: "17306194",
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
         url: `${SITE_URL}/brand/logo.png`,
       },
+      contactPoint: {
+        "@type": "ContactPoint",
+        email: "info@forrelief.org",
+        contactType: "public relations"
+      }
     },
   };
 
@@ -329,7 +335,6 @@ export default async function NewsPostPage({
 
         {/* 🌟 تعديل الخط لمنع التداخل والقطع */}
         <h1
-          itemProp="headline"
           className="mb-4 text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 leading-snug sm:leading-normal tracking-normal"
         >
           {displayTitle}
@@ -342,7 +347,7 @@ export default async function NewsPostPage({
               <Icon name="file-text" size={16} />
             </div>
             <div>
-              <p className="font-bold text-slate-900" itemProp="author">
+              <p className="font-bold text-slate-900">
                 {txtWrittenBy} <span className="text-brand">{txtAuthorName}</span>
               </p>
               <p className="text-[11px] text-slate-500">{txtTrustBadge}</p>
@@ -352,13 +357,13 @@ export default async function NewsPostPage({
           <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-600">
             <span>
               {txtPublishedAt}{" "}
-              <time itemProp="datePublished" dateTime={publishedDateISO}>
+              <time  dateTime={publishedDateISO}>
                 {new Date(publishedDateISO).toLocaleDateString(locale)}
               </time>
             </span>
             <span>
               {txtUpdatedAt}{" "}
-              <time itemProp="dateModified" dateTime={updatedDateISO}>
+              <time dateTime={updatedDateISO}>
                 {new Date(updatedDateISO).toLocaleDateString(locale)}
               </time>
             </span>
@@ -376,8 +381,7 @@ export default async function NewsPostPage({
             sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover"
             priority
-            itemProp="image"
-          />
+            />
         </div>
       )}
 
@@ -385,7 +389,6 @@ export default async function NewsPostPage({
       {displayExcerpt && (
         <section
           aria-label="Executive Summary"
-          itemProp="description"
           className="mb-8 border-s-4 border-brand bg-brand/5 p-4 rounded-e-xl text-xs sm:text-sm leading-relaxed text-slate-800"
         >
           <strong className="block mb-1 text-xs uppercase tracking-wider text-brand font-bold flex items-center gap-1.5">
@@ -400,7 +403,7 @@ export default async function NewsPostPage({
       <div className={`grid grid-cols-1 ${displayVideoUrl ? "lg:grid-cols-12" : "max-w-4xl mx-auto"} gap-8 items-start`}>
         
         {/* Main Body Column */}
-        <div className={`${displayVideoUrl ? "lg:col-span-8" : "w-full"} space-y-6`} itemProp="articleBody">
+        <div className={`${displayVideoUrl ? "lg:col-span-8" : "w-full"} space-y-6`}>
           
           {/* 1. Primary Text Block */}
           {displayBody && (
