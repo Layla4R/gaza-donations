@@ -17,6 +17,8 @@
     "@supabase/supabase-js": "^2.45.4",
     "bcryptjs": "^2.4.3",
     "countries-list": "^3.4.1",
+    "elevenlabs": "^1.59.0",
+    "google-tts-api": "^2.0.2",
     "jose": "^5.9.6",
     "jspdf": "^4.2.1",
     "next": "14.2.5",
