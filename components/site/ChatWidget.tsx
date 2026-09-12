@@ -211,8 +211,6 @@ export default function ChatWidget({ locale = "ar" }: { locale?: string }) {
               <video
                 ref={videoRef}
                 autoPlay
-                muted
-                loop
                 className="w-44 h-44 rounded-full object-cover border-4 border-[#0069D2] shadow-2xl"
                 src="/brand/welcome.mp4"
               />
