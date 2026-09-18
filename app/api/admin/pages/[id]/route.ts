@@ -30,12 +30,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (body.title !== undefined) data.title = body.title;
   if (body.description !== undefined) data.description = body.description;
   if (body.sections !== undefined) {
-    // Ensure sections is stored as valid JSON array (not string)
     data.sections = Array.isArray(body.sections) ? body.sections : [];
   }
   if (body.isPublished !== undefined) data.isPublished = body.isPublished;
   if (body.showInMenu !== undefined) data.showInMenu = body.showInMenu;
   if (body.order !== undefined) data.order = body.order;
+
+  // 🌟 استلام وحفظ حقول التقرير الصحفي والإعلامي المتقدم للمشاريع
+  if (body.body !== undefined) data.body = body.body;
+  if (body.body2 !== undefined) data.body2 = body.body2;
+  if (body.coverImage !== undefined) data.coverImage = body.coverImage;
+  if (body.secondaryImage !== undefined) data.secondaryImage = body.secondaryImage;
+  if (body.gallery !== undefined) data.gallery = Array.isArray(body.gallery) ? body.gallery : [];
+  if (body.videoUrl !== undefined) data.videoUrl = body.videoUrl;
 
   const supabase = getSupabase();
 

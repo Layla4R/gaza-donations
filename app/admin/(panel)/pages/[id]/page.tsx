@@ -8,7 +8,8 @@ import { PageSection } from "@/lib/blocks";
 export const revalidate = 0;
 
 export default async function EditPagePage({
-  params, searchParams,
+  params,
+  searchParams,
 }: {
   params: { id: string };
   searchParams: { locale?: string };
@@ -19,14 +20,15 @@ export default async function EditPagePage({
   const rawLocale = searchParams.locale;
   const locale = rawLocale && VALID_LOCALES.includes(rawLocale) ? rawLocale : "ar";
 
-  // Always load the base page
   const { data: page } = await supabase
     .from("Page").select("*").eq("id", params.id).maybeSingle();
   if (!page) notFound();
 
-  // For non-Arabic: load existing translation or start empty
   let editTitle = page.title;
   let editSections = (page.sections as unknown as PageSection[]) || [];
+  let editBody = page.body || "";
+  let editBody2 = page.body2 || "";
+  let editVideoUrl = page.videoUrl || "";
   let hasTranslation = false;
 
   if (locale !== "ar") {
@@ -38,14 +40,12 @@ export default async function EditPagePage({
       .maybeSingle();
 
     if (trans) {
-      editTitle = trans.title;
-      editSections = (trans.sections as unknown as PageSection[]) || [];
+      editTitle = trans.title || editTitle;
+      editSections = (trans.sections as unknown as PageSection[]) || editSections;
+      editBody = trans.body || editBody;
+      editBody2 = trans.body2 || editBody2;
+      editVideoUrl = trans.videoUrl || editVideoUrl;
       hasTranslation = true;
-    } else {
-      // Start from Arabic base as a starting point
-      editTitle = page.title;
-      editSections = (page.sections as unknown as PageSection[]) || [];
-      hasTranslation = false;
     }
   }
 
@@ -55,6 +55,13 @@ export default async function EditPagePage({
         id: page.id,
         title: editTitle,
         slug: page.slug,
+        description: page.description || "",
+        body: editBody,
+        body2: editBody2,
+        coverImage: page.coverImage || null,
+        secondaryImage: page.secondaryImage || null,
+        gallery: Array.isArray(page.gallery) ? page.gallery : [],
+        videoUrl: editVideoUrl,
         isPublished: page.isPublished,
         showInMenu: page.showInMenu,
         isSystem: page.isSystem,
