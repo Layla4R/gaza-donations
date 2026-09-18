@@ -6,13 +6,14 @@ import Icon from "@/components/icons";
 
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import LegalPageContent from "@/components/site/LegalPageContent";
+import ProjectArticleLayout from "@/components/site/ProjectArticleLayout";
 
-import { getPageBySlug, getCampaignsLite } from "@/lib/pageData";
+import { getCampaignsLite } from "@/lib/pageData";
 import { LOCALES, loadTranslations } from "@/lib/i18n";
 import { PageSection } from "@/lib/blocks";
 import { getSupabaseOrNull } from "@/lib/supabase";
 
-export const revalidate = 300;
+export const revalidate = 0;
 
 interface PageProps {
   params: { slug: string; locale: string };
@@ -87,7 +88,7 @@ const LEGAL_TITLES: Record<string, Record<string, string>> = {
     ar: "الشفافية المالية",
     en: "Financial Transparency",
     fr: "Transparence Financière",
-    tr: "Mali Şeffaflık",
+    tr: "Mali Şeffاflık",
   },
   "how-we-use-donations": {
     ar: "كيف نستخدم التبرعات",
@@ -131,7 +132,7 @@ const TRUST_TRANSLATIONS: Record<string, Record<string, string>> = {
   transparencyLabel: {
     ar: "الشفافية المالية",
     en: "Financial Transparency",
-    tr: "Mali Şeffaflık",
+    tr: "Mali Şeffافية",
     fr: "Transparence Financière",
   },
   transparencyValue: {
@@ -221,7 +222,7 @@ function getCommonPageTitle(slug: string, locale: string, fullName: string, bran
       ar: `الشفافية والتقارير المالية | ${brandName}`,
       en: `Financial Transparency | ${fullName}`,
       fr: `Transparence Financière | ${fullName}`,
-      tr: `Mali Şeffaflık | ${brandName}`,
+      tr: `Mali Şeffافية | ${brandName}`,
     },
     contact: {
       ar: `اتصل بنا | ${fullName}`,
@@ -242,11 +243,85 @@ function cleanText(value: unknown): string {
     .trim();
 }
 
+function parseGalleryImages(galleryData: any): string[] {
+  if (!galleryData) return [];
+  if (Array.isArray(galleryData)) {
+    return galleryData.filter((item) => typeof item === "string" && item.trim() !== "");
+  }
+  if (typeof galleryData === "string") {
+    try {
+      const parsed = JSON.parse(galleryData);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((item) => typeof item === "string" && item.trim() !== "");
+      }
+    } catch {
+      if (galleryData.startsWith("http")) return [galleryData];
+    }
+  }
+  return [];
+}
+
 function getSchemaType(slug: string) {
   if (slug === "about" || slug === "about-us") return "AboutPage";
   if (slug === "contact") return "ContactPage";
   if (slug === "our-work" || slug === "sectors" || slug === "projects") return "CollectionPage";
   return "WebPage";
+}
+
+// 🌟 دالة جلب البيانات مع استخراج الحقول الجديدة من قاعدة البيانات مباشرة
+async function getFullPageData(slug: string, locale: string) {
+  const supabase = getSupabaseOrNull();
+  if (!supabase) return null;
+
+  const { data: page } = await supabase
+    .from("Page")
+    .select("*")
+    .eq("slug", slug)
+    .eq("isPublished", true)
+    .maybeSingle();
+
+  if (!page) return null;
+
+  let title = page.title;
+  let description = page.description || "";
+  let body = page.body || page.content || "";
+  let body2 = page.body2 || "";
+  let coverImage = page.coverImage || page.image || null;
+  let secondaryImage = page.secondaryImage || null;
+  let gallery = parseGalleryImages(page.gallery);
+  let videoUrl = page.videoUrl || null;
+  let sections = page.sections || [];
+
+  if (locale !== "ar") {
+    const { data: translation } = await supabase
+      .from("PageTranslation")
+      .select("*")
+      .eq("pageId", page.id)
+      .eq("locale", locale)
+      .maybeSingle();
+
+    if (translation) {
+      if (translation.title) title = translation.title;
+      if (translation.description) description = translation.description;
+      if (translation.body || translation.content) body = translation.body || translation.content;
+      if (translation.body2) body2 = translation.body2;
+      if (translation.videoUrl) videoUrl = translation.videoUrl;
+      if (translation.sections) sections = translation.sections;
+    }
+  }
+
+  return {
+    ...page,
+    title,
+    description,
+    body,
+    body2,
+    coverImage,
+    secondaryImage,
+    gallery,
+    videoUrl,
+    sections,
+  };
 }
 
 export async function generateMetadata({
@@ -256,7 +331,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, locale } = params;
   const { siteUrl, brandName, fullName } = await getDomainContext();
-  const page = await getPageBySlug(slug, locale);
+  const page = await getFullPageData(slug, locale);
 
   if (!page) return {};
 
@@ -321,7 +396,7 @@ export default async function DynamicPage({
           .maybeSingle()
       : Promise.resolve({ data: null }),
 
-    getPageBySlug(slug, locale),
+    getFullPageData(slug, locale),
     getCampaignsLite(locale),
     loadTranslations(locale),
   ]);
@@ -330,6 +405,49 @@ export default async function DynamicPage({
     notFound();
   }
 
+  const isAr = locale === "ar";
+  const isLegalPage = LEGAL_SLUGS.includes(slug);
+
+  // 🌟 التوجيه المباشر للتصميم الصحفي إذا احتوت الصفحة على نصوص أو ميديا المشروع
+  const hasProjectArticleContent =
+    !isLegalPage &&
+    Boolean(
+      page.body || page.coverImage || page.videoUrl || page.secondaryImage || (Array.isArray(page.gallery) && page.gallery.length > 0)
+    );
+
+  if (hasProjectArticleContent) {
+    const p = isAr ? "" : `/${locale}`;
+    return (
+      <ProjectArticleLayout
+        data={{
+          title: page.title,
+          excerpt: page.description || "",
+          body: page.body || "",
+          body2: page.body2 || "",
+          coverImage: page.coverImage || null,
+          secondaryImage: page.secondaryImage || null,
+          gallery: page.gallery || [],
+          videoUrl: page.videoUrl || null,
+          publishedAtISO: page.createdAt || new Date().toISOString(),
+          updatedAtISO: page.updatedAt || new Date().toISOString(),
+          authorName: isAr ? "فريق المتابعة والتوثيق الميداني" : "Field Monitoring Team",
+          trustBadge: isAr ? "مشروع إغاثي موثق ميدانياً | شفافية 100%" : "Verified Field Project | 100% Audited",
+        }}
+        context={{
+          locale,
+          dict,
+          isAr,
+          brandName: fullName,
+          backLink: `${p}/projects`,
+          backText: dict["projects.back"] || (isAr ? "العودة إلى المشاريع" : "Back to Projects"),
+          categoryLabel: isAr ? "مشروع إغاثي ميداني" : "Relief Project",
+          donateUrl: `${p}/donate`,
+        }}
+      />
+    );
+  }
+
+  // ⬇️ جميع الكود القديم للصفحات العادية والأنظمة بدون حذف ⬇️
   const appearance = appearanceResult.data;
   const primaryColor = appearance?.primaryColor || "#0069D2";
   const accentColor = appearance?.accentColor || "#F00F5A";
@@ -340,7 +458,6 @@ export default async function DynamicPage({
     id: sec.id || `section-${idx}`,
   }));
 
-  const isLegalPage = LEGAL_SLUGS.includes(slug);
   const isTrustPage =
     slug === "about" ||
     slug === "about-us" ||
@@ -365,8 +482,6 @@ export default async function DynamicPage({
 
   const pageUrl = `${siteUrl}/${locale}/${slug}`;
   const schemaType = getSchemaType(slug);
-
-  const isAr = locale === "ar";
 
   const tTrust = (key: string) =>
     TRUST_TRANSLATIONS[key]?.[locale] || TRUST_TRANSLATIONS[key]?.en || "";

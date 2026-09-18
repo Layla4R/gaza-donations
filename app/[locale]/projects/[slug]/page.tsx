@@ -35,10 +35,15 @@ async function getProjectData(slug: string, locale: string) {
   const supabase = getSupabaseOrNull();
   if (!supabase) return null;
 
+  // تنظيف الـ slug للبحث المرن بوجود البادئة أو بدونها
+  const cleanSlug = slug.replace(/^projects\//, "");
+  const possibleSlugs = [cleanSlug, `projects/${cleanSlug}`];
+
+  // 1. البحث بجدول الصفحات Page
   const { data: page } = await supabase
     .from("Page")
     .select("*")
-    .eq("slug", slug)
+    .in("slug", possibleSlugs)
     .maybeSingle();
 
   let project: any = null;
@@ -49,21 +54,22 @@ async function getProjectData(slug: string, locale: string) {
       id: page.id,
       slug: page.slug,
       title: page.title,
-      excerpt: page.description || "",
-      body: page.content || page.body || "",
+      excerpt: page.description || page.excerpt || "",
+      body: page.body || page.content || "",
       body2: page.body2 || "",
       coverImage: page.coverImage || page.image || null,
       secondaryImage: page.secondaryImage || null,
       gallery: parseGalleryImages(page.gallery),
       videoUrl: page.videoUrl || null,
-      publishedAt: page.createdAt || new Date().toISOString(),
-      updatedAt: page.updatedAt || new Date().toISOString(),
+      publishedAt: page.createdAt || page.created_at || new Date().toISOString(),
+      updatedAt: page.updatedAt || page.updated_at || new Date().toISOString(),
     };
   } else {
+    // 2. البحث بجدول الحملات Campaign كبديل
     const { data: campaign } = await supabase
       .from("Campaign")
       .select("*")
-      .eq("slug", slug)
+      .in("slug", possibleSlugs)
       .maybeSingle();
 
     if (campaign) {
@@ -79,8 +85,8 @@ async function getProjectData(slug: string, locale: string) {
         secondaryImage: campaign.secondaryImage || null,
         gallery: parseGalleryImages(campaign.gallery),
         videoUrl: campaign.videoUrl || null,
-        publishedAt: campaign.createdAt || new Date().toISOString(),
-        updatedAt: campaign.updatedAt || new Date().toISOString(),
+        publishedAt: campaign.createdAt || campaign.created_at || new Date().toISOString(),
+        updatedAt: campaign.updatedAt || campaign.updated_at || new Date().toISOString(),
       };
     }
   }
@@ -126,7 +132,8 @@ export async function generateMetadata({
   const { project } = data;
   const title = `${cleanText(project.title)} | 4Relief`;
   const description = cleanText(project.excerpt) || cleanText(project.body).slice(0, 160);
-  const url = `${SITE_URL}/${params.locale}/projects/${project.slug}`;
+  const cleanSlug = project.slug.replace(/^projects\//, "");
+  const url = `${SITE_URL}/${params.locale}/projects/${cleanSlug}`;
   const image = project.coverImage || `${SITE_URL}/brand/og-image.png`;
 
   return {
@@ -135,7 +142,7 @@ export async function generateMetadata({
     alternates: {
       canonical: url,
       languages: Object.fromEntries(
-        LOCALES.map((l) => [l, `${SITE_URL}/${l}/projects/${project.slug}`])
+        LOCALES.map((l) => [l, `${SITE_URL}/${l}/projects/${cleanSlug}`])
       ),
     },
     openGraph: {
@@ -173,7 +180,8 @@ export default async function ProjectDetailPage({
   const { project, isCampaign } = data;
   const isAr = locale === "ar";
   const p = isAr ? "" : `/${locale}`;
-  const pageUrl = `${SITE_URL}/${locale}/projects/${project.slug}`;
+  const cleanSlug = project.slug.replace(/^projects\//, "");
+  const pageUrl = `${SITE_URL}/${locale}/projects/${cleanSlug}`;
 
   // Schema.org Structured Data
   const breadcrumbSchema = {
@@ -233,7 +241,7 @@ export default async function ProjectDetailPage({
           backLink: `${p}/projects`,
           backText: dict["projects.back"] || (isAr ? "العودة إلى المشاريع" : "Back to Projects"),
           categoryLabel: isAr ? "مشروع إغاثي تنموي" : "Relief Project",
-          donateUrl: isCampaign ? `${p}/donate?campaign=${project.slug}` : `${p}/donate`,
+          donateUrl: isCampaign ? `${p}/donate?campaign=${cleanSlug}` : `${p}/donate`,
         }}
       />
     </>

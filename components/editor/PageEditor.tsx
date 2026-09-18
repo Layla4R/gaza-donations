@@ -14,7 +14,6 @@ import Inspector from "./Inspector";
 import CanvasPreview from "./CanvasPreview";
 import MediaUpload from "@/components/admin/MediaUpload";
 
-// 🌟 تحديث واجهة البيانات لدعم كافة حقول التقرير التوثيقي للمشاريع
 interface PageData {
   id: string;
   title: string;
@@ -64,7 +63,7 @@ export default function PageEditor({
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [history, setHistory] = useState<PageSection[][]>([page.sections || []]);
   const [historyIdx, setHistoryIdx] = useState(0);
-  const [leftTab, setLeftTab] = useState<"layers" | "blocks" | "details">("layers");
+  const [leftTab, setLeftTab] = useState<"layers" | "blocks" | "details">("details");
   const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [blockSearch, setBlockSearch] = useState("");
   const [blockCat, setBlockCat] = useState("all");
@@ -73,19 +72,28 @@ export default function PageEditor({
   const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  // 🌟 مراجع حية لمنع الـ Stale Closure أثناء الحفظ
   const latestSections = useRef(sections);
   const latestTitle = useRef(title);
+  const latestDescription = useRef(description);
+  const latestBodyText = useRef(bodyText);
+  const latestBody2Text = useRef(body2Text);
+  const latestCoverImage = useRef(coverImage);
+  const latestSecondaryImage = useRef(secondaryImage);
+  const latestGallery = useRef(gallery);
+  const latestVideoUrl = useRef(videoUrl);
   const latestIsPublished = useRef(isPublished);
 
-  useEffect(() => {
-    latestSections.current = sections;
-  }, [sections]);
-  useEffect(() => {
-    latestTitle.current = title;
-  }, [title]);
-  useEffect(() => {
-    latestIsPublished.current = isPublished;
-  }, [isPublished]);
+  useEffect(() => { latestSections.current = sections; }, [sections]);
+  useEffect(() => { latestTitle.current = title; }, [title]);
+  useEffect(() => { latestDescription.current = description; }, [description]);
+  useEffect(() => { latestBodyText.current = bodyText; }, [bodyText]);
+  useEffect(() => { latestBody2Text.current = body2Text; }, [body2Text]);
+  useEffect(() => { latestCoverImage.current = coverImage; }, [coverImage]);
+  useEffect(() => { latestSecondaryImage.current = secondaryImage; }, [secondaryImage]);
+  useEffect(() => { latestGallery.current = gallery; }, [gallery]);
+  useEffect(() => { latestVideoUrl.current = videoUrl; }, [videoUrl]);
+  useEffect(() => { latestIsPublished.current = isPublished; }, [isPublished]);
 
   const selected = sections.find((s) => s.id === selectedId) ?? null;
   const selectedDef = selected ? getBlockDefinition(selected.type) : null;
@@ -95,9 +103,19 @@ export default function PageEditor({
     setSaveError("");
     try {
       let res: Response;
-      const currentSections = latestSections.current;
-      const currentTitle = latestTitle.current;
-      const currentIsPublished = latestIsPublished.current;
+      const payload = {
+        title: latestTitle.current,
+        description: latestDescription.current,
+        body: latestBodyText.current,
+        body2: latestBody2Text.current,
+        coverImage: latestCoverImage.current,
+        secondaryImage: latestSecondaryImage.current,
+        gallery: latestGallery.current,
+        videoUrl: latestVideoUrl.current,
+        sections: latestSections.current,
+        isPublished: latestIsPublished.current,
+        showInMenu: page.showInMenu,
+      };
 
       if (isTranslation) {
         res = await adminFetch("/api/admin/pages/translations", {
@@ -106,31 +124,14 @@ export default function PageEditor({
           body: JSON.stringify({
             pageId: page.id,
             locale,
-            title: currentTitle,
-            description,
-            body: bodyText,
-            body2: body2Text,
-            videoUrl,
-            sections: currentSections,
+            ...payload,
           }),
         });
       } else {
         res = await adminFetch(`/api/admin/pages/${page.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: currentTitle,
-            description,
-            body: bodyText,
-            body2: body2Text,
-            coverImage,
-            secondaryImage,
-            gallery,
-            videoUrl,
-            sections: currentSections,
-            isPublished: currentIsPublished,
-            showInMenu: page.showInMenu,
-          }),
+          body: JSON.stringify(payload),
         });
       }
       if (!res.ok) {
@@ -309,7 +310,7 @@ export default function PageEditor({
         </div>
       )}
 
-      {/* ══ TOP BAR ════════════════════════════════════════════ */}
+      {/* TOP BAR */}
       <div className="h-[52px] bg-white border-b border-[#E2E5ED] flex items-center px-4 gap-4 shrink-0 shadow-sm z-50">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <a
@@ -427,9 +428,9 @@ export default function PageEditor({
         </div>
       </div>
 
-      {/* ══ BODY ════════════════════════════════════════════════ */}
+      {/* BODY */}
       <div className="flex flex-1 overflow-hidden">
-        {/* ── LEFT PANEL ─────────────────────────────────────── */}
+        {/* LEFT PANEL */}
         <div className="w-[300px] bg-white border-r border-[#E2E5ED] flex flex-col shrink-0 overflow-hidden">
           <div className="flex border-b border-[#E2E5ED] shrink-0">
             {[
@@ -452,7 +453,6 @@ export default function PageEditor({
             ))}
           </div>
 
-          {/* 🌟 Tab 1: Project Article Details & Media Form */}
           {leftTab === "details" ? (
             <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs">
               <div className="font-bold text-[#374151] border-b pb-2 flex items-center gap-1.5">
@@ -599,23 +599,6 @@ export default function PageEditor({
                   />
                 </div>
               </div>
-              {!blockSearch && (
-                <div className="px-3 py-2 flex flex-wrap gap-1 border-b border-[#F3F4F6]">
-                  {BLOCK_CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setBlockCat(cat.id)}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition ${
-                        blockCat === cat.id
-                          ? "bg-[#6366F1] text-white shadow-sm"
-                          : "bg-[#F3F4F6] text-[#6B7280] hover:bg-[#E5E7EB] hover:text-[#374151]"
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-              )}
               <div className="flex-1 overflow-y-auto p-2">
                 <div className="grid grid-cols-1 gap-1">
                   {filteredBlocks.map((def) => (
@@ -628,12 +611,7 @@ export default function PageEditor({
                         <Icon name={def.icon} size={17} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[#111] font-semibold text-xs">
-                          {def.label}
-                        </div>
-                        <div className="text-[#9CA3AF] text-[10px] mt-0.5 leading-tight">
-                          {def.description}
-                        </div>
+                        <div className="text-[#111] font-semibold text-xs">{def.label}</div>
                       </div>
                     </button>
                   ))}
@@ -641,166 +619,36 @@ export default function PageEditor({
               </div>
             </div>
           ) : (
-            /* Tab 3: Layers */
-            <div className="flex-1 overflow-y-auto">
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-[#9CA3AF] uppercase tracking-wider">
-                    {sections.length} Blocks
-                  </span>
-                  <button
-                    onClick={() => setLeftTab("blocks")}
-                    className="text-[#6366F1] text-[11px] font-semibold hover:underline flex items-center gap-0.5"
-                  >
-                    <Icon name="plus" size={11} />
-                    Add
-                  </button>
+            <div className="flex-1 overflow-y-auto p-3">
+              {sections.map((s, idx) => (
+                <div key={s.id} onClick={() => setSelectedId(s.id)} className="p-2 border rounded cursor-pointer mb-1">
+                  {s.type}
                 </div>
-                {sections.length === 0 ? (
-                  <div className="text-center py-10">
-                    <p className="text-[#9CA3AF] text-xs">No blocks yet</p>
-                    <button
-                      onClick={() => setLeftTab("blocks")}
-                      className="text-[#6366F1] text-xs font-semibold mt-1 hover:underline"
-                    >
-                      + Add your first block
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {sections.map((s, idx) => {
-                      const def = getBlockDefinition(s.type);
-                      const isActive = s.id === selectedId;
-                      return (
-                        <div
-                          key={s.id}
-                          className={`flex items-center gap-2 px-3 py-2.5 rounded-xl cursor-pointer transition group border ${
-                            isActive
-                              ? "bg-[#F5F3FF] border-[#C4B5FD] text-[#6366F1]"
-                              : "border-transparent hover:bg-[#F9FAFB] text-[#374151]"
-                          }`}
-                          onClick={() => setSelectedId(s.id)}
-                        >
-                          <div
-                            className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isActive ? "bg-[#6366F1] text-white" : "bg-[#F3F4F6] text-[#6B7280]"}`}
-                          >
-                            <Icon name={def?.icon || "minus"} size={13} />
-                          </div>
-                          <span className="flex-1 text-xs font-semibold truncate">
-                            {def?.label || s.type}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── CANVAS ─────────────────────────────────────────── */}
-        <div
-          ref={canvasRef}
-          className="flex-1 overflow-y-auto flex flex-col items-center py-6 px-4"
-        >
-          {sections.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center max-w-xs">
-              <div className="w-24 h-24 rounded-3xl bg-white border-2 border-dashed border-[#C4B5FD] flex items-center justify-center mb-5">
-                <Icon name="layout-grid" size={36} className="text-[#A5B4FC]" />
-              </div>
-              <h3 className="text-[#374151] font-bold text-lg mb-2">Build or Add Media</h3>
-              <p className="text-[#9CA3AF] text-sm mb-4">
-                Use "+ Block" for custom sections, or "Media & Text" for journalistic layout.
-              </p>
-            </div>
-          ) : (
-            <div
-              className="bg-white rounded-2xl overflow-hidden shadow-lg border border-[#E2E5ED] transition-all duration-300 w-full"
-              style={{ maxWidth: canvasMaxWidth }}
-            >
-              {sections.map((section, idx) => (
-                <SectionWrapper
-                  key={section.id}
-                  section={section}
-                  idx={idx}
-                  total={sections.length}
-                  isSelected={section.id === selectedId}
-                  onSelect={() => setSelectedId(section.id)}
-                  onDelete={() => deleteSection(section.id)}
-                  onMoveUp={() => moveSection(section.id, "up")}
-                  onMoveDown={() => moveSection(section.id, "down")}
-                  onDuplicate={() => duplicateSection(section.id)}
-                />
               ))}
             </div>
           )}
         </div>
 
-        {/* ── RIGHT INSPECTOR ────────────────────────────────── */}
+        {/* CANVAS */}
+        <div ref={canvasRef} className="flex-1 overflow-y-auto flex flex-col items-center py-6 px-4">
+          <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-[#E2E5ED] w-full" style={{ maxWidth: canvasMaxWidth }}>
+            {sections.map((section, idx) => (
+              <CanvasPreview key={section.id} section={section} />
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT INSPECTOR */}
         {!rightCollapsed && (
           <div className="w-[280px] bg-white border-l border-[#E2E5ED] flex flex-col shrink-0 overflow-hidden">
-            <div className="h-[44px] flex items-center justify-between px-4 border-b border-[#E2E5ED] shrink-0">
-              <span className="text-xs font-bold text-[#374151]">Properties</span>
-              <button
-                onClick={() => setRightCollapsed(true)}
-                className="text-[#D1D5DB] hover:text-[#6B7280] transition p-1 rounded"
-              >
-                <Icon name="x" size={14} />
-              </button>
-            </div>
-
             {selected ? (
-              <div className="flex-1 overflow-y-auto">
-                <Inspector
-                  section={selected}
-                  onChange={(props) => updateSectionProps(selected.id, props)}
-                />
-              </div>
+              <Inspector section={selected} onChange={(props) => updateSectionProps(selected.id, props)} />
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-                <p className="text-[#9CA3AF] text-xs">Select any block on canvas to edit</p>
-              </div>
+              <div className="p-6 text-center text-xs text-[#9CA3AF]">Select a block to edit</div>
             )}
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function SectionWrapper({
-  section,
-  idx,
-  total,
-  isSelected,
-  onSelect,
-  onDelete,
-  onMoveUp,
-  onMoveDown,
-  onDuplicate,
-}: {
-  section: PageSection;
-  idx: number;
-  total: number;
-  isSelected: boolean;
-  onSelect: () => void;
-  onDelete: () => void;
-  onMoveUp: () => void;
-  onMoveDown: () => void;
-  onDuplicate: () => void;
-}) {
-  const def = getBlockDefinition(section.type);
-  return (
-    <div
-      onClick={onSelect}
-      className={`relative group cursor-pointer transition-all ${
-        isSelected
-          ? "outline outline-2 outline-[#6366F1] outline-offset-0"
-          : "hover:outline hover:outline-1 hover:outline-[#C4B5FD] hover:outline-offset-0"
-      }`}
-    >
-      <CanvasPreview section={section} />
     </div>
   );
 }
