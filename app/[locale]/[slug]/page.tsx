@@ -286,6 +286,7 @@ async function getFullPageData(slug: string, locale: string) {
   let description = page.description || "";
   let body = page.body || page.content || "";
   let body2 = page.body2 || "";
+  let body3 = page.body3 || "";
   let coverImage = page.coverImage || page.image || null;
   let secondaryImage = page.secondaryImage || null;
   let gallery = parseGalleryImages(page.gallery);
@@ -302,10 +303,15 @@ async function getFullPageData(slug: string, locale: string) {
 
     if (translation) {
       if (translation.title) title = translation.title;
-      if (translation.description) description = translation.description;
+      if (translation.description != null) description = translation.description;
       if (translation.body || translation.content) body = translation.body || translation.content;
-      if (translation.body2) body2 = translation.body2;
-      if (translation.videoUrl) videoUrl = translation.videoUrl;
+      if (translation.body != null) body = translation.body;
+      if (translation.body2 != null) body2 = translation.body2;
+      if (translation.body3 != null) body3 = translation.body3;
+      if (translation.coverImage != null) coverImage = translation.coverImage;
+      if (translation.secondaryImage != null) secondaryImage = translation.secondaryImage;
+      if (translation.gallery != null) gallery = parseGalleryImages(translation.gallery);
+      if (translation.videoUrl != null) videoUrl = translation.videoUrl;
       if (translation.sections) sections = translation.sections;
     }
   }
@@ -316,6 +322,7 @@ async function getFullPageData(slug: string, locale: string) {
     description,
     body,
     body2,
+    body3,
     coverImage,
     secondaryImage,
     gallery,
@@ -412,7 +419,7 @@ export default async function DynamicPage({
   const hasProjectArticleContent =
     !isLegalPage &&
     Boolean(
-      page.body || page.coverImage || page.videoUrl || page.secondaryImage || (Array.isArray(page.gallery) && page.gallery.length > 0)
+      page.body || page.body2 || page.body3 || page.coverImage || page.videoUrl || page.secondaryImage || (Array.isArray(page.gallery) && page.gallery.length > 0)
     );
 
   if (hasProjectArticleContent) {
@@ -424,6 +431,7 @@ export default async function DynamicPage({
           excerpt: page.description || "",
           body: page.body || "",
           body2: page.body2 || "",
+          body3: page.body3 || "",
           coverImage: page.coverImage || null,
           secondaryImage: page.secondaryImage || null,
           gallery: page.gallery || [],

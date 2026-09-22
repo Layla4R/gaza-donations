@@ -24,6 +24,7 @@ export default async function EditPagePage({
     .from("Page").select("*").eq("id", params.id).maybeSingle();
   if (!page) notFound();
 
+  let editPage = { ...page };
   let editTitle = page.title;
   let editSections = (page.sections as unknown as PageSection[]) || [];
   let editBody = page.body || "";
@@ -40,6 +41,9 @@ export default async function EditPagePage({
       .maybeSingle();
 
     if (trans) {
+      for (const key of ["description", "body", "body2", "body3", "coverImage", "secondaryImage", "gallery", "videoUrl"]) {
+        if (trans[key] !== null && trans[key] !== undefined) editPage[key] = trans[key];
+      }
       editTitle = trans.title || editTitle;
       editSections = (trans.sections as unknown as PageSection[]) || editSections;
       editBody = trans.body || editBody;
@@ -55,13 +59,14 @@ export default async function EditPagePage({
         id: page.id,
         title: editTitle,
         slug: page.slug,
-        description: page.description || "",
-        body: editBody,
-        body2: editBody2,
-        coverImage: page.coverImage || null,
-        secondaryImage: page.secondaryImage || null,
-        gallery: Array.isArray(page.gallery) ? page.gallery : [],
-        videoUrl: editVideoUrl,
+        description: editPage.description || "",
+        body: editPage.body || "",
+        body2: editPage.body2 || "",
+        body3: editPage.body3 || "",
+        coverImage: editPage.coverImage || null,
+        secondaryImage: editPage.secondaryImage || null,
+        gallery: Array.isArray(editPage.gallery) ? editPage.gallery : [],
+        videoUrl: editPage.videoUrl || "",
         isPublished: page.isPublished,
         showInMenu: page.showInMenu,
         isSystem: page.isSystem,

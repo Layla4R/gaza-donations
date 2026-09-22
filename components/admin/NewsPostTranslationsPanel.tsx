@@ -1,4 +1,5 @@
 "use client";
+import { autoTranslateContent } from "@/lib/auto-translate";
 import { adminFetch } from "@/lib/admin-fetch";
 import { useState, useEffect } from "react";
 import Icon from "@/components/icons";
@@ -59,17 +60,7 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
   async function autoTranslate() {
     setTranslating(true); setStatus(null);
     try {
-      const res = await adminFetch("/api/admin/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sections: [baseTitle, baseExcerpt, baseBody, baseBody2],
-          targetLang: activeLocale,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Translation failed");
-      const d = await res.json();
+      const d = { sections: await autoTranslateContent([baseTitle, baseExcerpt, baseBody, baseBody2], activeLocale) };
 
       if (d.sections && Array.isArray(d.sections)) {
         setForm(f => ({
@@ -117,7 +108,7 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
         <button
           type="button"
           onClick={autoTranslate}
-          disabled={translating}
+          disabled={translating || loadingLocale || loading}
           className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl transition shadow-sm disabled:opacity-50"
         >
           <Icon name="tablet" size={14} />
@@ -127,7 +118,7 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
 
       <div className="flex gap-2 my-5">
         {LOCALES.map(l => (
-          <button key={l.code} onClick={() => setActiveLocale(l.code)}
+          <button key={l.code} disabled={translating || loading} onClick={() => setActiveLocale(l.code)}
             className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-bold border transition ${activeLocale === l.code ? "bg-brand text-white border-brand" : "border-line text-muted hover:border-brand hover:text-brand"}`}>
             <span>{l.flag}</span>{l.name}
           </button>
@@ -164,7 +155,7 @@ export default function NewsPostTranslationsPanel({ postId, baseTitle, baseExcer
       )}
 
       <div className="flex gap-3 mt-5">
-        <button onClick={save} disabled={loading || !form.title.trim()}
+        <button onClick={save} disabled={loading || translating || loadingLocale || !form.title.trim()}
           className="flex items-center gap-2 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl px-6 py-2.5 text-sm transition disabled:opacity-50 shadow-sm">
           <Icon name="check" size={14} />{loading ? "Saving..." : "Save Translation"}
         </button>

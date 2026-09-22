@@ -57,6 +57,7 @@ async function getProjectData(slug: string, locale: string) {
       excerpt: page.description || page.excerpt || "",
       body: page.body || page.content || "",
       body2: page.body2 || "",
+      body3: page.body3 || "",
       coverImage: page.coverImage || page.image || null,
       secondaryImage: page.secondaryImage || null,
       gallery: parseGalleryImages(page.gallery),
@@ -113,8 +114,14 @@ async function getProjectData(slug: string, locale: string) {
       if (translation.body || translation.content) {
         project.body = translation.body || translation.content;
       }
-      if (translation.body2) project.body2 = translation.body2;
-      if (translation.videoUrl) project.videoUrl = translation.videoUrl;
+      if (translation.body != null) project.body = translation.body;
+      if (translation.body2 != null) project.body2 = translation.body2;
+      if (translation.body3 != null) project.body3 = translation.body3;
+      if (translation.description != null) project.excerpt = translation.description;
+      if (translation.coverImage != null) project.coverImage = translation.coverImage;
+      if (translation.secondaryImage != null) project.secondaryImage = translation.secondaryImage;
+      if (translation.gallery != null) project.gallery = parseGalleryImages(translation.gallery);
+      if (translation.videoUrl != null) project.videoUrl = translation.videoUrl;
     }
   }
 
@@ -224,6 +231,7 @@ export default async function ProjectDetailPage({
           excerpt: project.excerpt,
           body: project.body,
           body2: project.body2,
+          body3: project.body3,
           coverImage: project.coverImage,
           secondaryImage: project.secondaryImage,
           gallery: project.gallery,

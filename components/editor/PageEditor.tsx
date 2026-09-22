@@ -1,4 +1,5 @@
 "use client";
+import { autoTranslateContent } from "@/lib/auto-translate";
 import { adminFetch } from "@/lib/admin-fetch";
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
@@ -60,6 +61,8 @@ export default function PageEditor({
   const [videoUrl, setVideoUrl] = useState(page.videoUrl || "");
 
   const [isPublished, setIsPublished] = useState(page.isPublished);
+  const translationBusy = useRef(false);
+  const [translationProgress, setTranslationProgress] = useState("");
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string>("");
   const [isDirty, setIsDirty] = useState(false);
@@ -116,6 +119,7 @@ export default function PageEditor({
   const selectedDef = selected ? getBlockDefinition(selected.type) : null;
 
   async function save() {
+    if (translationBusy.current) return;
     setSaving(true);
     setSaveError("");
     try {
@@ -185,6 +189,7 @@ export default function PageEditor({
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (translationBusy.current) { e.preventDefault(); return; }
       const mod = e.metaKey || e.ctrlKey;
       if (mod && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
@@ -334,6 +339,11 @@ export default function PageEditor({
       style={{ fontFamily: "Inter, system-ui, sans-serif" }}
     >
       {" "}
+      {translationProgress && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/30" role="status" aria-live="polite">
+          <div className="rounded-xl bg-white p-6 shadow-xl text-sm font-semibold">{translationProgress}</div>
+        </div>
+      )}
       {saveSuccess && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[999] bg-success text-white text-xs font-bold rounded-xl px-5 py-2.5 shadow-lg flex items-center gap-2">
           <Icon name="check" size={14} /> Page saved successfully
@@ -372,54 +382,49 @@ export default function PageEditor({
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                disabled={saving}
                 onClick={async () => {
-                  if (
-                    confirm(
-                      "هل تريد نسخ جميع أقسام العربية وترجمتها تلقائياً عبر Google Translate؟",
-                    )
-                  ) {
-                    try {
-                      setSaving(true);
-                      const res = await adminFetch(
-                        `/api/admin/pages/${page.id}`,
-                      );
-                      if (!res.ok) throw new Error("فشل جلب الصفحة الأصلية");
-
-                      const data = await res.json();
-                      const originalSections =
-                        data.page?.sections || data.sections || [];
-                      const transRes = await adminFetch(
-                        "/api/admin/translate",
-                        {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            sections: originalSections,
-                            targetLang: locale,
-                          }),
-                        },
-                      );
-
-                      if (!transRes.ok) throw new Error("فشلت عملية الترجمة");
-
-                      const transData = await transRes.json();
-                      if (transData.sections) {
-                        setSections(transData.sections);
-                        setIsDirty(true);
-                        alert(
-                          `تمت الترجمة التلقائية إلى اللغة (${locale.toUpperCase()}) بنجاح!`,
-                        );
-                      }
-                    } catch (err: any) {
-                      alert(err.message || "حدث خطأ أثناء الترجمة التلقائية");
-                    } finally {
-                      setSaving(false);
-                    }
+                  if (translationBusy.current || saving) return;
+                  if (!confirm("نسخ المحتوى والصور والأقسام من النسخة العربية المحفوظة وترجمتها؟ سيستبدل ذلك تعديلات هذه اللغة عند نجاح العملية.")) return;
+                  translationBusy.current = true;
+                  setSaving(true);
+                  setTranslationProgress("جلب المحتوى العربي…");
+                  try {
+                    const res = await adminFetch("/api/admin/pages/" + page.id, { cache: "no-store" });
+                    const data = await res.json();
+                    if (!res.ok || !data.page) throw new Error(data.error || "فشل جلب الصفحة العربية");
+                    const original = data.page;
+                    const translated = await autoTranslateContent({
+                      title: original.title || "", description: original.description || "",
+                      body: original.body || "", body2: original.body2 || "", body3: original.body3 || "",
+                      coverImage: original.coverImage || "", secondaryImage: original.secondaryImage || "",
+                      gallery: Array.isArray(original.gallery) ? original.gallery : [], videoUrl: original.videoUrl || "",
+                      sections: Array.isArray(original.sections) ? original.sections : [],
+                    }, locale, (done, total) => setTranslationProgress("ترجمة " + done + "/" + total));
+                    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+                    setTitle(translated.title); latestTitle.current = translated.title;
+                    setDescription(translated.description); latestDescription.current = translated.description;
+                    setBodyText(translated.body); latestBodyText.current = translated.body;
+                    setBody2Text(translated.body2); latestBody2Text.current = translated.body2;
+                    setBody3Text(translated.body3); latestBody3Text.current = translated.body3;
+                    setCoverImage(translated.coverImage); latestCoverImage.current = translated.coverImage;
+                    setSecondaryImage(translated.secondaryImage); latestSecondaryImage.current = translated.secondaryImage;
+                    setGallery(translated.gallery); latestGallery.current = translated.gallery;
+                    setVideoUrl(translated.videoUrl); latestVideoUrl.current = translated.videoUrl;
+                    setSections(translated.sections); latestSections.current = translated.sections;
+                    setHistory([translated.sections]); setHistoryIdx(0);
+                    setSelectedId(translated.sections[0]?.id || null);
+                    setIsDirty(true);
+                    alert("تمت ترجمة المحتوى ونسخ الصور والأقسام. اضغط Save لحفظ الترجمة.");
+                  } catch (error) {
+                    alert(error instanceof Error ? error.message : "فشلت الترجمة؛ لم يتم استبدال المحتوى.");
+                  } finally {
+                    translationBusy.current = false; setSaving(false); setTranslationProgress("");
                   }
                 }}
                 className="px-3 py-1.5 text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg transition flex items-center gap-1.5 shrink-0 shadow-sm"
               >
-                <span>✨ ترجمة تلقائية (Google)</span>
+                <span>{translationProgress || "✨ ترجمة تلقائية (Google)"}</span>
               </button>
             </div>
           )}

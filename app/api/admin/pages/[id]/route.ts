@@ -39,6 +39,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   // 🌟 استلام وحفظ حقول التقرير الصحفي والإعلامي المتقدم للمشاريع
   if (body.body !== undefined) data.body = body.body;
   if (body.body2 !== undefined) data.body2 = body.body2;
+  if (body.body3 !== undefined) data.body3 = body.body3;
   if (body.coverImage !== undefined) data.coverImage = body.coverImage;
   if (body.secondaryImage !== undefined) data.secondaryImage = body.secondaryImage;
   if (body.gallery !== undefined) data.gallery = Array.isArray(body.gallery) ? body.gallery : [];
