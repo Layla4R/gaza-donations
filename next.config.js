@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  experimental: { serverComponentsExternalPackages: ["node-edge-tts"] },
   staticPageGenerationTimeout: 180,
   images: {
     formats: ["image/avif", "image/webp"],
@@ -48,7 +49,7 @@ const nextConfig = {
       {
         source: "/_next/static/:path*",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          { key: "Cache-Control", value: process.env.NODE_ENV === "development" ? "no-store" : "public, max-age=31536000, immutable" },
         ],
       },
       {

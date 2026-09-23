@@ -1,265 +1,125 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+type Message = { sender: "user" | "bot"; text: string };
+const blue = "#0069d2";
 
 export default function ChatWidget({ locale = "ar" }: { locale?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"text" | "voice">("text");
-  const [messages, setMessages] = useState<
-    { sender: "user" | "bot"; text: string }[]
-  >([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-
+  const [welcome, setWelcome] = useState(true);
+  const [notice, setNotice] = useState("");
+  const [audioUrl, setAudioUrl] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const voiceActive = useRef(false);
+  const playbackId = useRef(0);
+  const speechRequest = useRef<AbortController | null>(null);
+  const answerRequest = useRef<AbortController | null>(null);
+  const clip = useRef<{ text: string; locale: string; url: string } | null>(null);
+  const lastAnswer = [...messages].reverse().find(m => m.sender === "bot");
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  function stopMedia() {
+    playbackId.current++;
+    speechRequest.current?.abort();
+    videoRef.current?.pause();
+    audioRef.current?.pause();
+    setIsSpeaking(false); setPreparing(false);
+  }
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  useEffect(() => () => {
+    playbackId.current++;
+    speechRequest.current?.abort(); answerRequest.current?.abort();
+    audioRef.current?.pause(); videoRef.current?.pause();
+    if (clip.current) URL.revokeObjectURL(clip.current.url);
+  }, []);
 
-  const playAudio = (audioData: string) => {
-    if (!audioData) return;
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
-
+  async function readAnswer(text: string) {
+    stopMedia(); setWelcome(false); setNotice("");
+    const id = playbackId.current;
+    const controller = new AbortController(); speechRequest.current = controller;
+    const timer = setTimeout(() => controller.abort(), 15000);
+    setPreparing(true);
     try {
-      const audio = new Audio(audioData); // يقبل Data URL و URLs عادية
-      audioRef.current = audio;
-
-      audio.onplay = () => setIsSpeaking(true);
-      audio.onended = () => setIsSpeaking(false);
-      audio.onerror = (err) => {
-        console.error("خطأ في تشغيل الصوت:", err);
-        setIsSpeaking(false);
-      };
-
-      audio.play().catch((err) => {
-        console.error("فشل تشغيل الصوت:", err);
-        setIsSpeaking(false);
-      });
-    } catch (err) {
-      console.error("خطأ في إنشاء الصوت:", err);
-      setIsSpeaking(false);
-    }
-  };
-
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-
-    const userMsg = input.trim();
-    setInput("");
-    setMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
-    setLoading(true);
-
-    if (audioRef.current) audioRef.current.pause();
-    setIsSpeaking(false);
-
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMsg, locale }),
-      });
-
-      const data = await res.json();
-      const botAnswer = data.answer || "عذراً، لم أتمكن من العثور على إجابة.";
-
-      setMessages((prev) => [...prev, { sender: "bot", text: botAnswer }]);
-
-      // إذا كان الزائر في تبويب "المتحدث الذكي"، شغّل الصوت الصادر من السيرفر فوراً
-      if (activeTab === "voice" && data.audioUrl) {
-        playAudio(data.audioUrl);
+      let url = clip.current?.text === text && clip.current.locale === locale ? clip.current.url : "";
+      if (!url) {
+        setAudioUrl("");
+        const response = await fetch("/api/chat/audio", { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text, locale }) });
+        if (!response.ok || !response.headers.get("content-type")?.includes("audio")) throw new Error("تعذّر تجهيز الصوت. اضغط إعادة الاستماع للمحاولة مجدداً.");
+        const blob = await response.blob();
+        if (!blob.size) throw new Error("لم يصل ملف صوتي. اضغط إعادة الاستماع.");
+        if (id !== playbackId.current) return;
+        if (clip.current) URL.revokeObjectURL(clip.current.url);
+        url = URL.createObjectURL(blob); clip.current = { text, locale, url };
       }
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { sender: "bot", text: "حدث خطأ أثناء الاتصال بالمساعد الذكي." },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+      if (id !== playbackId.current || !voiceActive.current) return;
+      setAudioUrl(url); setPreparing(false);
+      const audio = audioRef.current;
+      if (!audio) throw new Error("افتح تبويب المتحدث ثم أعد الاستماع.");
+      audio.src = url; audio.playbackRate = 1.1;
+      try { await audio.play(); }
+      catch { if (id === playbackId.current) setNotice("الصوت جاهز. اضغط زر التشغيل في المشغّل أدناه للسماح بتشغيله."); }
+    } catch (error) {
+      if (id === playbackId.current) setNotice(controller.signal.aborted ? "انتهت مهلة تجهيز الصوت. اضغط إعادة الاستماع." : error instanceof Error ? error.message : "تعذّر تشغيل الصوت.");
+    } finally { clearTimeout(timer); if (id === playbackId.current) setPreparing(false); }
   }
 
-  return (
-    <div className="fixed bottom-6 start-6 z-50 font-sans">
-      {!isOpen && (
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-[#0069D2] hover:bg-blue-700 text-white flex items-center justify-center shadow-2xl transition-transform hover:scale-105"
-        >
-          💬
-        </button>
-      )}
-
-      {isOpen && (
-        <div className="w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[520px]">
-          {/* Header وشريط التبديل */}
-          <div className="bg-[#0069D2] text-white p-3 flex items-center justify-between gap-2">
-            <div className="flex gap-1 bg-black/20 p-1 rounded-xl text-xs font-bold">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("text");
-                  if (audioRef.current) audioRef.current.pause();
-                  setIsSpeaking(false);
-                }}
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  activeTab === "text"
-                    ? "bg-white text-[#0069D2] shadow-sm"
-                    : "text-white/80"
-                }`}
-              >
-                💬 نص
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("voice")}
-                className={`px-3 py-1.5 rounded-lg transition ${
-                  activeTab === "voice"
-                    ? "bg-white text-[#0069D2] shadow-sm"
-                    : "text-white/80"
-                }`}
-              >
-                🎙️ المتحدث الذكي
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                if (audioRef.current) audioRef.current.pause();
-                setIsSpeaking(false);
-              }}
-              className="text-white hover:opacity-80 px-2 text-base font-bold"
-            >
-              ✕
-            </button>
+  async function handleSend(event: React.FormEvent) {
+    event.preventDefault(); if (!input.trim() || loading) return;
+    const text = input.trim(); setInput(""); stopMedia(); setWelcome(false); setNotice(""); setAudioUrl("");
+    setMessages(items => [...items, { sender: "user", text }]); setLoading(true);
+    const controller = new AbortController(); answerRequest.current = controller;
+    const timer = setTimeout(() => controller.abort(), 60000);
+    try {
+      const response = await fetch("/api/chat", { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text, locale }) });
+      const data = await response.json();
+      if (!response.ok || typeof data.answer !== "string" || !data.answer.trim()) throw new Error(data.error || "تعذّر الحصول على إجابة.");
+      if (controller.signal.aborted) return;
+      setMessages(items => [...items, { sender: "bot", text: data.answer }]);
+      if (voiceActive.current) void readAnswer(data.answer);
+    } catch (error) {
+      if (!controller.signal.aborted) setNotice(error instanceof Error ? error.message : "تعذّر الاتصال.");
+      else setNotice("تم إيقاف الطلب أو انتهت مهلة الإجابة.");
+    } finally { clearTimeout(timer); setLoading(false); }
+  }
+  function selectTab(tab: "text" | "voice") {
+    stopMedia(); setNotice(""); voiceActive.current = tab === "voice"; setActiveTab(tab);
+  }
+  return <div dir={locale === "ar" ? "rtl" : "ltr"} className="fixed bottom-6 start-6 z-50 font-sans" style={{ color: "#1e293b" }}>
+    {!isOpen ? <button type="button" aria-label="فتح المساعد" onClick={() => { setIsOpen(true); voiceActive.current = activeTab === "voice"; }} className="w-14 h-14 rounded-full shadow-2xl" style={{ backgroundColor: blue, color: "white" }}>💬</button> :
+      <section aria-label="المساعد الذكي" className="w-80 sm:w-96 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col" style={{ height: 580, maxWidth: "calc(100vw - 3rem)", maxHeight: "calc(100dvh - 3rem)", backgroundColor: "white" }}>
+        <header className="p-3 flex shrink-0 items-center justify-between gap-2" style={{ backgroundColor: blue, color: "white" }}>
+          <div className="flex gap-1 p-1 rounded-xl text-xs font-bold" style={{ backgroundColor: "#0054a8" }}>
+            {(["text", "voice"] as const).map(tab => <button key={tab} type="button" aria-pressed={activeTab === tab} onClick={() => selectTab(tab)} className="px-3 py-1.5 rounded-lg" style={{ backgroundColor: activeTab === tab ? "white" : "transparent", color: activeTab === tab ? blue : "white" }}>{tab === "text" ? "💬 نص" : "🎙️ المتحدث الذكي"}</button>)}
           </div>
-
-          {/* التبويب الأول: محادثة نصية */}
-          {activeTab === "text" && (
-            <div className="flex-1 flex flex-col justify-between overflow-hidden bg-slate-50">
-              <div className="flex-1 p-4 overflow-y-auto space-y-3">
-                {messages.length === 0 && (
-                  <p className="text-xs text-slate-400 text-center mt-12">
-                    {locale === "ar"
-                      ? "مرحباً بك! كيف يمكنني مساعدتك اليوم؟"
-                      : "Hello! How can I help you today?"}
-                  </p>
-                )}
-
-                {messages.map((m, i) => (
-                  <div
-                    key={i}
-                    className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-xl p-3 text-xs leading-relaxed ${
-                        m.sender === "user"
-                          ? "bg-[#0069D2] text-white"
-                          : "bg-white border border-slate-200 text-slate-800"
-                      }`}
-                    >
-                      {m.text}
-                    </div>
-                  </div>
-                ))}
-
-                {loading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border border-slate-200 text-xs text-slate-400 p-2.5 rounded-xl animate-pulse">
-                      جاري التفكير...
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              <form
-                onSubmit={handleSend}
-                className="p-3 border-t border-slate-200 flex gap-2 bg-white"
-              >
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="اكتب استفسارك..."
-                  className="flex-1 text-xs px-3 py-2.5 border border-slate-200 rounded-xl focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-[#0069D2] text-white px-4 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50"
-                >
-                  إرسال
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* التبويب الثاني: المتحدث الذكي */}
-          {activeTab === "voice" && (
-            <div className="flex-1 flex flex-col items-center justify-between p-4 bg-slate-900 text-white text-center">
-              <video
-                ref={videoRef}
-                autoPlay
-                className="w-44 h-44 rounded-full object-cover border-4 border-[#0069D2] shadow-2xl"
-                src="/brand/welcome.mp4"
-              />
-              <div className="relative w-44 h-44 rounded-full overflow-hidden border-4 border-[#0069D2] shadow-2xl my-auto bg-slate-800">
-                <img
-                  src="/brand/Avatar.png"
-                  alt="4Relief Voice Assistant"
-                  className={`w-full h-full object-cover transition-all duration-300 ${
-                    isSpeaking ? "scale-105" : "scale-100"
-                  }`}
-                />
-                {isSpeaking && (
-                  <div className="absolute inset-0 rounded-full border-4 border-[#0069D2] animate-ping opacity-75 pointer-events-none" />
-                )}
-              </div>
-
-              <div className="space-y-1 mb-2">
-                <h4 className="font-bold text-xs text-slate-200">
-                  المساعد الميداني الذكي
-                </h4>
-                <p className="text-[11px] text-slate-400">
-                  {isSpeaking
-                    ? "🔊 جاري التحدث والرد صوتياً..."
-                    : loading
-                      ? "⏳ جاري تحضير الإجابة..."
-                      : "اسأل المساعد وسيجيبك باللغة العربية"}
-                </p>
-              </div>
-
-              <form onSubmit={handleSend} className="w-full flex gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="اسأل المساعد المتحدث..."
-                  className="flex-1 text-xs px-3 py-2.5 border border-slate-700 bg-slate-800 text-white rounded-xl focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-[#0069D2] text-white px-4 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50"
-                >
-                  إرسال
-                </button>
-              </form>
-            </div>
-          )}
+          <button type="button" aria-label="إغلاق المساعد" onClick={() => { voiceActive.current = false; stopMedia(); answerRequest.current?.abort(); setIsOpen(false); }} className="px-2 text-base font-bold" style={{ color: "white" }}>✕</button>
+        </header>
+        {activeTab === "voice" && <div className="flex shrink-0 flex-col items-center gap-2 p-3 text-center" style={{ backgroundColor: "#0f172a", color: "white" }}>
+          {welcome ? <video ref={videoRef} src="/brand/welcome.mp4" aria-label="الفيديو الترحيبي" autoPlay playsInline controls onEnded={() => setWelcome(false)} onError={() => { setWelcome(false); setNotice("تعذّر تشغيل الفيديو الترحيبي. يمكنك كتابة سؤالك."); }} onPlay={() => audioRef.current?.pause()} className="w-28 h-28 rounded-full object-cover border-4" style={{ borderColor: blue }} /> :
+            <img src="/brand/Avatar.png" alt="المساعد المتحدث" className={`w-24 h-24 rounded-full object-cover border-4 ${isSpeaking ? "animate-pulse" : ""}`} style={{ borderColor: blue }} />}
+          <p className="text-xs" style={{ color: "#e2e8f0" }}>{isSpeaking ? "جاري قراءة الإجابة…" : preparing ? "جاري تجهيز الصوت…" : welcome ? "الفيديو الترحيبي — اكتب سؤالك في أي وقت" : "المساعد الصوتي — صوت عربي ذكوري"}</p>
+          <div className="flex gap-4 text-xs">
+            {lastAnswer && <button type="button" disabled={preparing} onClick={() => isSpeaking ? stopMedia() : void readAnswer(lastAnswer.text)} className="underline disabled:opacity-50" style={{ color: "white" }}>{isSpeaking ? "إيقاف الصوت" : "إعادة الاستماع"}</button>}
+            {!welcome && <button type="button" onClick={() => { stopMedia(); setWelcome(true); }} className="underline" style={{ color: "#cbd5e1" }}>إعادة الترحيب</button>}
+          </div>
+        </div>}
+        <audio ref={audioRef} controls aria-label="مشغل الإجابة الصوتية" className="w-full shrink-0" style={{ display: activeTab === "voice" && audioUrl ? "block" : "none" }} onPlay={() => { videoRef.current?.pause(); setWelcome(false); setIsSpeaking(true); setNotice(""); }} onPause={() => setIsSpeaking(false)} onEnded={() => setIsSpeaking(false)} onError={() => { setIsSpeaking(false); setNotice("تعذّر تشغيل الملف الصوتي. أعد الاستماع للمحاولة مجدداً."); }} />
+        <div className="min-h-0 flex-1 p-3 overflow-y-auto space-y-3" style={{ backgroundColor: "#f8fafc" }} aria-live="polite">
+          {!messages.length && <p className="text-xs text-center mt-4" style={{ color: "#64748b" }}>مرحباً بك! كيف يمكنني مساعدتك اليوم؟</p>}
+          {messages.map((message, index) => <div key={index} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}><div className="max-w-[85%] rounded-xl p-3 text-sm leading-relaxed border" style={{ backgroundColor: message.sender === "user" ? blue : "white", color: message.sender === "user" ? "white" : "#1e293b", borderColor: message.sender === "user" ? blue : "#e2e8f0", whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{message.text}</div></div>)}
+          {loading && <p className="text-xs" style={{ color: "#64748b" }}>جاري تجهيز الإجابة…</p>}<div ref={messagesEndRef} />
         </div>
-      )}
-    </div>
-  );
+        {notice && <p role="status" className="p-2 text-xs shrink-0" style={{ backgroundColor: "#fef3c7", color: "#78350f" }}>{notice}</p>}
+        <form onSubmit={handleSend} className="p-3 border-t flex shrink-0 gap-2" style={{ backgroundColor: "white" }}>
+          <input aria-label="السؤال" maxLength={4000} value={input} onChange={event => setInput(event.target.value)} placeholder="اكتب سؤالك…" className="min-w-0 flex-1 text-sm px-3 py-2.5 border rounded-xl" style={{ color: "#1e293b", backgroundColor: "white" }} />
+          <button type="submit" disabled={loading || !input.trim()} className="px-4 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50" style={{ backgroundColor: blue, color: "white" }}>إرسال</button>
+        </form>
+      </section>}
+  </div>;
 }

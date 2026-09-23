@@ -200,23 +200,6 @@ async function askGroq(message: string, locale: Locale): Promise<string> {
   throw new Error("Groq returned an empty or truncated response");
 }
 
-async function makeAudio(text: string): Promise<string> {
-  const key = process.env.ELEVENLABS_API_KEY;
-  if (!key) return "";
-  try {
-    return await withTimeout(6000, async signal => {
-      const voice = process.env.ELEVENLABS_VOICE_ID || "pNInz6obpgDQGcFmaJgB";
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(voice)}`, {
-        method: "POST", signal,
-        headers: { Accept: "audio/mpeg", "Content-Type": "application/json", "xi-api-key": key },
-        body: JSON.stringify({ text, model_id: "eleven_multilingual_v2", voice_settings: { stability: 0.5, similarity_boost: 0.75 } }),
-      });
-      if (!response.ok) throw new Error(`TTS HTTP ${response.status}`);
-      return `data:audio/mpeg;base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
-    });
-  } catch { console.warn("Chat audio unavailable; returning text"); return ""; }
-}
-
 const failure: Record<Locale, string> = {
   ar: "تعذّر الحصول على إجابة كاملة الآن. يرجى إعادة المحاولة بعد قليل.",
   en: "A complete answer is unavailable right now. Please try again shortly.",
@@ -244,10 +227,9 @@ export async function POST(req: NextRequest) {
     // إجابات الملفات الحالية عربية؛ اللغات الأخرى تحتاج صياغة بواسطة Groq.
     const localAnswer = locale === "ar" ? searchLocal(message) : "";
     const answer = localAnswer || await askGroq(message, locale);
-    // تبقى القيمة الافتراضية متوافقة مع واجهتك الحالية.
-    // يمكن للواجهة إرسال includeAudio: false في وضع النص لتقليل الانتظار والكلفة.
-    const audioUrl = input.includeAudio === false ? "" : await makeAudio(answer);
-    return NextResponse.json({ answer, audioUrl, source: localAnswer ? "local" : "groq" });
+    // لا يُنشأ صوت إلا عند طلب وضع القراءة صراحة.
+    const audio = { audioUrls: [], audioStatus: "not_requested" };
+    return NextResponse.json({ answer, audioUrl: audio.audioUrls[0] || "", ...audio, source: localAnswer ? "local" : "groq" });
   } catch (error) {
     console.error("[Chat API]", error instanceof Error ? error.message : "Unknown error");
     return errorResponse(failure[locale], 502);
