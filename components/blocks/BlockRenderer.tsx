@@ -826,6 +826,10 @@ export default function BlockRenderer({
     case "spacer":
       return <div style={{ height: `${p.height || 48}px` }} />;
 
+    case "chat_widget":
+      // The home page mounts ChatWidget separately; avoid rendering it twice.
+      return null;
+
     default:
       return (
         <div className="py-10 text-center text-slate-500 bg-slate-50 text-xs">
