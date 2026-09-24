@@ -1,3 +1,4 @@
+import { siteContext } from "@/lib/site-chat-context";
 import { enforceRequestLimit } from "@/lib/request-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { NGO_KNOWLEDGE } from "@/lib/ai-knowledge";
@@ -134,21 +135,11 @@ async function withTimeout<T>(ms: number, action: (signal: AbortSignal) => Promi
   finally { clearTimeout(timer); }
 }
 
-async function organizationContext(): Promise<string> {
+async function organizationContext(message: string, locale: Locale): Promise<string> {
   const db = getSupabaseOrNull();
   if (!db) return "";
-  try {
-    return await withTimeout(3000, async signal => {
-      const results = await Promise.all([
-        db.from("Campaign").select("slug, title, description").limit(10).abortSignal(signal),
-        db.from("Page").select("slug, title, description").limit(20).abortSignal(signal),
-      ]);
-      return results.map((result, index) => {
-        if (result.error) { console.warn("Chat context query failed", index); return ""; }
-        return JSON.stringify({ type: index === 0 ? "campaigns" : "pages", records: result.data });
-      }).join("\n").slice(0, 12000);
-    });
-  } catch { console.warn("Chat context unavailable"); return ""; }
+  try { return await withTimeout(8000, signal => siteContext(db, message, locale, signal)); }
+  catch { console.warn("Chat published context unavailable"); return ""; }
 }
 
 type Completion = {
@@ -159,7 +150,7 @@ async function askGroq(message: string, locale: Locale): Promise<string> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("GROQ_API_KEY is not configured");
   const language = { ar: "العربية", en: "English", tr: "Türkçe", fr: "français" }[locale];
-  const context = await organizationContext();
+  const context = await organizationContext(message, locale);
   const messages = [
     { role: "system", content: `أنت مساعد 4Relief وDestekol. أجب بلغة ${language}.
 أجب بجملة إلى ثلاث جمل كاملة، وبنص عادي. لا تقطع الكلمات أو الأرقام.
