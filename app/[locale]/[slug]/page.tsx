@@ -1,3 +1,5 @@
+import { getPolicyMetadata } from "@/lib/policy-metadata";
+import { normalizePublicContact, launchCopy } from "@/lib/public-contact";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -346,14 +348,14 @@ export async function generateMetadata({
   const commonTitle = getCommonPageTitle(slug, locale, fullName, brandName);
 
   const baseTitle = isLegalPage
-    ? LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.en || page.title
+    ? getPolicyMetadata(slug, locale).title
     : commonTitle || page.title;
 
   const title = baseTitle.includes(brandName)
     ? baseTitle
     : `${baseTitle} | ${fullName}`;
 
-  const description = cleanText(page.description) || title;
+  const description = isLegalPage ? getPolicyMetadata(slug, locale).description : cleanText(page.description) || title;
   const currentUrl = `${siteUrl}/${locale}/${slug}`;
 
   return {
@@ -466,26 +468,24 @@ export default async function DynamicPage({
     id: sec.id || `section-${idx}`,
   }));
 
-  const isTrustPage =
+  const isTrustPage = !isLegalPage && (
     slug === "about" ||
     slug === "about-us" ||
     slug === "our-work" ||
     slug === "sectors" ||
     slug === "transparency" ||
-    slug === "financial-transparency";
+    slug === "financial-transparency");
 
   const hasCustomSections = !isLegalPage && sections.length > 0;
 
   const commonTitle = getCommonPageTitle(slug, locale, fullName, brandName);
 
   const displayTitle = isLegalPage
-    ? LEGAL_TITLES[slug]?.[locale] || LEGAL_TITLES[slug]?.en || page.title
+    ? getPolicyMetadata(slug, locale).title
     : dict[`nav.${slug}`] || commonTitle || page.title;
 
   const displaySubtitle = isLegalPage
-    ? getLegalSubtitle(slug, locale, brandName) ||
-      cleanText(page.description) ||
-      null
+    ? (launchCopy[locale] || launchCopy.ar).status
     : cleanText(page.description) || null;
 
   const pageUrl = `${siteUrl}/${locale}/${slug}`;

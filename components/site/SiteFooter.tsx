@@ -1,4 +1,5 @@
 "use client";
+import { OFFICIAL_EMAIL } from "@/lib/public-contact";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -147,9 +148,7 @@ export default function SiteFooter({
 
   const siteName = isDestekol ? "Destekol" : settings?.siteName || "4Relief";
 
-  const defaultEmail = isDestekol
-    ? "info@destekol.org"
-    : "info@forrelief.org";
+  const defaultEmail = OFFICIAL_EMAIL;
 
   const safeNavItems = Array.isArray(navItems) ? navItems : [];
 
@@ -448,11 +447,11 @@ export default function SiteFooter({
           </h2>
           <address className="not-italic">
             <ul className="space-y-3 text-sm text-white/80">
-              {settings?.contactEmail && (
+              {(
                 <li>
                   <a
-                    href={`mailto:${settings.contactEmail}`}
-                    aria-label={`Send email to ${settings.contactEmail}`}
+                    href={`mailto:${OFFICIAL_EMAIL}`}
+                    aria-label={`Send email to ${OFFICIAL_EMAIL}`}
                     className="flex items-center gap-2 hover:text-white transition"
                   >
                     <Icon
@@ -460,7 +459,7 @@ export default function SiteFooter({
                       size={15}
                       className="text-white/80 shrink-0"
                     />
-                    {settings.contactEmail}
+                    {OFFICIAL_EMAIL}
                   </a>
                 </li>
               )}
@@ -496,16 +495,6 @@ export default function SiteFooter({
                     />
                     WhatsApp
                   </a>
-                </li>
-              )}
-              {!settings?.contactEmail && !settings?.contactPhone && (
-                <li className="flex items-center gap-2">
-                  <Icon
-                    name="mail"
-                    size={15}
-                    className="text-white/80 shrink-0"
-                  />
-                  {defaultEmail}
                 </li>
               )}
             </ul>

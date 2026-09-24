@@ -1,4 +1,5 @@
 "use client";
+import { launchCopy, normalizePublicContact } from "@/lib/public-contact";
 import { useState } from "react";
 import Icon from "@/components/icons";
 
@@ -19,7 +20,13 @@ export default function FaqSection({
 
   const title = data?.headline || data?.title;
   const subtitle = data?.subheading || data?.subtitle || data?.description;
-  const items = data?.items || [];
+  const items = normalizePublicContact(data?.items || []).map((item: any) => {
+    const content = [item.q, item.question, item.title, item.a, item.answer, item.content, item.body].filter(Boolean).join(" ");
+    if (!/تبرع|متبرع|استرداد|زكاة|donat|refund|donateur|bağış|iade|PCI-DSS|3D Secure/i.test(content)) return item;
+    const copy = launchCopy[locale] || launchCopy.ar;
+    const answer = copy.status + " " + copy.contact + " " + copy.response;
+    return { ...item, a: answer, answer, content: answer, body: answer };
+  });
 
   if (!title && items.length === 0) return null;
 

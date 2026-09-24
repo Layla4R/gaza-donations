@@ -1,3 +1,4 @@
+import { OFFICIAL_EMAIL } from "@/lib/public-contact";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { sendContactNotification } from "@/lib/mailer";
@@ -48,12 +49,8 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const settingsRow = supabase
-        ? await supabase.from("SiteSettings").select("contactEmail").eq("id", "default").maybeSingle().then(r => r.data)
-        : null;
-      const adminEmail = settingsRow?.contactEmail?.trim() || null;
       await sendContactNotification({
-        adminEmail: adminEmail || "info@forrelief.org",
+        adminEmail: OFFICIAL_EMAIL,
         senderName: name,
         senderEmail: email,
         subject: subject?.trim() || "(no subject)",

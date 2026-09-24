@@ -1,3 +1,4 @@
+import { normalizePublicContact } from "@/lib/public-contact";
 import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/icons";
@@ -38,6 +39,7 @@ function getYouTubeEmbedUrl(url?: string | null): string | null {
 }
 
 export default function ProjectArticleLayout({ data, context }: ProjectArticleLayoutProps) {
+  data = normalizePublicContact(data);
   const { locale, dict, isAr, backLink, backText, categoryLabel, donateUrl } = context;
   const youtubeEmbed = getYouTubeEmbedUrl(data.videoUrl);
 

@@ -1,3 +1,4 @@
+import { OFFICIAL_EMAIL } from "@/lib/public-contact";
 import type { Metadata } from "next";
 import { loadTranslations } from "@/lib/i18n";
 import { getHomeData } from "@/lib/services/home.service";
@@ -179,7 +180,7 @@ export default async function HomePage({ params }: PageProps) {
         ],
         contactPoint: {
           "@type": "ContactPoint",
-          email: settings?.contactEmail || (isDestekol ? "info@destekol.org" : "info@forrelief.org"),
+          email: OFFICIAL_EMAIL,
           contactType: "customer support",
           availableLanguage: ["Arabic", "English", "French", "Turkish"],
         },

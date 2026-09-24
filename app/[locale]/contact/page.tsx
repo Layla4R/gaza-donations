@@ -1,3 +1,4 @@
+import { OFFICIAL_EMAIL, launchCopy } from "@/lib/public-contact";
 import type { Metadata } from "next";
 import { loadTranslations, LOCALES } from "@/lib/i18n";
 import { getSupabaseOrNull } from "@/lib/supabase";
@@ -45,12 +46,7 @@ export async function generateMetadata({
   };
 
   // الأوصاف المترجمة (Description)
-  const descriptions: Record<string, string> = {
-    ar: `تواصل مع فريق ${brandName} عبر البريد الإلكتروني، الهاتف، أو الواتساب. نحن هنا للإجابة عن جميع استفسارات التبرع والدعم.`,
-    en: `Get in touch with ${brandName} team via email, phone, or WhatsApp for donation inquiries and support.`,
-    fr: `Contactez l'équipe de ${brandName} par e-mail, téléphone ou WhatsApp pour toutes vos demandes de dons et d'assistance.`,
-    tr: `${brandName} ekibiyle e-posta, telefon veya WhatsApp üzerinden iletişime geçin. Bağış ve destek sorularınız için buradayız.`,
-  };
+  const descriptions: Record<string, string> = Object.fromEntries(Object.entries(launchCopy).map(([language, copy]) => [language, copy.contact + " " + copy.response]));
 
   const title = titles[locale] || titles.en;
   const description = descriptions[locale] || descriptions.en;
@@ -126,8 +122,8 @@ export default async function ContactPage({
 
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
   const accentColor = appearance?.accentColor || "var(--color-accent, #F00F5A)";
-  const contactEmail = settings?.contactEmail || "info@forrelief.org";
-  const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "+44 20 1234 5678";
+  const contactEmail = OFFICIAL_EMAIL;
+  const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "";
 
   const t = (ar: string, en: string, fr: string, tr: string) =>
     locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
@@ -217,6 +213,7 @@ export default async function ContactPage({
 
   return (
     <div className="bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100">
+      <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{(launchCopy[locale] || launchCopy.ar).contact}</p><p>{(launchCopy[locale] || launchCopy.ar).response}</p><p>{(launchCopy[locale] || launchCopy.ar).status}</p></section>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(contactSchema) }}
@@ -242,8 +239,8 @@ export default async function ContactPage({
 
           <p className="text-white/85 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
             {t(
-              "نحن هنا للإجابة على استفساراتك ومساعدتك في أي وقت.",
-              "We're here to answer your questions and help you anytime.",
+              "نرد على رسائلك عبر البريد الرسمي خلال 24 ساعة.",
+              "We reply to messages sent to our official email within 24 hours.",
               "Nous sommes là pour répondre à vos questions.",
               "Sorularınızı yanıtlamak için buradayız."
             )}
@@ -298,9 +295,9 @@ export default async function ContactPage({
               <span className="block text-slate-700 mb-0.5">
                 {t("الهاتف والواتساب", "Phone / WhatsApp", "Téléphone / WhatsApp", "Telefon / WhatsApp")}
               </span>
-              <a href={`tel:${contactPhone}`} itemProp="telephone" className="text-slate-900 font-bold block hover:text-brand">
+              {contactPhone ? <a href={`tel:${contactPhone}`} itemProp="telephone" className="text-slate-900 font-bold block hover:text-brand">
                 {contactPhone}
-              </a>
+              </a> : <span>{contactEmail}</span>}
             </div>
             <div>
               <span className="block text-slate-700 mb-0.5">

@@ -1,3 +1,4 @@
+import { OFFICIAL_EMAIL, normalizePublicContact } from "@/lib/public-contact";
 import Image from "next/image";
 import Link from "next/link";
 import { PageSection } from "@/lib/blocks";
@@ -43,7 +44,7 @@ export default function BlockRenderer({
   section: PageSection;
   context?: RendererContext;
 }) {
-  const p = section.props || (section as any).data || {};
+  const p = normalizePublicContact(section.props || (section as any).data || {});
 
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
@@ -717,35 +718,7 @@ export default function BlockRenderer({
     }
 
     case "faq": {
-      const faqItems = p.items || [];
-      const faqSchema = faqItems.length > 0 ? {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": faqItems.map((item: any) => ({
-          "@type": "Question",
-          "name": item.question || item.title || "",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": item.answer || item.body || ""
-          }
-        }))
-      } : null;
-
-      return (
-        <>
-          {faqSchema && (
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-            />
-          )}
-          <FaqSection
-            locale={locale}
-            dict={context?.dict || {}}
-            data={p}
-          />
-        </>
-      );
+      return <FaqSection locale={locale} dict={context?.dict || {}} data={p} />;
     }
 
     case "cta":
@@ -781,7 +754,7 @@ export default function BlockRenderer({
         "url": "https://forrelief.org",
         "contactPoint": {
           "@type": "ContactPoint",
-          "email": p.email || "info@forrelief.org",
+          "email": OFFICIAL_EMAIL,
           "contactType": "customer service",
           "availableLanguage": ["Arabic", "English", "Turkish", "French"]
         }
@@ -799,7 +772,7 @@ export default function BlockRenderer({
             {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
           </div>
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-            <ContactForm locale={locale} dict={context?.dict || {}} email={p.email || "info@forrelief.org"} />
+            <ContactForm locale={locale} dict={context?.dict || {}} email={OFFICIAL_EMAIL} />
           </div>
         </section>
       );

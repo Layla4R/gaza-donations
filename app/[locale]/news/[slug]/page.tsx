@@ -1,3 +1,4 @@
+import { normalizePublicContact } from "@/lib/public-contact";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -290,7 +291,7 @@ export default async function NewsPostPage({
       return (
         <div
           className="prose prose-base sm:prose-lg max-w-none text-slate-800 leading-relaxed prose-p:leading-relaxed prose-headings:font-bold"
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: normalizePublicContact(content) }}
         />
       );
     }
