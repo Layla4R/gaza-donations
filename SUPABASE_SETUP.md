@@ -124,3 +124,7 @@ NEXT_PUBLIC_GA_ID = G-XXXXXXXXXX
 | تسجيل الدخول لا يعمل | `seed.sql` لم يُشغّل (لا يوجد صف في جدول `User`) | شغّل `supabase/seed.sql` في SQL Editor |
 | الموقع بدون محتوى | `schema.sql`/`seed.sql` لم يُشغّلا | شغّلهم بالترتيب في SQL Editor |
 | خطأ صلاحيات (RLS) | الكود يستخدم `SUPABASE_SERVICE_ROLE_KEY` (يتجاوز RLS) — تأكد إنه موجود في env vars | تأكد من ظهور `SUPABASE_SERVICE_ROLE_KEY` في Netlify Environment variables |
+
+### Required session signing secret
+
+`SUPABASE_JWT_SECRET` must be a private, randomly generated secret of at least 32 bytes, configured only on the server. Never use a Supabase anon/public key. Admin and donor session signing and verification fail closed when this setting is missing or invalid, in development and production. Login returns HTTP 503 for invalid configuration. There is no fallback key. Changing this secret invalidates existing sessions.

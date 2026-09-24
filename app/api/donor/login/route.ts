@@ -1,8 +1,10 @@
+import { getSessionSecret } from "@/lib/session-secret";
 import { NextRequest, NextResponse } from "next/server";
 import { loginDonor } from "@/lib/donorAuth";
 
 export async function POST(req: NextRequest) {
   try {
+    getSessionSecret();
     const { email, password } = await req.json();
     if (!email || !password) return NextResponse.json({ error: "البريد وكلمة المرور مطلوبان" }, { status: 400 });
 
@@ -27,6 +29,9 @@ export async function POST(req: NextRequest) {
 
     return res;
   } catch (e: any) {
+    if (e.message === "AUTH_CONFIGURATION_ERROR") {
+      return NextResponse.json({ error: "Authentication is temporarily unavailable." }, { status: 503 });
+    }
     const msgs: Record<string, string> = {
       INVALID_CREDENTIALS: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
       USE_ADMIN_LOGIN: "استخدم صفحة تسجيل دخول الأدمن",

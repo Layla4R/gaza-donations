@@ -1,15 +1,13 @@
+import { getSessionSecret } from "./lib/session-secret";
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const LOCALES = ["ar", "en", "fr", "tr"];
 const COOKIE_NAME = "gd_admin_session";
-const SECRET = new TextEncoder().encode(
-  process.env.SUPABASE_JWT_SECRET || "dev-secret-change-me"
-);
 
 async function verifyAdminToken(token: string): Promise<boolean> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
     return ["ADMIN", "EDITOR", "VIEWER"].includes(payload.role as string);
   } catch {
     return false;

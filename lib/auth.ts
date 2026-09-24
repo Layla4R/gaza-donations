@@ -1,11 +1,7 @@
+import { getSessionSecret } from "./session-secret";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
-if (!JWT_SECRET && process.env.NODE_ENV === "production") {
-  console.error("[AUTH] CRITICAL: SUPABASE_JWT_SECRET is not set!");
-}
-const SECRET = new TextEncoder().encode(JWT_SECRET || "dev-secret-change-me");
 
 const COOKIE_NAME = "gd_admin_session";
 
@@ -14,7 +10,7 @@ export async function createAdminSession(email: string, role = "ADMIN"): Promise
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(SECRET);
+    .sign(getSessionSecret());
 
   const isProd = process.env.NODE_ENV === "production";
   cookies().set(COOKIE_NAME, token, {
@@ -41,7 +37,7 @@ export async function getAdminSession(req?: { headers: { get: (k: string) => str
 
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
     return payload as { email: string; role: string };
   } catch {
     return null;

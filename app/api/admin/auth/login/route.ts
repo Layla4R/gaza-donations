@@ -1,3 +1,4 @@
+import { getSessionSecret } from "@/lib/session-secret";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getSupabase } from "@/lib/supabase";
@@ -23,6 +24,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    getSessionSecret();
     const { email, password } = await req.json();
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
@@ -49,6 +51,9 @@ export async function POST(req: NextRequest) {
     const token = await createAdminSession(user.email, user.role);
     return NextResponse.json({ ok: true, token });
   } catch (err: any) {
+    if (err.message === "AUTH_CONFIGURATION_ERROR") {
+      return NextResponse.json({ error: "Authentication is temporarily unavailable." }, { status: 503 });
+    }
     if (process.env.NODE_ENV !== "production") console.error("Admin login error:", err);
     return NextResponse.json({ error: "Server error. Please try again." }, { status: 500 });
   }

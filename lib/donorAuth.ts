@@ -1,3 +1,4 @@
+import { getSessionSecret } from "./session-secret";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -7,9 +8,6 @@ import { sendMail, loadDonorEmailTemplate, sendEmailVerification } from "./maile
 
 const SESSION_COOKIE = "donor_session";
 const SALT_ROUNDS = 12;
-const SECRET = new TextEncoder().encode(
-  process.env.SUPABASE_JWT_SECRET || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "fallback-secret-key-32-chars-long"
-);
 
 function generateToken() {
   return crypto.randomBytes(48).toString("hex");
@@ -123,6 +121,7 @@ export async function verifyEmail(token: string) {
 
 // ── Login ─────────────────────────────────────────────────────
 export async function loginDonor(email: string, password: string) {
+  getSessionSecret();
   const supabase = getSupabase();
 
   const { data: user, error } = await supabase
@@ -144,7 +143,7 @@ export async function loginDonor(email: string, password: string) {
   const token = await new SignJWT({ userId: user.id, role: user.role })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("30d")
-    .sign(SECRET);
+    .sign(getSessionSecret());
 
   return { user: { id: user.id, name: user.name, email: user.email }, token };
 }
@@ -155,7 +154,7 @@ export async function getCurrentDonor() {
     const token = cookies().get(SESSION_COOKIE)?.value;
     if (!token) return null;
 
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
     if (!payload.userId) return null;
 
     const supabase = getSupabase();
