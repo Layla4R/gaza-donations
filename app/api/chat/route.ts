@@ -1,3 +1,4 @@
+import { enforceRequestLimit } from "@/lib/request-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { NGO_KNOWLEDGE } from "@/lib/ai-knowledge";
 import { getSupabaseOrNull } from "@/lib/supabase";
@@ -213,6 +214,8 @@ function errorResponse(answer: string, status: number) {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRequestLimit(req, "chat");
+  if (limited) return limited;
   let body: unknown;
   try { body = await req.json(); }
   catch { return errorResponse("صيغة الطلب غير صحيحة.", 400); }

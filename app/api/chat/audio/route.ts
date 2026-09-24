@@ -1,8 +1,11 @@
+import { enforceRequestLimit } from "@/lib/request-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { generateChatAudio } from "@/lib/chat-audio";
 export const runtime = "nodejs";
 export const maxDuration = 15;
 export async function POST(req: NextRequest) {
+  const limited = await enforceRequestLimit(req, "chat-audio");
+  if (limited) return limited;
   let input;
   try { input = await req.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   if (typeof input?.text !== "string" || !input.text.trim() || input.text.length > 6000) return NextResponse.json({ error: "Invalid speech text" }, { status: 400 });

@@ -1,8 +1,11 @@
+import { enforceRequestLimit } from "@/lib/request-limit";
 import { getSessionSecret } from "@/lib/session-secret";
 import { NextRequest, NextResponse } from "next/server";
 import { loginDonor } from "@/lib/donorAuth";
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRequestLimit(req, "donor-login");
+  if (limited) return limited;
   try {
     getSessionSecret();
     const { email, password } = await req.json();

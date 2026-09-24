@@ -128,3 +128,7 @@ NEXT_PUBLIC_GA_ID = G-XXXXXXXXXX
 ### Required session signing secret
 
 `SUPABASE_JWT_SECRET` must be a private, randomly generated secret of at least 32 bytes, configured only on the server. Never use a Supabase anon/public key. Admin and donor session signing and verification fail closed when this setting is missing or invalid, in development and production. Login returns HTTP 503 for invalid configuration. There is no fallback key. Changing this secret invalidates existing sessions.
+
+### Request limits
+
+Run `supabase/rate_limits.sql` in Supabase SQL Editor before deploying. Production uses an atomic shared database counter; an unavailable limiter returns 503 before authentication or AI work. Development uses bounded in-process counters. Login: 10 requests/15 minutes; chat: 20/minute; speech: 10/minute per client IP. Netlify uses its overwritten `x-nf-client-connection-ip` header. On another host set `RATE_LIMIT_TRUSTED_IP_HEADER` only to a header your reverse proxy overwrites and prevent direct origin access. Without a trusted valid IP, requests share a conservative bucket. These controls do not replace hosting-level DDoS protection.
