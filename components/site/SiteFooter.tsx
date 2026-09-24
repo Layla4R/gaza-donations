@@ -1,4 +1,5 @@
 "use client";
+import type { PublicSiteSettings } from "@/lib/public-site-settings";
 import { OFFICIAL_EMAIL } from "@/lib/public-contact";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -113,7 +114,7 @@ export default function SiteFooter({
   dict = {},
 }: {
   navItems?: NavItem[];
-  settings?: any;
+  settings?: PublicSiteSettings | null;
   locale?: string;
   dict?: Record<string, string>;
 }) {
@@ -137,8 +138,8 @@ export default function SiteFooter({
     (dict && dict[key]) || fallbacks[loc] || fallbacks["en"] || "";
 
   const socialLinks = Object.entries(SOCIAL_ICONS)
-    .filter(([key]) => settings?.[key])
-    .map(([key, meta]) => ({ url: settings[key] as string, ...meta }));
+    .filter(([key]) => settings?.[key as keyof PublicSiteSettings])
+    .map(([key, meta]) => ({ url: settings?.[key as keyof PublicSiteSettings] as string, ...meta }));
 
   const logoSrc = isDestekol
     ? "/brand/destekol_logo.png"

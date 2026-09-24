@@ -1,3 +1,4 @@
+import { PUBLIC_SITE_SETTINGS_SELECT, pickPublicSiteSettings, type PublicSiteSettings } from "@/lib/public-site-settings";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import type { Metadata } from "next";
@@ -162,10 +163,10 @@ async function getSiteData(locale: string) {
 
     supabase
       .from("SiteSettings")
-      .select("*")
+      .select(PUBLIC_SITE_SETTINGS_SELECT)
       .eq("id", "default")
       .maybeSingle()
-      .then((result) => result.data),
+      .then((result) => pickPublicSiteSettings(result.data)),
 
     loadTranslations(locale),
   ]);
@@ -214,7 +215,7 @@ function safeJsonLd(data: unknown) {
 
 function buildSiteSchemas(
   locale: string, 
-  settings: any, 
+  settings: PublicSiteSettings | null,
   localeData: { description: string }, 
   siteUrl: string, 
   fullName: string, 

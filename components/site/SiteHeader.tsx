@@ -1,4 +1,5 @@
 "use client";
+import type { PublicSiteSettings } from "@/lib/public-site-settings";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,7 +21,7 @@ export default function SiteHeader({
   transparent = false,
 }: {
   navItems: NavItem[];
-  settings: any;
+  settings: PublicSiteSettings | null;
   locale: string;
   dict: Record<string, string>;
   transparent?: boolean;
