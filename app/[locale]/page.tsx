@@ -1,3 +1,5 @@
+import HomeTrustContent from "@/components/site/HomeTrustContent";
+import { COMPANY_RECORD_URL, getHomeTrustContent } from "@/lib/home-trust-content";
 import { OFFICIAL_EMAIL } from "@/lib/public-contact";
 import type { Metadata } from "next";
 import { loadTranslations } from "@/lib/i18n";
@@ -15,13 +17,6 @@ interface PageProps {
     locale: string;
   };
 }
-
-const DEFAULT_DESCRIPTIONS: Record<string, string> = {
-  ar: "مؤسسة إنسانية مستقلة نبني جسور العطاء ونحوّل التعاطف الإنساني إلى أثر مستدام من خلال حملات ومشاريع شفافة بنسبة مصاريف إدارية 5%.",
-  en: "An independent humanitarian foundation connecting donors with transparent relief campaigns and sustainable humanitarian projects with a 5% admin fee cap.",
-  fr: "Une fondation humanitaire indépendante qui relie les donateurs à des campagnes de secours transparentes et à des projets durables.",
-  tr: "Bağışçıları şeffaf yardım kampanyaları ve sürdürülebilir insani projelerle buluşturan bağımsız bir insani yardım kuruluşu.",
-};
 
 const OPTIMIZED_HOME_TITLES: Record<string, string> = {
   ar: "4Relief | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)",
@@ -52,20 +47,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? "Destekol | Uluslararası İnsani Yardım Vakfı"
     : (OPTIMIZED_HOME_TITLES[locale] || OPTIMIZED_HOME_TITLES.en);
 
-  const description =
-    cleanSchemaText(settings?.footerDescription) ||
-    dict["footer.description"] ||
-    DEFAULT_DESCRIPTIONS[locale] ||
-    DEFAULT_DESCRIPTIONS.en;
+  const description = getHomeTrustContent(locale).intro;
 
   const currentUrl = `${SITE_URL}/${locale}`;
 
   return {
-    title: siteTitle,
+    title: { absolute: siteTitle },
     description,
 
     alternates: {
       canonical: currentUrl,
+      languages: Object.fromEntries(["ar", "en", "fr", "tr"].map(language => [language, `${SITE_URL}/${language}`])),
     },
 
     openGraph: {
@@ -106,31 +98,12 @@ export default async function HomePage({ params }: PageProps) {
   const primaryColor = settings?.primaryColor || "#0069D2";
   const accentColor = settings?.accentColor || "#F00F5A";
 
-  const faqSection = sections.find(
-    (section: any) => section.type?.toLowerCase() === "faq"
-  );
-
-  const rawFaqItems = faqSection?.props?.items || faqSection?.props?.faqs || [];
-
-  const faqItems = Array.isArray(rawFaqItems)
-    ? rawFaqItems
-        .map((item: any) => ({
-          question: cleanSchemaText(item.question || item.q),
-          answer: cleanSchemaText(item.answer || item.a),
-        }))
-        .filter((item) => item.question && item.answer)
-    : [];
-
   const pageUrl = `${SITE_URL}/${locale}`;
 
-  const description =
-    cleanSchemaText(settings?.footerDescription) ||
-    dict["footer.description"] ||
-    DEFAULT_DESCRIPTIONS[locale] ||
-    DEFAULT_DESCRIPTIONS.en;
+  const description = getHomeTrustContent(locale).intro;
 
-  const publishedDateISO = "2024-01-01T00:00:00.000Z";
-  const updatedDateISO = new Date().toISOString();
+  const publishedDateISO = data.page?.createdAt;
+  const updatedDateISO = data.page?.updatedAt;
 
   const homeSchema = {
     "@context": "https://schema.org",
@@ -142,8 +115,9 @@ export default async function HomePage({ params }: PageProps) {
         name: isDestekol ? "Destekol | Uluslararası İnsani Yardım Vakfı" : "4Relief | International Humanitarian Foundation & Emergency Relief",
         description,
         inLanguage: locale,
-        datePublished: publishedDateISO,
-        dateModified: updatedDateISO,
+        ...(publishedDateISO ? { datePublished: publishedDateISO } : {}),
+        ...(updatedDateISO ? { dateModified: updatedDateISO } : {}),
+        author: { "@id": `${SITE_URL}/#organization` },
         isPartOf: { "@id": `${SITE_URL}/#website` },
         about: { "@id": `${SITE_URL}/#organization` },
         publisher: { "@id": `${SITE_URL}/#organization` },
@@ -154,11 +128,12 @@ export default async function HomePage({ params }: PageProps) {
         name: isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation",
         alternateName: isDestekol ? ["Destekol", "Destekol NGO"] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
         url: SITE_URL,
+        ...(!isDestekol ? { legalName: "FOR RELIEF LTD", identifier: { "@type": "PropertyValue", propertyID: "Companies House company number", value: "17306194" }, sameAs: [COMPANY_RECORD_URL] } : {}),
         logo: {
           "@type": "ImageObject",
-          url: `${SITE_URL}${isDestekol ? "/brand/desekol_logo.png" : "/brand/logo.png"}`,
+          url: `${SITE_URL}${isDestekol ? "/brand/destekol_logo.png" : "/brand/logo.png"}`,
         },
-        foundingDate: "2026",
+
         areaServed: [
           "Global",
           "United Arab Emirates",
@@ -185,22 +160,6 @@ export default async function HomePage({ params }: PageProps) {
           availableLanguage: ["Arabic", "English", "French", "Turkish"],
         },
       },
-      ...(faqItems.length > 0
-        ? [
-            {
-              "@type": "FAQPage",
-              "@id": `${pageUrl}/#faq`,
-              mainEntity: faqItems.map((item) => ({
-                "@type": "Question",
-                name: item.question,
-                acceptedAnswer: {
-                  "@type": "Answer",
-                  text: item.answer,
-                },
-              })),
-            },
-          ]
-        : []),
     ],
   };
 
@@ -221,7 +180,7 @@ export default async function HomePage({ params }: PageProps) {
   };
 
   return (
-    <main suppressHydrationWarning>
+    <div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -234,8 +193,10 @@ export default async function HomePage({ params }: PageProps) {
         <BlockRenderer key={section.id} section={section} context={context} />
       ))}
       
+      {!isDestekol && <HomeTrustContent locale={locale} siteUrl={SITE_URL} />}
+
       {/* عرض مكون الدردشة بشكل منفصل إذا كان يجب أن يظهر دائماً */}
       <ChatWidget locale={locale} />
-    </main>
+    </div>
   );
 }

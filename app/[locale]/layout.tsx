@@ -253,7 +253,7 @@ function buildSiteSchemas(
       settings?.instagramUrl,
       settings?.linkedinUrl,
       settings?.youtubeUrl,
-      "https://find-and-update.company-information.service.gov.uk/",
+      ...(!isDestekol ? ["https://find-and-update.company-information.service.gov.uk/company/17306194"] : []),
     ].filter(Boolean),
   };
 

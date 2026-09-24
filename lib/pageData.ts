@@ -6,6 +6,8 @@ export interface PageData {
   title: string;
   description?: string | null;
   sections: any[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CampaignLite {
@@ -32,7 +34,7 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
 
   const { data: base } = await supabase
     .from("Page")
-    .select("id, slug, title, description, sections")
+    .select("id, slug, title, description, sections, createdAt, updatedAt")
     .eq("slug", slug)
     .eq("isPublished", true)
     .maybeSingle();
@@ -43,7 +45,7 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
   if (locale !== "ar") {
     const { data: trans } = await supabase
       .from("PageTranslation")
-      .select("title, description, sections")
+      .select("title, description, sections, updatedAt")
       .eq("pageId", base.id)
       .eq("locale", locale)
       .maybeSingle();
@@ -55,6 +57,8 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
         title: trans.title,
         description: trans.description,
         sections: trans.sections as any[],
+        createdAt: base.createdAt,
+        updatedAt: trans.updatedAt || base.updatedAt,
       };
     }
   }
@@ -65,6 +69,8 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
     title: base.title,
     description: base.description,
     sections: base.sections as any[],
+    createdAt: base.createdAt,
+    updatedAt: base.updatedAt,
   };
 }
 

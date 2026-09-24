@@ -72,7 +72,7 @@ export const policies: Record<string, Record<string, PolicySection[]>> = {
     "aml-policy": [
       {
         "title": "خبرة مؤسسية والتزام مسؤول",
-        "text": "تستند مؤسستنا إلى خبرة ممتدة ضمن مؤسسة قائمة منذ سنوات طويلة. ونلتزم بحماية الثقة التي يضعها فينا الداعمون والشركاء، وتطبيق إجراءات تتناسب مع طبيعة أنشطتنا والمتطلبات القانونية ذات الصلة. قنوات التبرع عبر الموقع لم تُفتح بعد؛ وتعبّر الالتزامات أدناه عن نهجنا المؤسسي في التعامل مع الأموال والشراكات."
+        "text": "مؤسستنا مستقلة حالياً، ونستند في عملنا إلى خبرة مؤسسية ممتدة. ونلتزم بحماية الثقة التي يضعها فينا الداعمون والشركاء، وتطبيق إجراءات تتناسب مع طبيعة أنشطتنا والمتطلبات القانونية ذات الصلة. قنوات التبرع عبر الموقع لم تُفتح بعد؛ وتعبّر الالتزامات أدناه عن نهجنا المؤسسي في التعامل مع الأموال والشراكات."
       },
       {
         "title": "التزاماتنا",
@@ -204,7 +204,7 @@ export const policies: Record<string, Record<string, PolicySection[]>> = {
     "aml-policy": [
       {
         "title": "Institutional experience and responsible practice",
-        "text": "Our organisation draws on longstanding experience as part of an established institution. We are committed to the trust of our supporters and partners through procedures appropriate to our activities and applicable legal requirements. Website donation channels are not yet open; the commitments below describe our institutional approach to funds and partnerships."
+        "text": "Our organisation is currently independent and draws on longstanding institutional experience. We are committed to the trust of our supporters and partners through procedures appropriate to our activities and applicable legal requirements. Website donation channels are not yet open; the commitments below describe our institutional approach to funds and partnerships."
       },
       {
         "title": "Our commitments",
@@ -336,7 +336,7 @@ export const policies: Record<string, Record<string, PolicySection[]>> = {
     "aml-policy": [
       {
         "title": "Expérience institutionnelle et engagement responsable",
-        "text": "Notre organisme bénéficie d’une longue expérience au sein d’une institution établie. Nous préservons la confiance de nos soutiens et partenaires par des procédures adaptées à nos activités et aux exigences légales applicables. Les canaux de dons du site ne sont pas encore ouverts ; les engagements suivants décrivent notre approche des fonds et des partenariats."
+        "text": "Notre organisme est actuellement indépendant et bénéficie d’une longue expérience institutionnelle. Nous préservons la confiance de nos soutiens et partenaires par des procédures adaptées à nos activités et aux exigences légales applicables. Les canaux de dons du site ne sont pas encore ouverts ; les engagements suivants décrivent notre approche des fonds et des partenariats."
       },
       {
         "title": "Nos engagements",
@@ -468,7 +468,7 @@ export const policies: Record<string, Record<string, PolicySection[]>> = {
     "aml-policy": [
       {
         "title": "Kurumsal deneyim ve sorumlu yaklaşım",
-        "text": "Kuruluşumuz, köklü bir kurumun parçası olarak uzun yıllara dayanan deneyimden yararlanır. Destekçilerimizin ve ortaklarımızın güvenini, faaliyetlerimize ve geçerli yasal gerekliliklere uygun süreçlerle korumayı taahhüt ediyoruz. Sitenin bağış kanalları henüz açık değildir; aşağıdaki taahhütler fonlara ve ortaklıklara kurumsal yaklaşımımızı açıklar."
+        "text": "Kuruluşumuz şu anda bağımsızdır ve uzun yıllara dayanan kurumsal deneyimden yararlanır. Destekçilerimizin ve ortaklarımızın güvenini, faaliyetlerimize ve geçerli yasal gerekliliklere uygun süreçlerle korumayı taahhüt ediyoruz. Sitenin bağış kanalları henüz açık değildir; aşağıdaki taahhütler fonlara ve ortaklıklara kurumsal yaklaşımımızı açıklar."
       },
       {
         "title": "Taahhütlerimiz",
