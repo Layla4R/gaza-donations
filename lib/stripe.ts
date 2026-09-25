@@ -1,3 +1,4 @@
+import { siteEnv } from "@/lib/request-site";
 import Stripe from "stripe";
 import { getSupabaseOrNull } from "./supabase";
 
@@ -17,7 +18,8 @@ async function resolveStripeKey(): Promise<string> {
     if (data?.stripeSecretKey && data.enableStripe) return data.stripeSecretKey;
   }
   // Fall back to env var
-  if (process.env.STRIPE_SECRET_KEY) return process.env.STRIPE_SECRET_KEY;
+  const envKey = siteEnv("STRIPE_SECRET_KEY");
+  if (envKey) return envKey;
   throw new Error("Stripe secret key not configured. Add it in Admin → Settings → Stripe.");
 }
 

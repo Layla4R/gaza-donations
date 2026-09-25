@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import crypto from "crypto";
 import { getSupabase } from "./supabase";
 import { sendMail } from "./mailer";
@@ -40,7 +41,7 @@ export async function createAdminInvite(opts: {
   const { data: settings } = await supabase.from("SiteSettings")
     .select("siteName, smtpFrom").eq("id", "default").maybeSingle();
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const acceptUrl = `${siteUrl}/admin/accept-invite?token=${token}`;
 
   // Send invite email

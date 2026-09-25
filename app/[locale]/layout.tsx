@@ -17,13 +17,8 @@ import {
   type Locale,
 } from "@/lib/i18n";
 
-export const revalidate = 300;
-
-export function generateStaticParams() {
-  return LOCALES.map((locale) => ({
-    locale,
-  }));
-}
+// Each domain has independent CMS data; do not reuse generated HTML between sites.
+export const dynamic = "force-dynamic";
 
 const LOCALE_METADATA: Record<
   string,

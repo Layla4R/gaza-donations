@@ -1,12 +1,15 @@
 import { getSessionSecret } from "./session-secret";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { getRequestSite } from "./request-site";
+import { getSupabase } from "./supabase";
+import { isSiteSession } from "./tenant";
 
 
 const COOKIE_NAME = "gd_admin_session";
 
 export async function createAdminSession(email: string, role = "ADMIN"): Promise<string> {
-  const token = await new SignJWT({ email, role })
+  const token = await new SignJWT({ email, role, site: getRequestSite().id })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
@@ -38,7 +41,12 @@ export async function getAdminSession(req?: { headers: { get: (k: string) => str
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
-    return payload as { email: string; role: string };
+    if (!isSiteSession(payload, getRequestSite().id) || typeof payload.email !== "string") return null;
+    // Membership and role are rechecked in this site's schema, so removal takes effect immediately.
+    const { data: user, error } = await getSupabase().from("User")
+      .select("email, role, isStaff").eq("email", payload.email).maybeSingle();
+    if (error || !user || !(user.role === "ADMIN" || user.isStaff === true) || !["ADMIN", "EDITOR", "VIEWER"].includes(user.role)) return null;
+    return { email: user.email as string, role: user.role as string, site: getRequestSite().id };
   } catch {
     return null;
   }

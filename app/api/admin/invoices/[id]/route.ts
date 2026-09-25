@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase";
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const { data: settings } = await supabase.from("SiteSettings").select("siteName, contactEmail").eq("id", "default").maybeSingle();
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
   const contactEmail = settings?.contactEmail || "info@forrelief.org";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const receipt = d.receiptNumber || d.id.slice(0, 8).toUpperCase();
   const date = new Date(d.createdAt).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
   const amount = `${(d.currency || "USD").toUpperCase()} ${Number(d.amount).toFixed(2)}`;

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase";
+import { getRequestSite } from "@/lib/request-site";
 
 export async function POST(req: NextRequest) {
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = getSupabase();
     const ext = file.name.split(".").pop() || "mp4";
-    const fileName = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const fileName = `${getRequestSite().id}/uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
     const bytes = await file.arrayBuffer();
 
     const { data, error } = await supabase.storage

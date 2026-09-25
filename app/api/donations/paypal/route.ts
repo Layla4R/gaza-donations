@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { getPaypalClientAsync, getPaypalAccessToken, paypal } from "@/lib/paypal";
@@ -14,11 +15,7 @@ export async function POST(req: NextRequest) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(donorEmail)) return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
 
     const isMonthly = frequency === "MONTHLY" || frequency === "monthly";
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (
-      process.env.NODE_ENV === "production"
-        ? (() => { console.error("[paypal] NEXT_PUBLIC_SITE_URL not set in production!"); return "http://localhost:3000"; })()
-        : "http://localhost:3000"
-    );
+    const siteUrl = getRequestSite().url;
 
     // Get settings (single DB call)
     const supabase = getSupabase();

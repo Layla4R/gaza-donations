@@ -1,3 +1,4 @@
+import { siteEnv } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseOrNull, getSupabase } from "@/lib/supabase";
 import { getStripeAsync } from "@/lib/stripe";
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
   const sig = req.headers.get("stripe-signature");
 
   // Read webhook secret from DB first, fallback to env
-  let webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
+  let webhookSecret = siteEnv("STRIPE_WEBHOOK_SECRET") || "";
   const supabaseOrNull = getSupabaseOrNull();
   if (supabaseOrNull) {
     const { data: settings } = await supabaseOrNull

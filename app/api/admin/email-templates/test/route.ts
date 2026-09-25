@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { sendMail } from "@/lib/mailer";
@@ -8,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!email || !html) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
   // Replace demo variables with English values matching template content
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
+  const siteUrl = getRequestSite().url;
   const demoVars: Record<string, string> = {
     donorName: "John Smith", amount: "$50", receiptNumber: "4R-TEST-0001",
     campaign: "Gaza Relief", date: new Date().toLocaleDateString("en-GB"),

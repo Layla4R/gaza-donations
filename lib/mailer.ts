@@ -1,3 +1,5 @@
+import { siteEnv } from "@/lib/request-site";
+import { getRequestSite } from "@/lib/request-site";
 /**
  * MAILBUX / Gmail SMTP Mailer
  * Uses settings stored in SiteSettings (smtpHost, smtpPort, smtpUser, smtpPassword, ...)
@@ -40,16 +42,16 @@ async function loadSmtpConfig(): Promise<SmtpConfig | null> {
   }
 
   // قراءة البيانات بالترتيب: DB ← .env.local ← القيمة الافتراضية
-  const host     = row?.smtpHost || process.env.SMTP_HOST || "smtp.gmail.com";
-  const port     = Number(row?.smtpPort || process.env.SMTP_PORT || 465);
-  const user     = (row?.smtpUser && row.smtpUser.trim() !== "") ? row.smtpUser : (process.env.SMTP_USER || "");
+  const host     = row?.smtpHost || siteEnv("SMTP_HOST") || "smtp.gmail.com";
+  const port     = Number(row?.smtpPort || siteEnv("SMTP_PORT") || 465);
+  const user     = (row?.smtpUser && row.smtpUser.trim() !== "") ? row.smtpUser : (siteEnv("SMTP_USER") || "");
   const password = (row?.smtpPassword && row.smtpPassword.trim() !== "") 
                     ? row.smtpPassword 
-                    : (process.env.SMTP_PASS || process.env.SMTP_PASSWORD || "");
+                    : (siteEnv("SMTP_PASS") || siteEnv("SMTP_PASSWORD") || "");
 
-  const from     = row?.smtpFrom     || process.env.SMTP_FROM     || row?.contactEmail || user;
-  const fromName = row?.smtpFromName || process.env.SMTP_FROM_NAME|| "4Relief Humanitarian Foundation";
-  const secure   = port === 465 ? true : (row?.smtpSecure ?? (process.env.SMTP_SECURE === "true"));
+  const from     = row?.smtpFrom     || siteEnv("SMTP_FROM")     || row?.contactEmail || user;
+  const fromName = row?.smtpFromName || siteEnv("SMTP_FROM_NAME")|| "4Relief Humanitarian Foundation";
+  const secure   = port === 465 ? true : (row?.smtpSecure ?? (siteEnv("SMTP_SECURE") === "true"));
 
   if (!user || !password) {
     console.warn("[mailer] ⚠️ لم يتم العثور على SMTP_USER أو SMTP_PASS بملف .env.local أو قاعدة البيانات.");
@@ -129,7 +131,7 @@ function buildTransporter(cfg: SmtpConfig) {
 export async function sendEmailVerification(opts: {
   to: string; donorName: string; verifyUrl: string;
 }): Promise<boolean> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const uniqueTag = `<!-- unique_time:${Date.now()} -->`; // 🌟 بصمة زمنية تمنع دمج Gmail للرسائل وإخفاء الزر
   const vars = { donorName: opts.donorName, verifyUrl: opts.verifyUrl, siteUrl };
 
@@ -223,7 +225,7 @@ const btnStyle = `
   margin: 8px 0;
 `;
 
-function emailWrapper(content: string, siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "#", dir: "ltr"|"rtl" = "rtl", lang = "ar") {
+function emailWrapper(content: string, siteUrl = getRequestSite().url, dir: "ltr"|"rtl" = "rtl", lang = "ar") {
   return `
 <!DOCTYPE html>
 <html dir="${dir}" lang="${lang}">
@@ -267,7 +269,7 @@ export async function sendDonationReceipt(opts: {
   campaignTitle?: string;
   donationDate?: string;
 }): Promise<boolean> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const date = opts.donationDate || new Date().toLocaleDateString("en-GB");
   const isMonthly = opts.frequency === "MONTHLY";
   const currencyDisplay = (opts.currency || "usd").toUpperCase();
@@ -339,7 +341,7 @@ export async function sendAdminDonationNotification(opts: {
   campaignTitle?: string;
   receiptNumber: string;
 }): Promise<boolean> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const amountStr = `$${Number(opts.amount).toFixed(2)}`;
 
   const vars = {
@@ -393,7 +395,7 @@ export async function sendContactNotification(opts: {
   message: string;
   subject?: string;
 }): Promise<boolean> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const vars = { senderName: opts.senderName, senderEmail: opts.senderEmail, message: opts.message, subject: opts.subject || "", siteUrl };
   const tpl = await loadEmailTemplate("contact_notification");
   if (tpl) return sendMail({ to: opts.adminEmail, subject: applyVars(tpl.subject, vars), html: applyVars(tpl.html, vars), replyTo: opts.senderEmail });
@@ -421,7 +423,7 @@ export async function sendContactNotification(opts: {
 
 /** Newsletter welcome email */
 export async function sendNewsletterWelcome(to: string): Promise<boolean> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const vars = { email: to, unsubscribeUrl: `${siteUrl}/unsubscribe?email=${encodeURIComponent(to)}`, siteUrl };
   const tpl = await loadEmailTemplate("newsletter_welcome");
   if (tpl) return sendMail({ to, subject: applyVars(tpl.subject, vars), html: applyVars(tpl.html, vars) });

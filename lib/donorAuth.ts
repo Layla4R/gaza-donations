@@ -1,4 +1,6 @@
 import { getSessionSecret } from "./session-secret";
+import { getRequestSite } from "./request-site";
+import { isSiteSession } from "./tenant";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -56,7 +58,7 @@ export async function registerDonor(opts: {
   }
 
   console.log("👉 [Register] تم الحفظ بـ Supabase. جاري تجهيز رابط التفعيل...");
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getRequestSite().url;
   const verifyUrl = `${siteUrl}/verify-email?token=${verifyToken}`;
 
   // 🌟 إرسال بريد التفعيل وانتظار النتيجة
@@ -140,7 +142,7 @@ export async function loginDonor(email: string, password: string) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("INVALID_CREDENTIALS");
 
-  const token = await new SignJWT({ userId: user.id, role: user.role })
+  const token = await new SignJWT({ userId: user.id, role: user.role, site: getRequestSite().id })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("30d")
     .sign(getSessionSecret());
@@ -155,7 +157,7 @@ export async function getCurrentDonor() {
     if (!token) return null;
 
     const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
-    if (!payload.userId) return null;
+    if (!payload.userId || !isSiteSession(payload, getRequestSite().id)) return null;
 
     const supabase = getSupabase();
     const { data: user } = await supabase
@@ -194,7 +196,7 @@ export async function requestPasswordReset(email: string) {
     resetExpiry: expiry.toISOString(),
   }).eq("id", user.id);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const resetUrl = `${siteUrl}/reset-password?token=${token}`;
 
   const resetVars = { donorName: user.name || email, email, resetUrl, expiryHours: "1", siteUrl };

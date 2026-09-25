@@ -1,3 +1,4 @@
+import { siteEnv } from "@/lib/request-site";
 import checkoutNodeJsSdk from "@paypal/checkout-server-sdk";
 import { getSupabaseOrNull } from "./supabase";
 
@@ -17,9 +18,9 @@ async function resolvePayPalConfig(): Promise<PayPalConfig> {
       return { clientId: data.paypalClientId, clientSecret: data.paypalClientSecret, mode: data.paypalMode || "sandbox" };
     }
   }
-  const clientId = process.env.PAYPAL_CLIENT_ID;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
-  const mode = process.env.PAYPAL_MODE || "sandbox";
+  const clientId = siteEnv("PAYPAL_CLIENT_ID");
+  const clientSecret = siteEnv("PAYPAL_CLIENT_SECRET");
+  const mode = siteEnv("PAYPAL_MODE") || "sandbox";
   if (!clientId || !clientSecret) throw new Error("PayPal credentials not configured. Add them in Admin → Settings → PayPal.");
   return { clientId, clientSecret, mode };
 }

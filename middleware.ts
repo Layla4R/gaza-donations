@@ -1,14 +1,15 @@
 import { getSessionSecret } from "./lib/session-secret";
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { siteForHost, isSiteSession, type SiteId } from "./lib/tenant";
 
 const LOCALES = ["ar", "en", "fr", "tr"];
 const COOKIE_NAME = "gd_admin_session";
 
-async function verifyAdminToken(token: string): Promise<boolean> {
+async function verifyAdminToken(token: string, site: SiteId): Promise<boolean> {
   try {
     const { payload } = await jwtVerify(token, getSessionSecret(), { algorithms: ["HS256"] });
-    return ["ADMIN", "EDITOR", "VIEWER"].includes(payload.role as string);
+    return isSiteSession(payload, site) && ["ADMIN", "EDITOR", "VIEWER"].includes(payload.role as string);
   } catch {
     return false;
   }
@@ -19,7 +20,10 @@ export async function middleware(req: NextRequest) {
   const host = req.headers.get("host") || "";
 
   // ── تحديد اللغة الافتراضية حسب الدومين ─────────────────────
-  const isDestekol = host.includes("destekol");
+  let site;
+  try { site = siteForHost(host, process.env.SITE_ID); }
+  catch { return new NextResponse("Site host not configured", { status: 421 }); }
+  const isDestekol = site.id === "destekol";
   const defaultLocale = isDestekol ? "tr" : "ar";
 
   // ── 1. Admin route protection ──────────────────────────────
@@ -28,7 +32,7 @@ export async function middleware(req: NextRequest) {
     const authHeader = req.headers.get("authorization");
     const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
     const token = cookie || bearerToken;
-    const valid = token ? await verifyAdminToken(token) : false;
+    const valid = token ? await verifyAdminToken(token, site.id) : false;
 
     if (!valid) {
       const loginUrl = req.nextUrl.clone();

@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   poweredByHeader: false,
   experimental: { serverComponentsExternalPackages: ["node-edge-tts"] },
   staticPageGenerationTimeout: 180,

@@ -4,6 +4,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
 import Breadcrumb from "@/components/admin/Breadcrumb";
 import { ToastProvider } from "@/components/admin/Toast";
+import { getRequestSite } from "@/lib/request-site";
 
 export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   const session = await getAdminSession();
@@ -15,6 +16,7 @@ export default async function AdminPanelLayout({ children }: { children: React.R
       <div className="flex h-screen overflow-hidden bg-dashbg">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <div className="bg-slate-900 text-white px-6 py-2 text-sm" dir="ltr">{getRequestSite().name} · Admin</div>
           <AdminTopbar />
           <Breadcrumb />
           

@@ -1,3 +1,4 @@
+import { getRequestSite } from "./request-site";
 /**
  * Loads translations from Supabase DB with fallback to local JSON files.
  * DB translations take priority — admin can edit them live.
@@ -44,7 +45,8 @@ async function loadFromFile(locale: string): Promise<TranslationMessages> {
 }
 
 export async function getTranslationMessages(locale: string): Promise<TranslationMessages> {
-  const cached = cache.get(locale);
+  const cacheKey = `${getRequestSite().id}:${locale}`;
+  const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.ts < TTL) return cached.data;
 
   // Load file fallback first
@@ -64,12 +66,13 @@ export async function getTranslationMessages(locale: string): Promise<Translatio
     merged = fileMessages;
   }
 
-  cache.set(locale, { data: merged, ts: Date.now() });
+  cache.set(cacheKey, { data: merged, ts: Date.now() });
   return merged;
 }
 
 /** Clear cache for a locale (called after admin saves translation) */
 export function clearTranslationCache(locale?: string) {
-  if (locale) cache.delete(locale);
-  else cache.clear();
+  const prefix = `${getRequestSite().id}:`;
+  if (locale) cache.delete(prefix + locale);
+  else for (const key of cache.keys()) if (key.startsWith(prefix)) cache.delete(key);
 }

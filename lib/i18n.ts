@@ -1,15 +1,9 @@
+import { getRequestSite } from "./request-site";
 import { getSupabaseOrNull } from "./supabase";
 
-export const LOCALES = ["ar", "en", "fr", "tr"] as const;
-export type Locale = (typeof LOCALES)[number];
-export const DEFAULT_LOCALE: Locale = "ar";
-
-export const LOCALE_NAMES: Record<Locale, string> = {
-  ar: "العربية", en: "English", fr: "Français", tr: "Türkçe",
-};
-export const LOCALE_DIR: Record<Locale, "rtl" | "ltr"> = {
-  ar: "rtl", en: "ltr", fr: "ltr", tr: "ltr",
-};
+export { LOCALES, DEFAULT_LOCALE, LOCALE_NAMES, LOCALE_DIR } from "./locales";
+export type { Locale } from "./locales";
+import { LOCALES, DEFAULT_LOCALE, type Locale } from "./locales";
 
 // ── Hardcoded fallbacks — used when DB is empty ──────────────
 export const FALLBACKS: Record<string, Record<string, string>> = {
@@ -295,7 +289,8 @@ const TTL = 60 * 1000;
 export async function loadTranslations(locale: string): Promise<Record<string, string>> {
   const loc = LOCALES.includes(locale as Locale) ? locale : DEFAULT_LOCALE;
 
-  const cached = cache.get(loc);
+  const cacheKey = `${getRequestSite().id}:${loc}`;
+  const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.ts < TTL) return cached.data;
 
   // Start with hardcoded fallbacks
@@ -310,7 +305,7 @@ export async function loadTranslations(locale: string): Promise<Record<string, s
         const dbDict: Record<string, string> = {};
         for (const row of data) dbDict[row.key] = row.value;
         const merged = { ...fallback, ...dbDict };
-        cache.set(loc, { data: merged, ts: Date.now() });
+        cache.set(cacheKey, { data: merged, ts: Date.now() });
         return merged;
       }
     } catch (e) {
@@ -320,11 +315,12 @@ export async function loadTranslations(locale: string): Promise<Record<string, s
   }
 
   // DB empty or failed — use fallbacks (never throw)
-  cache.set(loc, { data: fallback, ts: Date.now() });
+  cache.set(cacheKey, { data: fallback, ts: Date.now() });
   return fallback;
 }
 
 export function clearTranslationCache(locale?: string) {
-  if (locale) cache.delete(locale);
-  else cache.clear();
+  const prefix = `${getRequestSite().id}:`;
+  if (locale) cache.delete(prefix + locale);
+  else for (const key of cache.keys()) if (key.startsWith(prefix)) cache.delete(key);
 }

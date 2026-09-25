@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentDonor } from "@/lib/donorAuth";
 import { getSupabase } from "@/lib/supabase";
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     campaignTitle: (d.campaign as any)?.title, provider: d.provider,
     donationDate: new Date(d.createdAt).toLocaleDateString("en-GB", { year:"numeric", month:"long", day:"numeric" }),
     siteName: settings?.siteName, contactEmail: settings?.contactEmail,
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+    siteUrl: getRequestSite().url,
   });
   const pdfBuffer = pdf instanceof Uint8Array ? pdf.buffer : pdf;
   return new NextResponse(pdfBuffer as ArrayBuffer, {

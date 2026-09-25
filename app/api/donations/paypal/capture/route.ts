@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { getPaypalClientAsync, getPaypalAccessToken, paypal } from "@/lib/paypal";
@@ -5,7 +6,7 @@ import { incrementCampaignStats } from "@/lib/campaignHelpers";
 import { sendDonationReceipt } from "@/lib/mailer";
 
 export async function GET(req: NextRequest) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const siteUrl = getRequestSite().url;
   const donationId = req.nextUrl.searchParams.get("donationId");
   const token = req.nextUrl.searchParams.get("token");
   const type = req.nextUrl.searchParams.get("type");

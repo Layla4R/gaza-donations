@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentDonor } from "@/lib/donorAuth";
 import { getSupabase } from "@/lib/supabase";
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
     await supabase.from("Donation").update({ status: "REFUNDED" }).eq("id", donationId);
     const { data: s } = await supabase.from("SiteSettings").select("siteName,contactEmail").eq("id", "default").maybeSingle();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+    const siteUrl = getRequestSite().url;
     const cancelVars = {
       donorName: donor.name || donor.email,
       amount: `$${Number(donation.amount).toFixed(2)}`,

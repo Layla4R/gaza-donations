@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { sendEmailVerification } from "@/lib/mailer";
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   const token = crypto.randomBytes(32).toString("hex");
   const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   await supabase.from("User").update({ verifyToken: token, verifyExpiry: expiry }).eq("id", user.id);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
   const verifyUrl = `${siteUrl}/verify-email?token=${token}`;
   await sendEmailVerification({ to: email, donorName: user.name || email, verifyUrl });
   return NextResponse.json({ ok: true });

@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { getStripeAsync } from "@/lib/stripe";
@@ -19,11 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (
-      process.env.NODE_ENV === "production"
-        ? (() => { console.error("[checkout] NEXT_PUBLIC_SITE_URL not set in production!"); return "http://localhost:3000"; })()
-        : "http://localhost:3000"
-    );
+    const siteUrl = getRequestSite().url;
     const isMonthly = frequency === "monthly" || frequency === "MONTHLY";
     const supabase = getSupabase();
 

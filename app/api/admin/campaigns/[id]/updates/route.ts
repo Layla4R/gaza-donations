@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase";
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
   const primaryColor = (settings as any)?.primaryColor || "#0069D2";
   const accentColor = (settings as any)?.accentColor || "#F00F5A";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = getRequestSite().url;
 
   let emailsSent = 0;
   let failedEmails = 0;
