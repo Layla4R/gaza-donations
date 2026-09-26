@@ -338,7 +338,7 @@ export default async function LocaleLayout({
 
       <main className="flex-1 pt-20">{children}</main>
 
-      <SiteFooter navItems={pages} settings={settings} locale={locale} dict={dict} />
+      <SiteFooter isDestekol={isDestekol} navItems={pages} settings={settings} locale={locale} dict={dict} />
       <WhatsAppButton phone={settings?.whatsappNumber} />
 
       <SocialSidebar

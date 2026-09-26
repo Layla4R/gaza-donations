@@ -1,10 +1,12 @@
+import { getRequestSite } from "@/lib/request-site";
 import Link from "next/link";
 import { getPolicyMetadata } from "@/lib/policy-metadata";
 import { policies } from "@/lib/current-policies";
-import { OFFICIAL_EMAIL, launchCopy } from "@/lib/public-contact";
+import { officialEmail, normalizePublicContact, launchCopy } from "@/lib/public-contact";
 export default function LegalPageContent({ slug, locale }: { slug: string; locale: string }) {
-  const copy = launchCopy[locale] || launchCopy.ar;
-  const sections = (policies[locale] || policies.ar)[slug];
+  const email = officialEmail(getRequestSite().id === "destekol");
+  const copy = normalizePublicContact(launchCopy[locale] || launchCopy.ar, email);
+  const sections = normalizePublicContact((policies[locale] || policies.ar)[slug], email);
   if (!sections) return null;
   const heading = { ar: "قناة التواصل الرسمية", en: "Official contact", fr: "Contact officiel", tr: "Resmî iletişim" }[locale] || "قناة التواصل الرسمية";
   const updated = { ar: "آخر تحديث: 24 سبتمبر 2026", en: "Updated: 24 September 2026", fr: "Mise à jour : 24 septembre 2026", tr: "Güncelleme: 24 Eylül 2026" }[locale] || "24 September 2026";
@@ -24,7 +26,7 @@ export default function LegalPageContent({ slug, locale }: { slug: string; local
         <h2 className="text-xl font-bold mb-4" style={{ color: "white" }}>{heading}</h2>
         <p className="mb-3 leading-loose" style={{ color: "#e2e8f0" }}>{copy.contact}</p>
         <p className="mb-6 text-sm" style={{ color: "#cbd5e1" }}>{copy.response}</p>
-        <a href={`mailto:${OFFICIAL_EMAIL}?subject=${encodeURIComponent(sections[0].title)}`} className="inline-block rounded-xl bg-brand px-6 py-3 font-bold" style={{ color: "white" }} dir="ltr">{OFFICIAL_EMAIL}</a>
+        <a href={`mailto:${email}?subject=${encodeURIComponent(sections[0].title)}`} className="inline-block rounded-xl bg-brand px-6 py-3 font-bold" style={{ color: "white" }} dir="ltr">{email}</a>
       </section>
     </div>
   </div>;

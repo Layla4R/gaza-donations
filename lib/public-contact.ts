@@ -1,9 +1,12 @@
 export const OFFICIAL_EMAIL = "info@forrelief.org";
 // Public editorial content only. Never use this on account/customer records.
-export function normalizePublicContact<T>(value: T): T {
-  if (typeof value === "string") return value.replace(/[a-z0-9._%+-]+@(?:forrelief|4relief|destekol)\.org/gi, OFFICIAL_EMAIL) as T;
-  if (Array.isArray(value)) return value.map(normalizePublicContact) as T;
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, normalizePublicContact(item)])) as T;
+export const DESTEKOL_EMAIL = "info@destekol.org";
+export const DESTEKOL_ADDRESS = "TAŞDELEN MAH. BUKET SOKAK DIŞKAPI NO: 1-3, İÇKAPI NO: 38, ÇEKMEKÖY / İSTANBUL, TÜRKİYE";
+export const officialEmail = (isDestekol: boolean) => isDestekol ? DESTEKOL_EMAIL : OFFICIAL_EMAIL;
+export function normalizePublicContact<T>(value: T, email = OFFICIAL_EMAIL): T {
+  if (typeof value === "string") return value.replace(/[a-z0-9._%+-]+@(?:forrelief|4relief|destekol)\.org/gi, email) as T;
+  if (Array.isArray(value)) return value.map(item => normalizePublicContact(item, email)) as T;
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, normalizePublicContact(item, email)])) as T;
   return value;
 }
 export const launchCopy: Record<string, { status: string; contact: string; response: string }> = {

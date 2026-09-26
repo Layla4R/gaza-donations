@@ -1,4 +1,5 @@
-import { OFFICIAL_EMAIL, launchCopy } from "@/lib/public-contact";
+import { getRequestSite } from "@/lib/request-site";
+import { officialEmail, DESTEKOL_ADDRESS, normalizePublicContact, launchCopy } from "@/lib/public-contact";
 import type { Metadata } from "next";
 import { loadTranslations, LOCALES } from "@/lib/i18n";
 import { getSupabaseOrNull } from "@/lib/supabase";
@@ -8,13 +9,15 @@ import Icon from "@/components/icons";
 
 export const revalidate = 0;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
+
 
 export async function generateMetadata({
   params: { locale },
 }: {
   params: { locale: string };
 }): Promise<Metadata> {
+  const site = getRequestSite();
+  const SITE_URL = site.url;
   const supabase = getSupabaseOrNull();
 
   // جلب اسم الموقع/البراند ديناميكياً من إعدادات المنصة
@@ -28,7 +31,7 @@ export async function generateMetadata({
 
   // تحديد اسم البراند حسب اللغة الممررة أو من الإعدادات
   const brandName =
-    settings?.siteName ||
+    (site.id === "destekol" ? "Destekol" : settings?.siteName) ||
     (locale === "ar"
       ? "مؤسسة 4Relief الإنسانية"
       : locale === "fr"
@@ -46,7 +49,7 @@ export async function generateMetadata({
   };
 
   // الأوصاف المترجمة (Description)
-  const descriptions: Record<string, string> = Object.fromEntries(Object.entries(launchCopy).map(([language, copy]) => [language, copy.contact + " " + copy.response]));
+  const descriptions: Record<string, string> = Object.fromEntries(Object.entries(launchCopy).map(([language, copy]) => [language, normalizePublicContact(copy.contact + " " + copy.response, officialEmail(site.id === "destekol"))]));
 
   const title = titles[locale] || titles.en;
   const description = descriptions[locale] || descriptions.en;
@@ -80,6 +83,10 @@ export default async function ContactPage({
 }: {
   params: { locale: string };
 }) {
+  const site = getRequestSite();
+  const SITE_URL = site.url;
+  const isDestekol = site.id === "destekol";
+  const copy = normalizePublicContact(launchCopy[locale] || launchCopy.ar, officialEmail(isDestekol));
   const dict = await loadTranslations(locale);
   const supabase = getSupabaseOrNull();
 
@@ -122,13 +129,17 @@ export default async function ContactPage({
 
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
   const accentColor = appearance?.accentColor || "var(--color-accent, #F00F5A)";
-  const contactEmail = OFFICIAL_EMAIL;
+  const contactEmail = officialEmail(isDestekol);
+  sections = normalizePublicContact(sections, contactEmail);
+  const street = isDestekol ? "TAŞDELEN MAH. BUKET SOKAK DIŞKAPI NO: 1-3, İÇKAPI NO: 38" : "71-75 Shelton Street, Covent Garden";
+  const locality = isDestekol ? "ÇEKMEKÖY / İSTANBUL" : "London";
+  const country = isDestekol ? "TÜRKİYE" : "United Kingdom";
   const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "";
 
   const t = (ar: string, en: string, fr: string, tr: string) =>
     locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
 
-  const mapEmbedUrl = `https://maps.google.com/maps?q=71-75%20Shelton%20Street,%20Covent%20Garden,%20London,%20WC2H%209JQ,%20UK&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(isDestekol ? DESTEKOL_ADDRESS : "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, UK")}&z=15&output=embed`;
   const pageUrl = `${SITE_URL}/${locale}/contact`;
 
   // استخراج أسئلة الـ FAQ المترجمة لبناء الـ Schema
@@ -158,18 +169,18 @@ export default async function ContactPage({
       {
         "@type": ["Organization", "NGO"],
         "@id": `${SITE_URL}/#organization`,
-        name: "4Relief Humanitarian Foundation",
-        alternateName: "4Relief",
+        name: isDestekol ? "Destekol" : "4Relief Humanitarian Foundation",
+        alternateName: site.name,
         url: SITE_URL,
-        logo: `${SITE_URL}/brand/logo.png`,
+        logo: `${SITE_URL}/brand/${isDestekol ? "destekol_logo.png" : "logo.png"}`,
         email: contactEmail,
         telephone: contactPhone,
         address: {
           "@type": "PostalAddress",
-          streetAddress: "71-75 Shelton Street, Covent Garden",
-          addressLocality: "London",
-          postalCode: "WC2H 9JQ",
-          addressCountry: "GB",
+          streetAddress: street,
+          addressLocality: locality,
+          ...(!isDestekol ? { postalCode: "WC2H 9JQ" } : {}),
+          addressCountry: isDestekol ? "TR" : "GB",
         },
         contactPoint: [
           {
@@ -209,11 +220,11 @@ export default async function ContactPage({
   const safeJsonLd = (data: unknown) =>
     JSON.stringify(data).replace(/</g, "\\u003c");
 
-  const rendererContext = { locale, dict, primaryColor, accentColor };
+  const rendererContext = { isDestekol, locale, dict, primaryColor, accentColor };
 
   return (
     <div className="bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100">
-      <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{(launchCopy[locale] || launchCopy.ar).contact}</p><p>{(launchCopy[locale] || launchCopy.ar).response}</p><p>{(launchCopy[locale] || launchCopy.ar).status}</p></section>
+      <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(contactSchema) }}
@@ -304,13 +315,14 @@ export default async function ContactPage({
                 {t("المقر الرئيسي", "Headquarters", "Siège Social", "Genel Merkez")}
               </span>
               <strong className="text-slate-900 block truncate" itemProp="address" itemScope itemType="http://schema.org/PostalAddress">
-                <span itemProp="addressLocality">London</span>, <span itemProp="addressCountry">United Kingdom</span>
+                <span itemProp="addressLocality">{locality}</span>, <span itemProp="addressCountry">{country}</span>
               </strong>
             </div>
           </div>
         </section>
       </div>
 
+      {isDestekol && <address dir="ltr" className="max-w-screen-xl mx-auto px-6 pb-8 not-italic leading-relaxed">{DESTEKOL_ADDRESS}</address>}
       {/* عرض الأقسام المترجمة عبر BlockRenderer */}
       {sections.length > 0 ? (
         <div className="space-y-4">
@@ -341,9 +353,9 @@ export default async function ContactPage({
                         {t("العنوان المسجل", "Registered Address", "Adresse Enregistrée", "Kayıtlı Adres")}
                       </div>
                       <address itemScope itemType="http://schema.org/PostalAddress" className="not-italic text-slate-800 font-bold text-xs sm:text-sm group-hover:text-brand transition whitespace-normal leading-relaxed">
-                        <span itemProp="streetAddress">71-75 Shelton Street, Covent Garden</span><br />
-                        <span itemProp="addressLocality">London</span>, <span itemProp="postalCode">WC2H 9JQ</span><br />
-                        <span itemProp="addressCountry">United Kingdom</span>
+                        <span itemProp="streetAddress">{street}</span><br />
+                        <span itemProp="addressLocality">{locality}</span>, {!isDestekol && <span itemProp="postalCode">WC2H 9JQ</span>}<br />
+                        <span itemProp="addressCountry">{country}</span>
                       </address>
                     </div>
                   </div>
@@ -383,7 +395,7 @@ export default async function ContactPage({
             allowFullScreen={true}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
-            title="4Relief Foundation Location in London"
+            title={isDestekol ? "Destekol — Çekmeköy, İstanbul" : "4Relief Foundation Location in London"}
           />
         </div>
       </div>

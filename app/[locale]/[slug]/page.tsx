@@ -1,5 +1,5 @@
 import { getPolicyMetadata } from "@/lib/policy-metadata";
-import { normalizePublicContact, launchCopy } from "@/lib/public-contact";
+import { normalizePublicContact, officialEmail, launchCopy } from "@/lib/public-contact";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -671,6 +671,7 @@ export default async function DynamicPage({
               key={section.id}
               section={section}
               context={{
+                isDestekol,
                 campaigns,
                 whiteBackground: true,
                 locale,
@@ -684,7 +685,7 @@ export default async function DynamicPage({
           <LegalPageContent slug={slug} locale={locale} />
         ) : (page as any).content ? (
           <div className="mx-auto max-w-screen-xl px-6 py-8 whitespace-pre-line text-slate-700 leading-relaxed text-base sm:text-lg">
-            {(page as any).content}
+            {normalizePublicContact((page as any).content, officialEmail(isDestekol))}
           </div>
         ) : null}
       </div>

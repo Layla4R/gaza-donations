@@ -1,13 +1,15 @@
 "use client";
-import { launchCopy, normalizePublicContact } from "@/lib/public-contact";
+import { OFFICIAL_EMAIL, launchCopy, normalizePublicContact } from "@/lib/public-contact";
 import { useState } from "react";
 import Icon from "@/components/icons";
 
 export default function FaqSection({
+  email = OFFICIAL_EMAIL,
   locale,
   dict,
   data,
 }: {
+  email?: string;
   locale: string;
   dict: Record<string, string>;
   data?: any;
@@ -20,10 +22,10 @@ export default function FaqSection({
 
   const title = data?.headline || data?.title;
   const subtitle = data?.subheading || data?.subtitle || data?.description;
-  const items = normalizePublicContact(data?.items || []).map((item: any) => {
+  const items = normalizePublicContact(data?.items || [], email).map((item: any) => {
     const content = [item.q, item.question, item.title, item.a, item.answer, item.content, item.body].filter(Boolean).join(" ");
     if (!/تبرع|متبرع|استرداد|زكاة|donat|refund|donateur|bağış|iade|PCI-DSS|3D Secure/i.test(content)) return item;
-    const copy = launchCopy[locale] || launchCopy.ar;
+    const copy = normalizePublicContact(launchCopy[locale] || launchCopy.ar, email);
     const answer = copy.status + " " + copy.contact + " " + copy.response;
     return { ...item, a: answer, answer, content: answer, body: answer };
   });
@@ -180,8 +182,8 @@ export default function FaqSection({
           </div>
 
           <a
-            href="mailto:info@forrelief.org"
-            aria-label="Send email to info@forrelief.org"
+            href={`mailto:${email}`}
+            aria-label={`Send email to ${email}`}
             className="inline-flex items-center gap-2 bg-brand hover:opacity-90 active:scale-98 text-white font-bold rounded-xl px-6 py-3 text-xs sm:text-sm transition-all shadow-sm shrink-0"
           >
             <Icon name="send" size={15} />

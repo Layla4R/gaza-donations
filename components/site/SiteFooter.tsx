@@ -1,9 +1,9 @@
 "use client";
 
 import type { PublicSiteSettings } from "@/lib/public-site-settings";
-import { OFFICIAL_EMAIL } from "@/lib/public-contact";
+import { OFFICIAL_EMAIL, DESTEKOL_ADDRESS } from "@/lib/public-contact";
 
-import { useState, useEffect } from "react";
+
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/icons";
@@ -147,35 +147,19 @@ const DESTEKOL_VERIFICATION_URL =
 /* ========================================================= */
 
 export default function SiteFooter({
+  isDestekol = false,
   navItems = [],
   settings = {},
   locale = "ar",
   dict = {},
 }: {
+  isDestekol?: boolean;
   navItems?: NavItem[];
   settings?: PublicSiteSettings | null;
   locale?: string;
   dict?: Record<string, string>;
 }) {
-  const [isDestekol, setIsDestekol] = useState(false);
 
-  /* =========================================================
-     Detect Destekol domain
-  ========================================================= */
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hostname = window.location.hostname.toLowerCase();
-
-      if (
-        hostname === "destekol.org" ||
-        hostname === "www.destekol.org" ||
-        hostname.includes("destekol")
-      ) {
-        setIsDestekol(true);
-      }
-    }
-  }, []);
 
   const p = locale === "ar" ? "" : `/${locale}`;
 
@@ -644,6 +628,8 @@ export default function SiteFooter({
                   {contactEmail}
                 </a>
               </li>
+
+              {isDestekol && <li dir="ltr" className="leading-relaxed break-words">{DESTEKOL_ADDRESS}</li>}
 
               {/* Phone */}
               {settings?.contactPhone && (

@@ -47,7 +47,7 @@ export function rankSiteContext(documents: Document[], question: string, locale:
   return '['+chosen.join(',')+']';
 }
 
-export async function siteContext(db: SupabaseClient, question: string, locale: string, signal: AbortSignal): Promise<string> {
+export async function siteContext(db: SupabaseClient, question: string, locale: string, signal: AbortSignal, email?: string): Promise<string> {
   const results = await Promise.all(sources.map(async source => {
     const documents: Document[]=[];
     for(let offset=0;;) {
@@ -64,7 +64,7 @@ export async function siteContext(db: SupabaseClient, question: string, locale: 
           const policy=source.table==='Page' ? policies[lang]?.[row.slug] : undefined;
           // Policy pages render maintained copy rather than legacy database sections.
           const content=policy ? policy.map(s=>s.title+'\n'+s.text).join('\n') : extractText(Object.fromEntries(Object.entries(variant).filter(([key])=>key!==source.translations)));
-          documents.push({title:variant.title || row.title,url:'/'+lang+source.prefix+'/'+row.slug,locale:lang,text:normalizePublicContact(content)});
+          documents.push({title:variant.title || row.title,url:'/'+lang+source.prefix+'/'+row.slug,locale:lang,text:normalizePublicContact(content, email)});
         }
       }
       offset+=batch.length;

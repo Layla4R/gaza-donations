@@ -1,4 +1,4 @@
-import { OFFICIAL_EMAIL, normalizePublicContact } from "@/lib/public-contact";
+import { officialEmail, normalizePublicContact } from "@/lib/public-contact";
 import Image from "next/image";
 import Link from "next/link";
 import { PageSection } from "@/lib/blocks";
@@ -44,7 +44,8 @@ export default function BlockRenderer({
   section: PageSection;
   context?: RendererContext;
 }) {
-  const p = normalizePublicContact(section.props || (section as any).data || {});
+  const email = officialEmail(!!context?.isDestekol);
+  const p = normalizePublicContact(section.props || (section as any).data || {}, email);
 
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
@@ -718,7 +719,7 @@ export default function BlockRenderer({
     }
 
     case "faq": {
-      return <FaqSection locale={locale} dict={context?.dict || {}} data={p} />;
+      return <FaqSection email={email} locale={locale} dict={context?.dict || {}} data={p} />;
     }
 
     case "cta":
@@ -754,7 +755,7 @@ export default function BlockRenderer({
         "url": "https://forrelief.org",
         "contactPoint": {
           "@type": "ContactPoint",
-          "email": OFFICIAL_EMAIL,
+          "email": email,
           "contactType": "customer service",
           "availableLanguage": ["Arabic", "English", "Turkish", "French"]
         }
@@ -772,7 +773,7 @@ export default function BlockRenderer({
             {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
           </div>
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-            <ContactForm locale={locale} dict={context?.dict || {}} email={OFFICIAL_EMAIL} />
+            <ContactForm locale={locale} dict={context?.dict || {}} email={email} />
           </div>
         </section>
       );

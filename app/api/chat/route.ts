@@ -1,3 +1,5 @@
+import { getRequestSite } from "@/lib/request-site";
+import { officialEmail, normalizePublicContact } from "@/lib/public-contact";
 import { siteContext } from "@/lib/site-chat-context";
 import { CHAT_TEXT, chatLocale } from "@/lib/chat-translations";
 import { enforceRequestLimit } from "@/lib/request-limit";
@@ -139,7 +141,7 @@ async function withTimeout<T>(ms: number, action: (signal: AbortSignal) => Promi
 async function organizationContext(message: string, locale: Locale): Promise<string> {
   const db = getSupabaseOrNull();
   if (!db) return "";
-  try { return await withTimeout(8000, signal => siteContext(db, message, locale, signal)); }
+  try { return await withTimeout(8000, signal => siteContext(db, message, locale, signal, officialEmail(getRequestSite().id === "destekol"))); }
   catch { console.warn("Chat published context unavailable"); return ""; }
 }
 
@@ -166,7 +168,7 @@ async function askGroq(message: string, locale: Locale): Promise<string> {
     { role: "user", content: JSON.stringify({
       question: message,
       localFileExcerpts: relevantContext(message),
-      organizationKnowledge: NGO_KNOWLEDGE,
+      organizationKnowledge: normalizePublicContact(NGO_KNOWLEDGE, officialEmail(getRequestSite().id === "destekol")),
       organizationPages: context,
     }) },
   ];

@@ -1,4 +1,5 @@
-import { OFFICIAL_EMAIL } from "@/lib/public-contact";
+import { getRequestSite } from "@/lib/request-site";
+import { officialEmail } from "@/lib/public-contact";
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { sendContactNotification } from "@/lib/mailer";
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     try {
       await sendContactNotification({
-        adminEmail: OFFICIAL_EMAIL,
+        adminEmail: officialEmail(getRequestSite().id === "destekol"),
         senderName: name,
         senderEmail: email,
         subject: subject?.trim() || "(no subject)",

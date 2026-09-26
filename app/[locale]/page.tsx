@@ -1,6 +1,6 @@
 import HomeTrustContent from "@/components/site/HomeTrustContent";
 import { COMPANY_RECORD_URL, getHomeTrustContent } from "@/lib/home-trust-content";
-import { OFFICIAL_EMAIL } from "@/lib/public-contact";
+import { officialEmail } from "@/lib/public-contact";
 import type { Metadata } from "next";
 import { loadTranslations } from "@/lib/i18n";
 import { getHomeData } from "@/lib/services/home.service";
@@ -155,7 +155,7 @@ export default async function HomePage({ params }: PageProps) {
         ],
         contactPoint: {
           "@type": "ContactPoint",
-          email: OFFICIAL_EMAIL,
+          email: officialEmail(isDestekol),
           contactType: "customer support",
           availableLanguage: ["Arabic", "English", "French", "Turkish"],
         },
