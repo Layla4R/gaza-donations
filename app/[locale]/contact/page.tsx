@@ -130,7 +130,6 @@ export default async function ContactPage({
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
   const accentColor = appearance?.accentColor || "var(--color-accent, #F00F5A)";
   const contactEmail = officialEmail(isDestekol);
-  sections = normalizePublicContact(sections, contactEmail);
   const street = isDestekol ? "TAŞDELEN MAH. BUKET SOKAK DIŞKAPI NO: 1-3, İÇKAPI NO: 38" : "71-75 Shelton Street, Covent Garden";
   const locality = isDestekol ? "ÇEKMEKÖY / İSTANBUL" : "London";
   const country = isDestekol ? "TÜRKİYE" : "United Kingdom";
@@ -144,9 +143,9 @@ export default async function ContactPage({
 
   // استخراج أسئلة الـ FAQ المترجمة لبناء الـ Schema
   const faqSection = sections.find(
-    (s: any) => s.type?.toLowerCase() === "faq" || Boolean(s.props?.items) || Boolean(s.data?.items)
+    (s: any) => s.type?.toLowerCase() === "faq"
   );
-  const faqItems: Array<{ question?: string; q?: string; title?: string; answer?: string; a?: string; body?: string }> =
+  const faqItems: Array<{ question?: string; q?: string; title?: string; answer?: string; a?: string; content?: string; body?: string }> =
     faqSection?.props?.items || faqSection?.data?.items || faqSection?.items || [];
 
   const contactSchema: any = {
@@ -208,10 +207,10 @@ export default async function ContactPage({
       "@type": "FAQPage",
       mainEntity: faqItems.map((item) => ({
         "@type": "Question",
-        name: item.question || item.q || item.title || "",
+        name: item.q || item.question || item.title || "",
         acceptedAnswer: {
           "@type": "Answer",
-          text: item.answer || item.a || item.body || "",
+          text: item.a || item.answer || item.content || item.body || "",
         },
       })),
     });

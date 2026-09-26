@@ -1,5 +1,5 @@
 "use client";
-import { OFFICIAL_EMAIL, launchCopy, normalizePublicContact } from "@/lib/public-contact";
+import { OFFICIAL_EMAIL } from "@/lib/public-contact";
 import { useState } from "react";
 import Icon from "@/components/icons";
 
@@ -22,13 +22,7 @@ export default function FaqSection({
 
   const title = data?.headline || data?.title;
   const subtitle = data?.subheading || data?.subtitle || data?.description;
-  const items = normalizePublicContact(data?.items || [], email).map((item: any) => {
-    const content = [item.q, item.question, item.title, item.a, item.answer, item.content, item.body].filter(Boolean).join(" ");
-    if (!/تبرع|متبرع|استرداد|زكاة|donat|refund|donateur|bağış|iade|PCI-DSS|3D Secure/i.test(content)) return item;
-    const copy = normalizePublicContact(launchCopy[locale] || launchCopy.ar, email);
-    const answer = copy.status + " " + copy.contact + " " + copy.response;
-    return { ...item, a: answer, answer, content: answer, body: answer };
-  });
+  const items = Array.isArray(data?.items) ? data.items : [];
 
   if (!title && items.length === 0) return null;
 
@@ -51,7 +45,7 @@ export default function FaqSection({
       {/* حقن JSON-LD Schema للذكاء الاصطناعي ومحركات البحث */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema).replace(/</g, "\\u003c") }}
       />
 
       <div className="max-w-screen-xl mx-auto px-6">
@@ -144,7 +138,7 @@ export default function FaqSection({
                         isOpen ? "block" : "hidden"
                       }`}
                     >
-                      <p className="text-slate-500 leading-loose">
+                      <p className="text-slate-500 leading-loose whitespace-pre-wrap">
                         {answerText}
                       </p>
                     </dd>

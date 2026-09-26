@@ -45,7 +45,9 @@ export default function BlockRenderer({
   context?: RendererContext;
 }) {
   const email = officialEmail(!!context?.isDestekol);
-  const p = normalizePublicContact(section.props || (section as any).data || {}, email);
+  const rawProps = section.props || (section as any).data || {};
+  // FAQ questions and answers belong to the site's admin, including their wording and links.
+  const p = section.type === "faq" ? rawProps : normalizePublicContact(rawProps, email);
 
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
