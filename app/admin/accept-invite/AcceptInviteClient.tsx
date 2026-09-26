@@ -3,9 +3,11 @@ import { storeAdminToken } from "@/lib/admin-fetch";
 import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAdminBranding } from "@/components/admin/AdminBranding";
 import Icon from "@/components/icons";
 
 export default function AcceptInviteClient() {
+  const brand = useAdminBranding();
   const params = useSearchParams();
   const router = useRouter();
   const token = params.get("token") || "";
@@ -47,7 +49,7 @@ export default function AcceptInviteClient() {
       <div className="absolute -right-24 -bottom-24 w-80 h-80 rounded-full border border-white/10 hidden sm:block" />
       <div className="relative bg-white rounded-2xl shadow-2xl border border-line w-full max-w-md overflow-hidden">
         <div className="bg-brand-gradient p-8 text-center">
-          <Image src="/brand/logo-horizontal-transparent.png" alt="4Relief" width={180} height={72} className="h-10 w-auto object-contain mx-auto mb-3" />
+          <Image src={brand.logo} alt={brand.name} width={208} height={84} className={`h-10 mx-auto mb-3 ${brand.name === "Destekol" ? "w-52 object-cover" : "w-auto object-contain"}`} />
           <span className="inline-block text-white/70 text-xs font-bold tracking-widest uppercase">Admin Panel Invitation</span>
         </div>
         <div className="p-8">

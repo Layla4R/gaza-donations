@@ -3,6 +3,7 @@ import { adminFetch, clearAdminToken } from "@/lib/admin-fetch";
 
 import Link from "next/link";
 import Image from "next/image";
+import { useAdminBranding } from "./AdminBranding";
 import { usePathname, useRouter } from "next/navigation";
 import Icon, { IconName } from "@/components/icons";
 
@@ -30,6 +31,7 @@ const NAV: { href: string; label: string; icon: IconName; group?: string }[] = [
 ];
 
 export default function AdminSidebar() {
+  const brand = useAdminBranding();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -46,7 +48,7 @@ export default function AdminSidebar() {
     <aside className="w-60 bg-sidebar-gradient text-white h-screen flex flex-col shrink-0 border-r border-white/5">
       {/* Logo */}
       <div className="p-5 border-b border-white/10">
-        <Image src="/brand/logo-horizontal-transparent.png" alt="4Relief" width={140} height={56} className="h-9 w-auto object-contain mb-1.5" />
+        <Image src={brand.logo} alt={brand.name} width={180} height={72} className={`h-9 mb-1.5 ${brand.name === "Destekol" ? "w-44 object-cover" : "w-auto object-contain"}`} />
         <div className="text-white/80 text-xs font-semibold tracking-widest uppercase">Admin Panel</div>
       </div>
 

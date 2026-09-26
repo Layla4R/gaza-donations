@@ -4,9 +4,11 @@ import { storeAdminToken } from "@/lib/admin-fetch";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAdminBranding } from "@/components/admin/AdminBranding";
 import Icon from "@/components/icons";
 
 export default function AdminLogin() {
+  const brand = useAdminBranding();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -90,7 +92,7 @@ async function submit(e: React.FormEvent) {
 
       <form onSubmit={submit} className="relative bg-white rounded-2xl shadow-2xl border border-line p-8 w-full max-w-md space-y-5">
         <div className="text-center mb-2">
-          <Image src="/brand/logo-horizontal-transparent.png" alt="4Relief" width={200} height={80} className="h-12 w-auto object-contain mx-auto mb-5" />
+          <Image src={brand.logo} alt={brand.name} width={240} height={96} className={`h-12 mx-auto mb-5 ${brand.name === "Destekol" ? "w-60 object-cover" : "w-auto object-contain"}`} />
           <span className="inline-flex items-center gap-2 text-brand-light font-display font-bold text-xs tracking-[0.25em] uppercase mb-2">
             <span className="inline-block w-6 h-px bg-brand-light" />
             Admin Panel
