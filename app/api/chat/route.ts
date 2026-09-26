@@ -1,4 +1,5 @@
 import { siteContext } from "@/lib/site-chat-context";
+import { CHAT_TEXT, chatLocale } from "@/lib/chat-translations";
 import { enforceRequestLimit } from "@/lib/request-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { NGO_KNOWLEDGE } from "@/lib/ai-knowledge";
@@ -212,10 +213,11 @@ export async function POST(req: NextRequest) {
   catch { return errorResponse("صيغة الطلب غير صحيحة.", 400); }
   if (!body || typeof body !== "object" || Array.isArray(body)) return errorResponse("صيغة الطلب غير صحيحة.", 400);
   const input = body as Row;
-  const locale: Locale = input.locale === "en" || input.locale === "tr" || input.locale === "fr" ? input.locale : "ar";
-  if (typeof input.message !== "string" || !input.message.trim()) return errorResponse("يرجى كتابة السؤال.", 400);
+  const locale = chatLocale(input.locale);
+  const t = CHAT_TEXT[locale];
+  if (typeof input.message !== "string" || !input.message.trim()) return errorResponse(t.questionRequired, 400);
   const message = input.message.trim();
-  if (message.length > 4000) return errorResponse("السؤال طويل جداً؛ يرجى اختصاره.", 400);
+  if (message.length > 4000) return errorResponse(t.questionLong, 400);
 
   try {
     // إجابات الملفات الحالية عربية؛ اللغات الأخرى تحتاج صياغة بواسطة Groq.

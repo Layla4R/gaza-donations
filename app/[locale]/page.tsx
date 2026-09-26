@@ -196,7 +196,7 @@ export default async function HomePage({ params }: PageProps) {
       {!isDestekol && <HomeTrustContent locale={locale} siteUrl={SITE_URL} />}
 
       {/* عرض مكون الدردشة بشكل منفصل إذا كان يجب أن يظهر دائماً */}
-      <ChatWidget locale={locale} />
+      <ChatWidget key={locale} locale={locale} />
     </div>
   );
 }
