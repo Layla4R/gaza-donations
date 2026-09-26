@@ -333,7 +333,7 @@ export default async function LocaleLayout({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} />
 
-      <SiteHeader navItems={pages} settings={settings} locale={locale} dict={dict} transparent={true} />
+      <SiteHeader navItems={pages} settings={settings} locale={locale} dict={dict} transparent={false} />
       <CookieBanner locale={locale} />
 
       <main className="flex-1 pt-20">{children}</main>

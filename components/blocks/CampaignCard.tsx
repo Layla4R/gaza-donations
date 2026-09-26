@@ -394,7 +394,7 @@ export default function CampaignCard({
     "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
 
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <div className="campaign-card group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       {/* Image */}
 
       <Link
@@ -582,7 +582,7 @@ export default function CampaignCard({
                 </button>
 
                 <div className="relative flex-1">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-500">
+                  <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-xs font-semibold text-slate-500">
                     $
                   </span>
 
@@ -610,7 +610,7 @@ export default function CampaignCard({
                       }
                     }}
                     aria-label="Custom Amount"
-                    className="w-full rounded-lg border border-slate-200 bg-white py-1.5 pl-6 pr-2 text-center text-xs font-semibold focus:border-brand focus:outline-none"
+                    className="block m-0 w-full rounded-lg border border-slate-200 bg-white py-1.5 pl-6 pr-2 text-center text-xs font-semibold focus:border-brand focus:outline-none"
                   />
                 </div>
 

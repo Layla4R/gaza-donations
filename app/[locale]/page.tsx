@@ -168,6 +168,7 @@ export default async function HomePage({ params }: PageProps) {
 
   // تمرير السياق المطلوب للـ BlockRenderer
   const context = {
+    isHomePage: true,
     locale,
     dict,
     primaryColor,
@@ -180,7 +181,7 @@ export default async function HomePage({ params }: PageProps) {
   };
 
   return (
-    <div>
+    <div className="home-layout">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -190,10 +191,10 @@ export default async function HomePage({ params }: PageProps) {
 
       {/* استخدام BlockRenderer لتصيير جميع الأقسام ديناميكياً */}
       {sections.map((section: any) => (
-        <BlockRenderer key={section.id} section={section} context={context} />
+        <div key={section.id} className={`home-section home-section--${section.type}`}><BlockRenderer section={section} context={context} /></div>
       ))}
       
-      {!isDestekol && <HomeTrustContent locale={locale} siteUrl={SITE_URL} />}
+      {!isDestekol && <div className="home-section"><HomeTrustContent locale={locale} siteUrl={SITE_URL} /></div>}
 
       {/* عرض مكون الدردشة بشكل منفصل إذا كان يجب أن يظهر دائماً */}
       <ChatWidget key={locale} locale={locale} />

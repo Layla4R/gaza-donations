@@ -1,3 +1,5 @@
+import CardDescription from "@/components/site/CardDescription";
+import CardCarousel from "@/components/site/CardCarousel";
 import { officialEmail, normalizePublicContact } from "@/lib/public-contact";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,6 +18,7 @@ import type { CampaignLite } from "@/lib/pageData";
 import FaqSection from "../site/FaqSection";
 
 interface RendererContext {
+  isHomePage?: boolean;
   campaigns?: CampaignLite[];
   whiteBackground?: boolean;
   locale?: string;
@@ -331,11 +334,11 @@ export default function BlockRenderer({
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <CardCarousel enabled={context?.isHomePage === true} locale={locale} href={getLocalizedLink("/projects")} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {projects.map((item: any, index: number) => (
                 <div
                   key={index}
-                  className="group relative bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-brand/30 transition-all duration-300 flex flex-col justify-between"
+                  className="project-card group relative bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-brand/30 transition-all duration-300 flex flex-col justify-between"
                 >
                   <div>
                     {item.image && (
@@ -369,9 +372,9 @@ export default function BlockRenderer({
                         {item.title}
                       </h3>
 
-                      <p className="text-slate-600 text-sm leading-relaxed mb-6">
+                      {context?.isHomePage ? <CardDescription text={item.description || item.body || ""} locale={locale} /> : <p className="text-slate-600 text-sm leading-relaxed mb-6">
                         {item.description || item.body}
-                      </p>
+                      </p>}
                     </div>
                   </div>
 
@@ -386,7 +389,7 @@ export default function BlockRenderer({
                   </div>
                 </div>
               ))}
-            </div>
+            </CardCarousel>
           </div>
         </section>
       );
@@ -562,7 +565,7 @@ export default function BlockRenderer({
               {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">{p.title}</h2>}
               {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+            <CardCarousel enabled={context?.isHomePage === true} locale={locale} href={getLocalizedLink("/campaigns")} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {campaigns.map((c) => (
                 <CampaignCard
                   key={c.id}
@@ -582,8 +585,8 @@ export default function BlockRenderer({
               {campaigns.length === 0 && (
                 <p className="text-slate-500 col-span-full text-center py-10">{noCampaignsText}</p>
               )}
-            </div>
-            {campaigns.length > 0 && (
+            </CardCarousel>
+            {!context?.isHomePage && campaigns.length > 0 && (
               <div className="text-center mt-12">
                 <Link
                   href={getLocalizedLink("/campaigns")}
@@ -707,7 +710,7 @@ export default function BlockRenderer({
     // 🌟 التعديل الخاص بقسم القصص والأخبار (stories / news)
     case "stories": {
       const posts = context?.posts || [];
-      if (!posts || posts.length === 0) return null;
+      if (!posts.length && !p.items?.length) return null;
 
       return (
         <NewsSection
@@ -716,6 +719,7 @@ export default function BlockRenderer({
           locale={locale}
           dict={context?.dict || {}}
           data={p}
+          compact={context?.isHomePage}
         />
       );
     }

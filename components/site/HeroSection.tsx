@@ -128,10 +128,7 @@ export default function HeroSection({
   const accent = accentColor || "#F00F5A";
   const primary = primaryColor || "#0069D2";
 
-  const prefix =
-    locale === "ar" ? "" : `/${locale}`;
-
-  /*
+/*
    * Admin slides
    */
   const adminSlides = Array.isArray(data?.items)
@@ -521,26 +518,18 @@ export default function HeroSection({
     }
   }
 
-  // دالة لمعالجة الروابط
-  const getLocalizedLink = (url?: string, defaultFallback = "/") => {
-    if (!url) return locale === "ar" ? defaultFallback : `/${locale}${defaultFallback}`;
-    if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    
-    const cleanUrl = url.startsWith("/") ? url : `/${url}`;
-    const langPrefix = `/${locale}`;
-
-    if (locale === "ar") return cleanUrl;
-    
-    if (cleanUrl.startsWith(`${langPrefix}/`) || cleanUrl === langPrefix) {
-      return cleanUrl;
-    }
-    
-    return `${langPrefix}${cleanUrl}`;
-  };
+  // Each slide uses the campaign URL saved by the admin.
+  const enteredUrl = slide?.buttonUrl?.trim() || "";
+  const donationUrl = /^(?:https?:\/\/|\/(?!\/)|#)/i.test(enteredUrl)
+    ? enteredUrl
+    : enteredUrl && !/^[a-z][a-z0-9+.-]*:|^\/\//i.test(enteredUrl) ? "/" + enteredUrl : "";
 
   if (!slide) {
     return null;
   }
+
+  const donationButtonClass = "inline-flex items-center gap-2.5 rounded-2xl px-8 py-4 text-lg font-bold text-white shadow-lg transition-all enabled:hover:scale-[1.02] disabled:cursor-not-allowed";
+  const donationButtonContent = <><Icon name="heart" size={20} />{slide.buttonLabel || t("hero.cta_donate", "تبرع الآن", "Donate Now", "Faire un Don", "Bağış Yap")}</>;
 
   return (
     <section
@@ -550,215 +539,166 @@ export default function HeroSection({
       onMouseLeave={() =>
         setHovered(false)
       }
-      className="relative flex min-h-[85vh] flex-col justify-between overflow-hidden bg-slate-900 -mt-20 pt-20 lg:min-h-[90vh]"
+  className="hero-section relative flex flex-col justify-between overflow-hidden bg-slate-900 -mt-20 pt-20"
     >
-      {/* Background Slides */}
+      <div className="hero-stage relative w-full overflow-hidden">
 
-      {slides.map(
-        (sl, index) => (
-          <div
-            key={`${sl.image}-${index}`}
-            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+  {/* يحافظ على النسبة الأصلية للصورة ويحدد ارتفاع السلايدر تلقائياً */}
+  <img
+    src={slide.image}
+    alt=""
+    aria-hidden="true"
+    className="block w-full h-auto invisible pointer-events-none"
+  />
+
+  {/* Background Slides */}
+  {slides.map((sl, index) => (
+    <div
+      key={`${sl.image}-${index}`}
+      className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+      style={{
+        opacity:
+          index === current && !animating
+            ? 1
+            : 0,
+        zIndex: 0,
+      }}
+    >
+      <Image
+        src={sl.image}
+        alt={
+          sl[
+            `title_${locKey}` as keyof Slide
+          ] ||
+          sl.title_ar ||
+          "Hero"
+        }
+        fill
+        priority={index === 0}
+        quality={75}
+        sizes="100vw"
+        className="object-contain object-center"
+      />
+    </div>
+  ))}
+
+  {/* Decorative Effect */}
+  <div className="pointer-events-none absolute top-1/4 -right-20 z-[1] h-80 w-80 rounded-full bg-white/5 blur-3xl" />
+
+  {/* Main Content */}
+  <div className="hero-caption absolute inset-0 z-10 flex items-center py-12 lg:py-16">
+    <div className="mx-auto w-full max-w-screen-xl px-6">
+      <div className="max-w-2xl">
+
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-md">
+          <span
+            className="h-2 w-2 animate-pulse rounded-full"
             style={{
-              opacity:
-                index === current &&
-                !animating
-                  ? 1
-                  : 0,
-              zIndex: 0,
+              backgroundColor: accent,
             }}
-          >
-            <Image
-              src={sl.image}
-              alt={
-                sl[
-                  `title_${locKey}` as keyof Slide
-                ] ||
-                sl.title_ar ||
-                "Hero"
-              }
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              quality={75}
-              className="object-cover object-center"
-            />
+          />
 
-            <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/50 to-black/90" />
-          </div>
-        )
-      )}
-
-      {/* Decorative Effect */}
-
-      <div className="pointer-events-none absolute top-1/4 -right-20 z-[1] h-80 w-80 rounded-full bg-white/5 blur-3xl" />
-
-      {/* Main Content */}
-
-      <div className="relative z-10 flex flex-1 items-center py-12 lg:py-16">
-        <div className="mx-auto w-full max-w-screen-xl px-6">
-          <div className="max-w-2xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 backdrop-blur-md">
-              <span
-                className="h-2 w-2 animate-pulse rounded-full"
-                style={{
-                  backgroundColor: accent,
-                }}
-              />
-
-              <span className="text-xs font-medium uppercase tracking-wider text-white/90">
-                {t(
-                  "hero.eyebrow",
-                  isDestekol ? "مؤسسة Destekol الإنسانية" : "مؤسسة 4Relief الإنسانية",
-                  isDestekol ? "Destekol Humanitarian Foundation" : "4Relief Humanitarian Foundation",
-                  isDestekol ? "Fondation Humanitaire Destekol" : "Fondation Humanitaire 4Relief",
-                  isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief İnsani Yardım Vakfı"
-                )}
-              </span>
-            </div>
-
-            <h1
-              className="mb-6 font-display font-extrabold leading-[1.1] tracking-tight text-white drop-shadow-md"
-              style={{
-                fontSize:
-                  "clamp(2.2rem, 5vw, 4.2rem)",
-              }}
-            >
-              {slide[
-                `title_${locKey}` as keyof Slide
-              ] || slide.title_ar}
-            </h1>
-
-            <p
-              className="mb-8 max-w-xl font-normal leading-relaxed text-white/85"
-              style={{
-                fontSize:
-                  "clamp(0.95rem, 1.4vw, 1.1rem)",
-              }}
-            >
-              {slide[
-                `subtitle_${locKey}` as keyof Slide
-              ] || slide.subtitle_ar}
-            </p>
-
-            <div className="mb-10 flex flex-wrap items-center gap-4">
-              <Link
-                href={getLocalizedLink(slide.buttonUrl, "/donate")}
-                className="inline-flex items-center gap-2.5 rounded-2xl px-8 py-3.5 font-bold text-white shadow-lg transition-all hover:scale-[1.02] active:scale-95"
-                style={{
-                  background: accent,
-                }}
-              >
-                <Icon
-                  name="heart"
-                  size={18}
-                />
-
-                {slide.buttonLabel || t(
-                  "hero.cta_donate",
-                  "تبرع الآن",
-                  "Donate Now",
-                  "Faire un Don",
-                  "Bağış Yap"
-                )}
-              </Link>
-
-              <Link
-                href={`${prefix}/projects`}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-7 py-3.5 font-semibold text-white backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20"
-              >
-                {t(
-                   "hero.cta_projects",
-                   "استعرض مشاريعنا",
-                   "Browse Our Projects",
-                   "Découvrez Nos Projets",
-                   "Projelerimizi İnceleyin")}
-              </Link>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-6 border-t border-white/10 pt-2">
-              {[
-                {
-                  icon: "shield-check" as const,
-                  ar: "عملية شفافة",
-                  en: "Transparent Process",
-                  fr: "Processus Transparent",
-                  tr: "Şeffaf Süreç",
-                },
-                {
-                  icon: "hand-heart" as const,
-                  ar: "حضور ميداني مع شركاء محليين",
-                  en: "Field Presence with Local Partners",
-                  fr: "Présence sur le Terrain avec des Partenaires Locaux",
-                  tr: "Yerel Ortaklarla Sahada Bulunma",
-                },
-                {
-                  icon: "globe" as const,
-                  ar: "دعم قائم على الاحتياج",
-                  en: "Needs-Based Support",
-                  fr: "Soutien Basé sur les Besoins",
-                  tr: "İhtiyaç Odaklı Destek",
-                },
-              ].map(
-                (item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 text-xs font-medium text-white/75"
-                  >
-                    <Icon
-                      name={item.icon}
-                      size={15}
-                      className="text-white/90"
-                    />
-
-                    {t(
-                      `hero.trust${index}`,
-                      item.ar,
-                      item.en,
-                      item.fr,
-                      item.tr
-                    )}
-                  </div>
-                )
-              )}
-            </div>
-          </div>
+          <span className="text-xs font-medium uppercase tracking-wider text-white/90">
+            {t(
+              "hero.eyebrow",
+              isDestekol
+                ? "مؤسسة Destekol الإنسانية"
+                : "مؤسسة 4Relief الإنسانية",
+              isDestekol
+                ? "Destekol Humanitarian Foundation"
+                : "4Relief Humanitarian Foundation",
+              isDestekol
+                ? "Fondation Humanitaire Destekol"
+                : "Fondation Humanitaire 4Relief",
+              isDestekol
+                ? "Destekol İnsani Yardım Vakfı"
+                : "4Relief İnsani Yardım Vakfı"
+            )}
+          </span>
         </div>
-      </div>
 
-      {/* Slider Controls */}
+        <h1
+          className="font-display font-extrabold text-white drop-shadow-md"
+          style={{
+            fontSize:
+              "clamp(2.5rem, 3vw, 5.25rem)",
+          }}
+        >
+          {slide[
+            `title_${locKey}` as keyof Slide
+          ] || slide.title_ar}
+        </h1>
 
-      {slides.length > 1 && (
-        <div className="absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-2 md:flex">
-          {slides.map(
-            (_, index) => (
-              <button
-                key={index}
-                type="button"
-                onClick={() =>
-                  goTo(index)
-                }
-                aria-label={`Go to slide ${index + 1}`}
-                aria-current={
-                  index === current
-                    ? "true"
-                    : undefined
-                }
-                className={`rounded-full transition-all ${
-                  index === current
-                    ? "h-6 w-2 bg-white"
-                    : "h-2 w-2 bg-white/40 hover:bg-white/70"
-                }`}
-              />
-            )
+        <p
+          className="mb-8 max-w-2xl font-semibold leading-relaxed text-white drop-shadow-md"
+          style={{
+            fontSize:
+              "clamp(1.125rem, 1.8vw, 1.5rem)",
+          }}
+        >
+          {slide[
+            `subtitle_${locKey}` as keyof Slide
+          ] || slide.subtitle_ar}
+        </p>
+
+        <div className="hero-actions mb-10 flex flex-wrap items-center gap-4">
+          {donationUrl ? (
+            <Link
+              href={donationUrl}
+              className={donationButtonClass}
+              style={{
+                backgroundColor: "#F00F5A",
+              }}
+            >
+              {donationButtonContent}
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className={donationButtonClass}
+              style={{
+                backgroundColor: "#F00F5A",
+              }}
+            >
+              {donationButtonContent}
+            </button>
           )}
         </div>
-      )}
 
+      </div>
+    </div>
+  </div>
+
+  {/* Slider Controls */}
+  {slides.length > 1 && (
+    <div className="hero-controls absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-2 md:flex">
+      {slides.map((_, index) => (
+        <button
+          key={index}
+          type="button"
+          onClick={() => goTo(index)}
+          aria-label={`Go to slide ${index + 1}`}
+          aria-current={
+            index === current
+              ? "true"
+              : undefined
+          }
+          className={`rounded-full transition-all ${
+            index === current
+              ? "h-6 w-2 bg-white"
+              : "h-2 w-2 bg-white/40 hover:bg-white/70"
+          }`}
+        />
+      ))}
+    </div>
+  )}
+
+</div>
       {/* Quick Donation */}
 
       <div
-        className="relative z-20 w-full border-t border-white/15 shadow-2xl backdrop-blur-xl"
+        className="hero-quick-donate relative z-20 w-full border-t border-white/15 shadow-2xl backdrop-blur-xl"
         style={{
           backgroundColor: primary,
         }}

@@ -1,6 +1,9 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import CardCarousel from "./CardCarousel";
+import CardDescription from "./CardDescription";
+import { storyLink } from "@/lib/story-link";
 import Image from "next/image";
 import Icon from "@/components/icons";
 
@@ -14,6 +17,7 @@ interface NewsSectionProps {
   locale: string;
   dict: Record<string, string>;
   data?: any;
+  compact?: boolean;
 }
 
 function cleanMarkdown(text: string) {
@@ -68,7 +72,7 @@ function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: stri
   );
 }
 
-export default function NewsSection({ posts, locale, dict, data }: NewsSectionProps) {
+export default function NewsSection({ posts, locale, dict, data, compact = false }: NewsSectionProps) {
   const p = locale === "ar" ? "" : `/${locale}`;
   const isRTL = locale === "ar";
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
@@ -138,7 +142,7 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
           </div>
 
           {/* أسهم التمرير للجميع (الموبايل والسطح المكتب) */}
-          <div className="flex items-center gap-2">
+          <div className={compact ? "hidden" : "flex items-center gap-2"}>
             <button
               onClick={() => scroll(isRTL ? "right" : "left")}
               aria-label="Previous"
@@ -155,11 +159,8 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
         </div>
 
         {/* Carousel Container (Native Smooth Horizontal Scroll) */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex gap-5 overflow-x-auto scrollbar-none snap-x snap-mandatory py-2 px-1 -mx-1 transition-all"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
+        <CardCarousel enabled={compact} locale={locale} href={`${p}/news`} fallbackRef={scrollContainerRef} className="flex gap-5 overflow-x-auto scrollbar-none snap-x snap-mandatory py-2 px-1 -mx-1">
+
           {displayItems.map((item: any, i: number) => {
             const key = item.id || i;
             const title = item.title || item.name;
@@ -167,11 +168,16 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
             const description = cleanMarkdown(rawDesc);
             const image = hasAdminStories ? (item.image || item.photo) : item.coverImage;
             const videoUrl = item.videoUrl;
+            const donationHref = hasAdminStories
+              ? storyLink(item.buttonLink, locale)
+              : `${p}/donate`;
+            const donationLabel = item.buttonText || t("news.contribute_now", "ساهم معنا الآن", "Donate Now", "Faites un don", "Şimdi Bağış Yapın");
+            const donationClass = "w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm";
 
             return (
               <div
                 key={key}
-                className="snap-start shrink-0 w-[88%] sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] transition-all"
+                className={compact ? "story-card h-full" : "snap-start shrink-0 w-[88%] sm:w-[calc(50%-10px)] lg:w-[calc(33.333%-14px)] transition-all"}
               >
                 <div className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full justify-between">
                   <div>
@@ -186,35 +192,31 @@ export default function NewsSection({ posts, locale, dict, data }: NewsSectionPr
                         {title}
                       </h3>
 
-                      <div className="text-slate-600 text-xs leading-relaxed max-h-36 overflow-y-auto pr-1 space-y-2 text-justify">
+                      {compact ? <CardDescription text={description} locale={locale} /> : <div className="text-slate-600 text-xs leading-relaxed max-h-36 overflow-y-auto pr-1 space-y-2 text-justify">
                         {description}
-                      </div>
+                      </div>}
                     </div>
                   </div>
 
                   {/* زر التبرع */}
 <div className="p-5 pt-0 mt-auto">
-  <Link
-    href={`${p}/donate`}
-    className="w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm"
-  >
-    <Icon name="heart" size={14} />
-    <span>
-      {item.buttonText || t(
-        "news.contribute_now",
-        "ساهم معنا الآن",
-        "Donate Now",
-        "Faites un don",
-        "Şimdi Bağış Yapın"
-      )}
-    </span>
-  </Link>
+  {donationHref ? (
+    <Link href={donationHref} className={donationClass}>
+      <Icon name="heart" size={14} />
+      <span>{donationLabel}</span>
+    </Link>
+  ) : (
+    <button type="button" disabled className={`${donationClass} opacity-50 cursor-not-allowed`}>
+      <Icon name="heart" size={14} />
+      <span>{donationLabel}</span>
+    </button>
+  )}
 </div>
                 </div>
               </div>
             );
           })}
-        </div>
+        </CardCarousel>
 
       </div>
     </section>

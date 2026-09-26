@@ -6,10 +6,11 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
 
   switch (section.type) {
    case "hero": {
-      const slide = (p.items && p.items.length > 0) ? p.items[0] : p;
+      const slide = p.items?.[0] || p.slides?.[0] || p;
       const bgImage = slide.backgroundImage || slide.image || p.backgroundImage;
       const title = slide.headline || slide.title_ar || slide.title || p.title || "Hero Title";
       const subtitle = slide.subheading || slide.subtitle_ar || slide.subtitle || p.subtitle;
+      const btnUrl = slide.buttonUrl || slide.buttonLink;
       const btnText = slide.buttonLabel || slide.buttonText || p.buttonText;
 
       return (
@@ -17,13 +18,13 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
           {bgImage && (
             <>
               <img src={bgImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+
             </>
           )}
           <div className="relative z-10 px-12 py-16 text-white" style={{ maxWidth: 640 }}>
             <p className="text-white/80 text-xs font-semibold tracking-widest uppercase mb-3">4Relief Humanitarian Foundation</p>
-            <h1 className="font-bold text-4xl leading-tight mb-4" style={{ fontFamily: "serif" }}>{title}</h1>
-            <p className="text-white/75 text-sm leading-relaxed mb-8">{subtitle}</p>
+            <h1 className="font-extrabold text-5xl leading-tight mb-4" style={{ fontFamily: "serif" }}>{title}</h1>
+            <p className="text-white text-lg font-semibold leading-relaxed mb-8 drop-shadow-md">{subtitle}</p>
             {btnText && (
               <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white" style={{ background: "linear-gradient(135deg,#F00F5A,#FF4D88)" }}>
                 ♥ {btnText}

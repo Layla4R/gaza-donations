@@ -51,6 +51,7 @@ export default function SiteHeader({
   }, []);
 
   const isTransparent = canBeTransparent && !scrolled && !mobileOpen;
+  const isHomeResting = isHomePage && !scrolled && !mobileOpen;
 
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] ||
@@ -68,15 +69,17 @@ export default function SiteHeader({
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
-        isTransparent
+      className={`${isHomePage ? "site-home-header sticky shrink-0" : "fixed"} top-0 left-0 right-0 z-[100] transition-[background-color,box-shadow,border-color] duration-300 ${
+        isHomeResting
+          ? "bg-cream border-b border-transparent shadow-none"
+          : isTransparent
           ? "bg-transparent border-b border-transparent shadow-none"
           : "bg-white border-b border-line shadow-md"
       }`}
     >
       {!isTransparent && (
         <div
-          className="h-1"
+          className={`h-1 ${isHomeResting ? "invisible" : ""}`}
           role="presentation"
           style={{
             background: settings?.accentColor
@@ -86,7 +89,7 @@ export default function SiteHeader({
         />
       )}
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
+      <div className={`${isHomePage ? "home-header-container" : "max-w-screen-xl mx-auto px-4 sm:px-6"} h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4`}>
         {/* Logo */}
         <Link
           href={`${p}/`}

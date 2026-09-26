@@ -60,7 +60,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       ]
     },
     fields: [
-      { key: "overlayOpacity", label: "Overlay Darkness (0–1)", type: "text", hint: "0 = transparent, 1 = fully dark" },
+
       {
         key: "slides", 
         label: "Slider Images", 
@@ -69,7 +69,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
           { key: "title", label: "Headline", type: "text", placeholder: "Main hero title" },
           { key: "subtitle", label: "Subheading", type: "textarea", placeholder: "Supporting description text" },
           { key: "buttonText", label: "Button Label", type: "text" },
-          { key: "buttonLink", label: "Button URL", type: "text" },
+          { key: "buttonLink", label: "Campaign Donation URL", type: "text", hint: "Enter the donation link for this slide’s campaign. The pink button stays visible but is disabled until a link is entered." },
           { key: "backgroundImage", label: "Background Image", type: "image", hint: "Use high-res image (1920×1080 recommended)" }
         ]
       }
@@ -465,6 +465,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
           { key: "body", label: "Story Text", type: "textarea" },
           { key: "image", label: "Cover Photo", type: "image" },
           { key: "videoUrl", label: "Upload Video / Video URL", type: "image", hint: "Upload an MP4 video or paste URL" },
+          { key: "buttonText", label: "Button Label / نص الزر", type: "text" },
+          { key: "buttonLink", label: "Story Donation URL / رابط التبرع للقصة", type: "text", hint: "Enter this story's page path (e.g. /your-story) or its full https:// URL. The button is disabled until a valid link is entered." },
         ],
       },
     ],
