@@ -204,7 +204,7 @@ export default function SiteFooter({
   ========================================================= */
 
   const logoSrc = isDestekol
-    ? "/brand/destekol_logo.png"
+    ? "/brand/destekol-logo.jpeg"
     : settings?.logoImage ||
       "/brand/logo-horizontal-transparent.png";
 

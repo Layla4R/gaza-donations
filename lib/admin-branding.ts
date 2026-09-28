@@ -4,7 +4,7 @@ export function getAdminBranding(siteId: SiteId) {
   return {
     name: SITES[siteId].name,
     logo: siteId === "destekol"
-      ? "/brand/destekol_logo.png"
+      ? "/brand/destekol-logo.jpeg"
       : "/brand/logo-horizontal-transparent.png",
   };
 }
