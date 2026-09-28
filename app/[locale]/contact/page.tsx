@@ -171,7 +171,7 @@ export default async function ContactPage({
         name: isDestekol ? "Destekol" : "4Relief Humanitarian Foundation",
         alternateName: site.name,
         url: SITE_URL,
-        logo: `${SITE_URL}/brand/${isDestekol ? "destekol-logo.jpeg" : "logo.png"}`,
+        logo: `${SITE_URL}/brand/${isDestekol ? "destekol-logo.png" : "logo.png"}`,
         email: contactEmail,
         telephone: contactPhone,
         address: {

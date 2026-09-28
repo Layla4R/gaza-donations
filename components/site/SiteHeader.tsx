@@ -58,7 +58,7 @@ export default function SiteHeader({
     (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
   const logoImage = isDestekol
-    ? "/brand/destekol-logo.jpeg"
+    ? "/brand/destekol-logo.png"
     : settings?.logoImage || "/brand/logo-horizontal-transparent.png";
 
   const logoText = isDestekol ? "Destekol" : settings?.logoText || "4Relief";
@@ -82,9 +82,7 @@ export default function SiteHeader({
           className={`h-1 ${isHomeResting ? "invisible" : ""}`}
           role="presentation"
           style={{
-            background: settings?.accentColor
-              ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)`
-              : "linear-gradient(135deg, #F00F5A, #FF4D88)",
+            background: `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
           }}
         />
       )}
@@ -191,9 +189,7 @@ export default function SiteHeader({
             href={`${p}/donate`}
             className="font-bold rounded-xl px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm shadow-lg transition-all hover:-translate-y-0.5 hover:opacity-90 shrink-0 whitespace-nowrap"
             style={{
-              background: settings?.accentColor
-                ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)`
-                : "linear-gradient(135deg,#F00F5A,#FF4D88)",
+              background: `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg,#F00F5A,#FF4D88)"})`,
               color: "white",
             }}
           >

@@ -131,7 +131,7 @@ export default async function HomePage({ params }: PageProps) {
         ...(!isDestekol ? { legalName: "FOR RELIEF LTD", identifier: { "@type": "PropertyValue", propertyID: "Companies House company number", value: "17306194" }, sameAs: [COMPANY_RECORD_URL] } : {}),
         logo: {
           "@type": "ImageObject",
-          url: `${SITE_URL}${isDestekol ? "/brand/destekol-logo.jpeg" : "/brand/logo.png"}`,
+          url: `${SITE_URL}${isDestekol ? "/brand/destekol-logo.png" : "/brand/logo.png"}`,
         },
 
         areaServed: [

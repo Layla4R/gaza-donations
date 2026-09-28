@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CHAT_TEXT, chatLocale } from "@/lib/chat-translations";
 type Message = { sender: "user" | "bot"; text: string };
-const blue = "#0069d2";
+const blue = "var(--destekol-brand, #0069d2)";
 
 export default function ChatWidget({ locale = "ar" }: { locale?: string }) {
   locale = chatLocale(locale);

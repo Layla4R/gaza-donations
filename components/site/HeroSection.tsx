@@ -647,7 +647,7 @@ export default function HeroSection({
               href={donationUrl}
               className={donationButtonClass}
               style={{
-                backgroundColor: "#F00F5A",
+                backgroundColor: "var(--destekol-accent, #F00F5A)",
               }}
             >
               {donationButtonContent}
@@ -658,7 +658,7 @@ export default function HeroSection({
               disabled
               className={donationButtonClass}
               style={{
-                backgroundColor: "#F00F5A",
+                backgroundColor: "var(--destekol-accent, #F00F5A)",
               }}
             >
               {donationButtonContent}

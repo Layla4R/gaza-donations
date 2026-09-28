@@ -5,6 +5,7 @@ import Script from "next/script";
 import "./globals.css";
 
 import { getSupabaseOrNull } from "@/lib/supabase";
+import { getRequestSite } from "@/lib/request-site";
 import { Alexandria, Tajawal, Cairo } from "next/font/google";
 
 const alexandria = Alexandria({
@@ -138,8 +139,9 @@ export default async function RootLayout({
       ).data
     : null;
 
-  const primaryColor = settings?.primaryColor || "#0069D2";
-  const accentColor = settings?.accentColor || "#F00F5A";
+  const isDestekol = getRequestSite().id === "destekol";
+  const primaryColor = settings?.primaryColor || (isDestekol ? "#066090" : "#0069D2");
+  const accentColor = settings?.accentColor || (isDestekol ? "#D9A750" : "#F00F5A");
 
   const sameAsLinks = [
     settings?.facebookUrl,
@@ -274,6 +276,19 @@ export default async function RootLayout({
               :root {
                 --brand: ${primaryColor};
                 --accent: ${accentColor};
+                ${isDestekol ? `
+                --destekol-brand: var(--brand);
+                --destekol-accent: var(--accent);
+                --color-brand: var(--brand);
+                --color-accent: var(--accent);
+                --brand-dark: color-mix(in srgb, var(--brand) 75%, #063962);
+                --brand-light: color-mix(in srgb, var(--brand) 75%, white);
+                --accent-dark: color-mix(in srgb, var(--accent) 75%, #C79239);
+                --accent-light: color-mix(in srgb, var(--accent) 85%, white);
+                --destekol-brand-dark: var(--brand-dark);
+                --destekol-accent-light: var(--accent-light);
+                --destekol-accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-light));
+                ` : ""}
               }
             `,
           }}

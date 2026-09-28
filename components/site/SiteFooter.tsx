@@ -204,7 +204,7 @@ export default function SiteFooter({
   ========================================================= */
 
   const logoSrc = isDestekol
-    ? "/brand/destekol-logo.jpeg"
+    ? "/brand/destekol-logo.png"
     : settings?.logoImage ||
       "/brand/logo-horizontal-transparent.png";
 
@@ -241,9 +241,7 @@ export default function SiteFooter({
       <div
         className="h-1"
         style={{
-          background: settings?.accentColor
-            ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)`
-            : "linear-gradient(135deg, #F00F5A, #FF4D88)",
+          background: `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
         }}
       />
 
@@ -337,9 +335,7 @@ export default function SiteFooter({
             href={`${p}/donate`}
             className="inline-flex items-center gap-2 hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition shadow-md"
             style={{
-              background: settings?.accentColor
-                ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)`
-                : "linear-gradient(135deg, #F00F5A, #FF4D88)",
+              background: `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
             }}
           >
             <Icon

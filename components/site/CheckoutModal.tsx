@@ -64,7 +64,7 @@ export default function CheckoutModal({ amount: initialAmount, frequency: initia
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div dir={locale === "ar" ? "rtl" : "ltr"} className="relative w-full max-w-md bg-gradient-to-br from-[#003C87] to-[#0069D2] rounded-3xl shadow-2xl overflow-hidden">
+      <div dir={locale === "ar" ? "rtl" : "ltr"} className="relative w-full max-w-md bg-gradient-to-br from-[var(--destekol-brand-dark,#003C87)] to-[var(--destekol-brand,#0069D2)] rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
           <div>
@@ -115,7 +115,7 @@ export default function CheckoutModal({ amount: initialAmount, frequency: initia
 
               {/* Next */}
               <button onClick={() => setStep("details")} disabled={!final || final <= 0}
-                className="w-full bg-gradient-to-r from-[#F00F5A] to-[#FF4D88] hover:opacity-90 disabled:opacity-50 text-white font-bold rounded-2xl py-4 text-base shadow-lg transition flex items-center justify-center gap-2">
+                className="w-full bg-gradient-to-r from-[var(--destekol-accent,#F00F5A)] to-[var(--destekol-accent-light,#FF4D88)] hover:opacity-90 disabled:opacity-50 text-white font-bold rounded-2xl py-4 text-base shadow-lg transition flex items-center justify-center gap-2">
                 <Icon name="heart" size={18} />
                 {t("donate.title","تبرع بـ","Donate","Faire un Don","Bağış Yap")} ${final}
                 {freq === "MONTHLY" && <span className="text-white/65 text-sm font-normal">/{t("donate.monthly","شهر","mo","mois","ay")}</span>}
