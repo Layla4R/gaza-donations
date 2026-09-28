@@ -586,7 +586,7 @@ export default function HeroSection({
   <div className="pointer-events-none absolute top-1/4 -right-20 z-[1] h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
   {/* Main Content */}
-  <div className="hero-caption absolute inset-0 z-10 flex items-center py-12 lg:py-16">
+  <div className="hero-caption absolute inset-0 z-10 flex items-end py-8 lg:py-11">
     <div className="mx-auto w-full max-w-screen-xl px-6">
       <div className="max-w-2xl">
 
@@ -641,7 +641,7 @@ export default function HeroSection({
           ] || slide.subtitle_ar}
         </p>
 
-        <div className="hero-actions mb-10 flex flex-wrap items-center gap-4">
+        <div className="hero-actions flex flex-wrap items-center gap-4">
           {donationUrl ? (
             <Link
               href={donationUrl}

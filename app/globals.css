@@ -135,7 +135,7 @@ p.editable-field, div.editable-field, h2.editable-field, h3.editable-field {
 .home-layout .hero-caption {
   flex: 0 0 auto;
   text-align: center;
-  padding: clamp(80px, 14vw, 180px) 24px 44px;
+  padding: 24px 24px 44px;
 }
 .home-layout .hero-caption > div {
   padding-inline: 0;
@@ -175,7 +175,7 @@ p.editable-field, div.editable-field, h2.editable-field, h3.editable-field {
 @media (max-width: 639px) {
   .home-layout { padding-block: 16px 40px; }
   .home-layout .hero-stage { min-height: 500px; border-radius: 16px; }
-  .home-layout .hero-caption { padding: 100px 20px 32px; }
+  .home-layout .hero-caption { padding: 20px 20px 32px; }
   .home-layout .hero-quick-donate { margin-top: 20px; border-radius: 16px; }
 }
 .home-card-carousel { min-width: 0; }
