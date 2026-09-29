@@ -5,6 +5,7 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
   const p = section.props || {};
 
   switch (section.type) {
+    case "kindness_box": return <div className="p-8 grid grid-cols-3 gap-4 items-center" style={{background:"#edf8fb",color:"#063962"}}><img src={p.image} alt="" className="w-full"/><div><h2 className="font-bold text-2xl">{p.title}</h2><p className="text-sm">{p.subtitle}</p></div><div className="bg-white rounded-xl p-4">{(p.items || []).map((item:any,i:number)=><div key={i} className="text-xs py-2">{item.title} <span className="float-right">− 0 +</span></div>)}<div className="text-white p-2 rounded text-center text-xs" style={{background:"#0a5171"}}>{p.cartButtonText}</div></div></div>;
    case "hero": {
       const slide = p.items?.[0] || p.slides?.[0] || p;
       const bgImage = slide.backgroundImage || slide.image || p.backgroundImage;

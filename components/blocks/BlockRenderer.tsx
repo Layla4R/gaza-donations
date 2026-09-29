@@ -1,3 +1,4 @@
+import KindnessBox from "@/components/site/KindnessBox";
 import DestekolAchievements from "@/components/site/DestekolAchievements";
 import CardDescription from "@/components/site/CardDescription";
 import CardCarousel from "@/components/site/CardCarousel";
@@ -21,6 +22,7 @@ import FaqSection from "../site/FaqSection";
 interface RendererContext {
   isHomePage?: boolean;
   campaigns?: CampaignLite[];
+  kindnessCampaigns?: CampaignLite[];
   whiteBackground?: boolean;
   locale?: string;
   dict?: Record<string, string>;
@@ -75,6 +77,22 @@ export default function BlockRenderer({
   };
 
   switch (section.type) {
+    case "kindness_box": {
+      if (!context?.isDestekol) return null;
+      const available = new Map((context.kindnessCampaigns || context.campaigns || []).map(c => [c.id,c]));
+      const seen = new Set<string>();
+      const rows = (Array.isArray(p.items) ? p.items : []).flatMap((item: any) => {
+        const campaign = available.get(item.campaignId);
+        const unitAmount = Number(item.unitAmount);
+        if (!campaign || seen.has(campaign.id) || !Number.isFinite(unitAmount) || unitAmount < 1) return [];
+        seen.add(campaign.id);
+        const campaignName = locale === "ar" && campaign.slug === "save-infants-milk-and-medicine-camps"
+          ? "أطفال بلا حليب فقط"
+          : campaign.title.split(/[:：]/, 1)[0].trim() || campaign.title;
+        return [{campaignId:campaign.id, slug:campaign.slug,title:campaign.title,label:campaignName,icon:item.icon || campaign.category,unitAmount}];
+      });
+      return <KindnessBox data={p} rows={rows} locale={locale} currency={(context.settings?.defaultCurrency || "USD").toUpperCase()} buttonHref={p.buttonLink ? getLocalizedLink(p.buttonLink) : undefined} />;
+    }
     case "quick_donate":
       return <HeroSection mode="quick" locale={locale} dict={context?.dict || {}} data={p} isDestekol={context?.isDestekol} primaryColor={primary} accentColor={accent} />;
     case "destekol_achievements":
@@ -524,7 +542,7 @@ export default function BlockRenderer({
         ? "Bağışınız Nereye Gidiyor"
         : isFrench
         ? "Où va votre don"
-        : "أين يذهب تبرعك";
+        : "مشاريعنا";
 
       const viewAllText = isEnglish
         ? "View All Campaigns"
@@ -560,20 +578,22 @@ export default function BlockRenderer({
       };
 
       return (
-        <section className="py-20 sm:py-24 bg-white">
+        <section dir={locale === "ar" ? "rtl" : "ltr"} className={context?.isDestekol && context?.isHomePage ? "destekol-campaigns py-20 sm:py-24 bg-white" : "py-20 sm:py-24 bg-white"}>
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(campaignsListSchema) }}
           />
           <div className="max-w-screen-xl mx-auto px-6">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <Eyebrow className="justify-center">{eyebrowText}</Eyebrow>
+              <Eyebrow className="justify-center">{p.eyebrow || eyebrowText}</Eyebrow>
               {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-3">{p.title}</h2>}
               {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
             </div>
-            <CardCarousel enabled={context?.isHomePage === true} locale={locale} href={getLocalizedLink("/campaigns")} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+            <CardCarousel enabled={context?.isHomePage === true} locale={locale} href={getLocalizedLink("/campaigns")} className={context?.isDestekol && context?.isHomePage ? "campaign-carousel-one-up items-stretch" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch"}>
               {campaigns.map((c) => (
                 <CampaignCard
+                  variant={context?.isDestekol && context?.isHomePage ? "destekol" : "default"}
+                  currency={(context?.settings?.defaultCurrency || "USD").toUpperCase()}
                   key={c.id}
                   id={c.id}
                   slug={c.slug}

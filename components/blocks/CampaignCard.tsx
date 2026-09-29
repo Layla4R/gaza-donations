@@ -22,6 +22,8 @@ interface Props {
   category?: string;
   locale?: string;
   dict?: Record<string, string>;
+  variant?: "default" | "destekol";
+  currency?: string;
 }
 
 const QUICK_AMOUNTS = [5, 10, 25, 50];
@@ -38,6 +40,8 @@ export default function CampaignCard({
   category,
   locale = "ar",
   dict = {},
+  variant = "default",
+  currency = "USD",
 }: Props) {
   const [amount, setAmount] =
     useState(10);
@@ -233,7 +237,7 @@ export default function CampaignCard({
   );
 
   const prefix =
-    locale === "ar"
+    locale === "ar" && variant !== "destekol"
       ? ""
       : `/${locale}`;
 
@@ -393,6 +397,30 @@ export default function CampaignCard({
   const inputClass =
     "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand";
 
+  if (variant === "destekol" && step === "widget") {
+    const validAmount = custom === "" || (Number.isFinite(Number(custom)) && Number(custom) >= 1);
+    const money = (value: number) => locale === "ar" && currency === "USD"
+      ? `$${new Intl.NumberFormat("en-US", {maximumFractionDigits:0}).format(value)}`
+      : new Intl.NumberFormat(locale, {style:"currency", currency, maximumFractionDigits:0}).format(value);
+    const currencySymbol = locale === "ar" && currency === "USD"
+      ? "$"
+      : new Intl.NumberFormat(locale,{style:"currency",currency}).formatToParts(0).find(p=>p.type === "currency")?.value;
+    return <article className="destekol-campaign-card" dir={locale === "ar" ? "rtl" : "ltr"}>
+      <Link href={prefix + "/campaigns/" + slug} className="dc-image" aria-label={title}>
+        {coverImage && !imgError ? <Image src={coverImage} alt={title} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover" onError={() => setImgError(true)} /> : <Icon name="hand-heart" size={42} />}
+        <span>{cat.label}</span>
+      </Link>
+      <div className="dc-body">
+        <Link href={prefix + "/campaigns/" + slug}><h3>{title}</h3><p>{summary}</p></Link>
+        <div className="dc-progress" role="progressbar" aria-label={title} aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}><span style={{width:pct + "%"}} /></div>
+        <div className="dc-totals"><b>{pct}%</b><span><strong>{money(safeRaised)}</strong> / {money(safeGoal)}</span></div>
+        <div className="dc-frequency">{(["one_time","monthly"] as const).map(value => <button key={value} type="button" aria-pressed={frequency === value} onClick={() => setFrequency(value)}>{locale === "tr" && value === "one_time" ? "Bir Kez" : t(value)}</button>)}</div>
+        <div className="dc-amounts">{QUICK_AMOUNTS.map(value => <button key={value} type="button" aria-pressed={custom === "" && amount === value} onClick={() => {setAmount(value);setCustom("");}}>{money(value)}</button>)}</div>
+        <label className="dc-custom"><span>{currencySymbol}</span><input type="number" min="1" step="0.01" value={custom} onChange={e=>setCustom(e.target.value)} aria-label={locale === "ar" ? "مبلغ آخر" : locale === "tr" ? "Diğer tutar" : "Other amount"} placeholder={locale === "ar" ? "مبلغ آخر" : locale === "tr" ? "Diğer tutar" : "Other amount"} /></label>
+        <button type="button" className="dc-donate" disabled={!validAmount} onClick={()=>{setStep("details");setError("");}}>{t("donate_now")}<span aria-hidden="true">{locale === "ar" ? "←" : "→"}</span></button>
+      </div>
+    </article>;
+  }
   return (
     <div className="campaign-card group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       {/* Image */}

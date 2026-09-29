@@ -1,4 +1,4 @@
-export type FieldType = "text" | "textarea" | "image" | "color" | "number" | "select" | "boolean" | "list";
+export type FieldType = "campaign" | "text" | "textarea" | "image" | "color" | "number" | "select" | "boolean" | "list";
 
 export interface FieldDef {
   key: string;
@@ -27,6 +27,11 @@ export interface PageSection {
 }
 
 export const BLOCK_DEFINITIONS: BlockDefinition[] = [
+  {
+    type:"kindness_box", label:"Destekol — صندوق الخير", description:"اختيار حملات حقيقية وإضافتها إلى السلة", icon:"heart", category:"fundraising",
+    defaultProps:{title:"İyilik kutunuzu oluşturun.",subtitle:"Dilediğiniz alanlarda bağış yaparak kendi iyilik kutunuzu oluşturun.",buttonText:"Hemen Başla",buttonLink:"",cartButtonText:"Sepete Ekle",image:"",items:[]},
+    fields:[{key:"title",label:"العنوان",type:"text"},{key:"subtitle",label:"الوصف",type:"textarea"},{key:"image",label:"صورة صندوق الخير",type:"image"},{key:"imageAlt",label:"وصف الصورة",type:"text"},{key:"buttonText",label:"نص زر البدء",type:"text"},{key:"buttonLink",label:"رابط زر البدء",type:"text",hint:"مثال: /campaigns أو رابط كامل"},{key:"cartButtonText",label:"نص زر الإضافة للسلة",type:"text"},{key:"items",label:"خيارات التبرع (حملة مختلفة لكل خيار)",type:"list",itemFields:[{key:"title",label:"اسم الخيار",type:"text"},{key:"campaignId",label:"الحملة المرتبطة",type:"campaign"},{key:"unitAmount",label:"قيمة كل مساهمة بعملة الموقع",type:"number"},{key:"icon",label:"الأيقونة",type:"select",options:[{label:"الغذاء",value:"food"},{label:"التعليم",value:"education"},{label:"الماء",value:"water"},{label:"الصحة",value:"medical"}]}]}]
+  },
   {
     type: "destekol_achievements", label: "Destekol — إنجازاتنا", description: "أرقام الإنجازات مع الأيقونات والتمويج", icon: "bar-chart", category: "content",
     defaultProps: { title: "إنجازاتنا", items: [{title:"عدد الدول", value:"0", icon:"globe"},{title:"المستفيدون",value:"0",icon:"users"},{title:"المتطوعون",value:"0",icon:"heart"},{title:"المشاريع المكتملة",value:"0",icon:"projects"}] },
@@ -411,6 +416,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       onlyFeatured: false,
     },
     fields: [
+      { key: "eyebrow", label: "Section Label", type: "text" },
       { key: "title", label: "Title", type: "text" },
       { key: "subtitle", label: "Subtitle", type: "text" },
       { key: "limit", label: "Max Campaigns to Show", type: "number" },

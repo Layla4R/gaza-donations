@@ -1,6 +1,6 @@
 "use client";
 import { adminFetch } from "@/lib/admin-fetch";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PageSection, getBlockDefinition, FieldDef } from "@/lib/blocks";
 import Icon from "@/components/icons";
 
@@ -38,6 +38,7 @@ function FieldEditor({ field, value, onChange }: { field: FieldDef; value: any; 
   
   const inp = "w-full border border-[#E5E7EB] focus:border-[#6366F1] rounded-xl py-2.5 px-3.5 text-sm text-[#111] bg-[#F9FAFB] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#6366F1]/10 transition placeholder-[#9CA3AF]";
 
+  if (field.type === "campaign") return <div>{label}<CampaignPicker value={value || ""} onChange={onChange} /></div>;
   if (field.type === "text") return (
     <div>{label}<input value={value || ""} onChange={e => onChange(e.target.value)} placeholder={field.placeholder || `Enter ${field.label.toLowerCase()}…`} className={inp} /></div>
   );
@@ -266,4 +267,10 @@ function ListEditor({ field, value, onChange }: { field: FieldDef; value: any[];
       </div>
     </div>
   );
+}
+function CampaignPicker({value,onChange}:{value:string;onChange:(value:string)=>void}) {
+  const [campaigns,setCampaigns]=useState<{id:string;title:string;isActive:boolean}[]>([]);
+  const [error,setError]=useState("");
+  useEffect(()=>{let active=true;adminFetch("/api/admin/campaigns").then(async res=>{if(!res.ok)throw Error("تعذر تحميل الحملات");return res.json();}).then(data=>{if(active)setCampaigns(data.campaigns || []);}).catch(()=>{if(active)setError("تعذر تحميل الحملات، أعد فتح القسم.");});return()=>{active=false;};},[]);
+  return <><select value={value} onChange={e=>onChange(e.target.value)} className="w-full border rounded-xl p-2 text-sm"><option value="">اختر حملة</option>{value && !campaigns.some(c=>c.id===value) && <option value={value}>الحملة الحالية — {value}</option>}{campaigns.map(c=><option key={c.id} value={c.id} disabled={!c.isActive}>{c.title}{!c.isActive ? " (غير نشطة)" : ""}</option>)}</select>{error && <p role="alert" className="text-red-600 text-xs">{error}</p>}</>;
 }

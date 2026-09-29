@@ -304,3 +304,99 @@ body[data-site="destekol"] .hero-quick-donate button:focus-visible, body[data-si
 @media(prefers-reduced-motion:reduce) { body[data-site="destekol"] .hero-stage * { transition: none !important; animation: none !important; } }
 body[data-site="destekol"] .home-layout .home-section--destekol_achievements { margin-top: 0; }
 body[data-site="destekol"] .home-layout .home-section--quick_donate { margin-top: 10px; }
+/* Destekol: campaigns and the kindness box are styled independently. */
+body[data-site="destekol"] .home-layout .home-section--campaigns_grid { margin-top: 24px; }
+body[data-site="destekol"] .home-layout .destekol-campaigns { padding: 12px 28px 16px; border-radius: 0; }
+.destekol-campaigns > .max-w-screen-xl { padding: 0; position: relative; }
+.destekol-campaigns > .max-w-screen-xl > .text-center { text-align: left; margin: 0 230px 24px 0 !important; max-width: none; width: auto; }
+.destekol-campaigns[dir="rtl"] > .max-w-screen-xl > .text-center { text-align: right; margin: 0 0 24px 230px !important; }
+.destekol-campaigns > .max-w-screen-xl > .text-center > span { background: none; padding: 0; border-radius: 0; font-size: 10px; letter-spacing: .23em; color: #063962; margin-bottom: 10px; }
+.destekol-campaigns > .max-w-screen-xl > .text-center > span > span { display: none; }
+body[data-site="destekol"] .home-layout .destekol-campaigns h2 { font-size: clamp(24px,2.4vw,34px); line-height: 1.15; color: #063962; margin-bottom: 8px; font-weight: 800; letter-spacing: -.025em; }
+.destekol-campaigns > .max-w-screen-xl > .text-center p { color: #0a5171; font-size: 16px; line-height: 1.5; }
+.destekol-campaigns .home-carousel-toolbar { position: absolute; inset-inline-end: 0; top: 44px; gap: 20px; }
+.destekol-campaigns .home-carousel-toolbar button { width: 30px; height: 30px; border: 1px solid #dbe8ef; color: #066090; background: white; font-size: 20px; }
+.destekol-campaigns .home-view-all { font-size: 12px; }
+.destekol-campaigns .home-carousel-track { gap: 20px; padding: 2px 2px 16px; }
+.destekol-campaigns .home-carousel-slide { flex: 0 0 calc((100% - 40px)/3); }
+.destekol-campaigns .home-carousel-track.campaign-carousel-one-up > .home-carousel-slide { flex-basis: 100%; display: flex; justify-content: center; }
+.destekol-campaigns .home-carousel-track.campaign-carousel-one-up > .home-carousel-slide > .destekol-campaign-card { width: min(100%, 820px); }
+.destekol-campaigns .home-carousel-track.campaign-carousel-one-up .dc-image { aspect-ratio: 2.4; }
+.destekol-campaign-card { background: white; border: 1px solid #edf5f8; border-radius: 9px; overflow: hidden; box-shadow: 0 8px 20px #0a517109; color: #063962; display: flex; flex-direction: column; height: 100%; text-align: start; }
+.dc-image { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 1.9; background: #e9f4f7; flex-shrink: 0; }
+.dc-image > span { position: absolute; bottom: 9px; inset-inline-start: 12px; border-radius: 5px; background: white; color: #066090; padding: 3px 10px; font-size: 12px; font-weight: 750; line-height: 1.4; }
+.dc-body { display: flex; flex-direction: column; flex: 1; padding: 13px 16px 16px; }
+.dc-body h3 { font-size: 17px; line-height: 1.3; font-weight: 800; margin: 0 0 5px; min-height: 2.6em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dc-body p { font-size: 13px; line-height: 1.5; color: #37566c; margin: 0 0 10px; min-height: 3em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dc-progress { height: 6px; background: #e4edf2; border-radius: 8px; overflow: hidden; margin-top: auto; }
+.dc-progress > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#098494,#328970); }
+.dc-totals { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px; margin: 5px 0 15px; direction: ltr; color: #7290a6; }
+.dc-totals b, .dc-totals strong { color: #063962; font-weight: 800; }
+.dc-frequency { display: flex; gap: 3px; border: 1px solid #d6e4ec; background: #edf5f8; border-radius: 6px; overflow: hidden; margin-bottom: 7px; }
+.dc-frequency button { flex: 1; padding: 6px; font-size: 12px; line-height: 1.2; font-weight: 600; border-radius: 5px; }
+.dc-frequency button[aria-pressed="true"] { color: white; background: #0a5171; }
+.dc-amounts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-bottom: 8px; }
+.dc-amounts button { border: 1px solid #dce8ef; border-radius: 5px; padding: 7px 2px; background: #f7fbfd; color: #063962; font-size: 12px; font-weight: 750; }
+.dc-amounts button[aria-pressed="true"] { border-color: #098494; background: #e7f5f5; }
+.dc-custom { border: 1px solid #d6e4ec; border-radius: 6px; display: flex; align-items: center; margin-bottom: 10px; height: 38px; overflow: hidden; }
+.dc-custom span { padding-inline: 12px; border-inline-end: 1px solid #d6e4ec; font-weight: 800; font-size: 13px; }
+.dc-custom input { width: 100%; min-width: 0; border: 0; background: transparent; padding: 9px 12px; font-size: 12px; outline-color: #098494; }
+.dc-donate { display: flex; gap: 12px; align-items: center; justify-content: center; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: 700; color: white; background: linear-gradient(115deg,#d9a750,#c79239); }
+.dc-donate:disabled { opacity: .5; cursor: not-allowed; }
+body[data-site="destekol"] .home-layout .home-section--kindness_box { margin-top: 0; }
+.kindness-box { position: relative; background: linear-gradient(110deg,#edf8fb,#f7fcfd 55%,#e6f3f5); color: #063962; overflow: hidden; border-radius: 0 !important; }
+.kindness-inner { position: relative; z-index: 1; max-width: 1320px; margin: auto; padding: 40px 30px 48px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; gap: 35px; }
+.kindness-art img { display: block; width: 100%; max-height: 310px; object-fit: contain; }
+.kindness-copy h2 { font-size: clamp(25px,2.65vw,38px); line-height: 1.12; font-weight: 800; letter-spacing: -.03em; max-width: 320px; margin-bottom: 13px; }
+.kindness-copy p { color: #36596f; font-size: 15px; line-height: 1.5; margin-bottom: 17px; max-width: 340px; }
+.kindness-start,.kindness-submit { display: flex; align-items: center; justify-content: center; gap: 13px; border-radius: 6px; background: #0a5171; color: white; padding: 11px 23px; font-weight: 700; font-size: 13px; }
+.kindness-form { padding: 17px 18px 15px; border: 1px solid #fff; background: #ffffffeb; border-radius: 17px; box-shadow: 0 7px 25px #0a51710a; }
+.kindness-row { display: flex; align-items: center; gap: 10px; margin: 0 0 15px; }
+.kindness-row > svg { flex-shrink: 0; }
+.kindness-label { flex: 1; min-width: 0; }
+.kindness-label a { font-size: 12px; font-weight: 750; line-height: 1.4; }
+.kindness-label a:hover { text-decoration: underline; }
+.kindness-label small { display: block; font-size: 10px; color: #668294; }
+.kindness-counter { display: flex; align-items: center; gap: 9px; }
+.kindness-counter button { display: grid; place-items: center; border: 1px solid #e5edf2; background: #f8fcfe; border-radius: 5px; width: 25px; height: 25px; }
+.kindness-counter button:disabled { opacity: .4; }
+.kindness-counter output { min-width: 16px; text-align: center; font-weight: 750; font-size: 13px; }
+.kindness-total { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px; }
+.kindness-submit { width: 100%; }
+.kindness-status { font-size: 12px; line-height: 1.5; margin-top: 6px; }
+.kindness-status:empty { display: none; }
+.kindness-status a { text-decoration: underline; font-weight: bold; }
+.kindness-wave { position: absolute; left: 0; width: 100%; height: 60px; pointer-events: none; }
+.kindness-wave-top { top: -1px; }
+.kindness-wave-bottom { bottom: -1px; }
+.kindness-box :is(button,a):focus-visible,.destekol-campaigns :is(button,a,input):focus-visible { outline: 2px solid #098494; outline-offset: 3px; }
+@media(max-width:1023px) and (min-width:768px) { .destekol-campaigns .home-carousel-slide { flex-basis: calc((100% - 20px)/2); } .kindness-inner { gap: 18px; grid-template-columns: .8fr 1fr 1.2fr; padding-inline: 20px; } .kindness-form { padding: 14px 12px; } }
+@media(max-width:767px) {
+ body[data-site="destekol"] .home-layout .home-section--campaigns_grid { margin-top: 18px; }
+ body[data-site="destekol"] .home-layout .destekol-campaigns { padding: 8px 18px 0; }
+ .destekol-campaigns > .max-w-screen-xl > .text-center,.destekol-campaigns[dir="rtl"] > .max-w-screen-xl > .text-center { margin: 0 0 12px !important; }
+ body[data-site="destekol"] .home-layout .destekol-campaigns h2 { font-size: 25px; }
+ .destekol-campaigns > .max-w-screen-xl > .text-center p { font-size: 13px; }
+ .destekol-campaigns > .max-w-screen-xl > .text-center > span { font-size: 9px; margin-bottom: 7px; }
+ .destekol-campaigns .home-carousel-toolbar { position: static; margin-bottom: 12px; }
+ .destekol-campaigns .home-carousel-toolbar > div { display: flex; }
+ .destekol-campaigns .home-carousel-toolbar button { width: 32px; height: 32px; }
+ .destekol-campaigns .home-carousel-track { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 12px; }
+ .destekol-campaigns .home-carousel-track::-webkit-scrollbar { display: none; }
+ .destekol-campaigns .home-carousel-slide { flex: 0 0 100%; width: 100%; scroll-snap-align: start; }
+ .dc-image { aspect-ratio: 1.9; }
+ .dc-body { padding: 12px 14px 14px; }
+ .dc-body h3 { font-size: 17px; min-height: 0; }
+ .dc-body p { min-height: 0; font-size: 13px; }
+ .dc-totals { font-size: 11px; }
+ .kindness-inner { grid-template-columns: 1fr; gap: 15px; padding: 36px 18px; }
+ .kindness-art { display: none; }
+ .kindness-copy h2 { font-size: 26px; max-width: none; margin-bottom: 0; }
+ .kindness-copy p { display: none; }
+ .kindness-start { display: flex; width: fit-content; margin-top: 10px; }
+ .kindness-form { padding: 15px; }
+ .kindness-label a { font-size: 14px; }
+ .kindness-row { margin-bottom: 16px; }
+ .kindness-counter button { width: 29px; height: 29px; }
+ .kindness-wave { height: 30px; }
+}

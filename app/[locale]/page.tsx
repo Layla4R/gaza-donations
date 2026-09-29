@@ -175,6 +175,7 @@ export default async function HomePage({ params }: PageProps) {
     primaryColor,
     accentColor,
     campaigns,
+    kindnessCampaigns: data.kindnessCampaigns || [],
     posts,
     stats,
     settings,

@@ -321,7 +321,7 @@ export default function PageEditor({
   }
 
   const filteredBlocks = BLOCK_DEFINITIONS.filter((def) => {
-    if (!isDestekol && ["quick_donate", "destekol_achievements"].includes(def.type)) return false;
+    if (!isDestekol && ["quick_donate", "destekol_achievements", "kindness_box"].includes(def.type)) return false;
     if (blockSearch)
       return (
         def.label.toLowerCase().includes(blockSearch.toLowerCase()) ||

@@ -8,11 +8,14 @@ interface Item {
   title: string;
   amount: number;
   frequency: string;
+  kindnessBox?: boolean;
   campaignId?: string; // UUID — required for FK
 }
 
 export default function CartClient({ locale, dict: D }: { locale: string; dict: Record<string, string> }) {
   const p = locale === "ar" ? "" : `/${locale}`;
+  const [selectedCampaign, setSelectedCampaign] = useState("");
+  const itemKey = (item: Item) => item.slug + ":" + item.frequency.toLowerCase();
   const [cart, setCart] = useState<Item[]>([]);
   const [name, setName] = useState(""); const [email, setEmail] = useState("");
   const [loading, setLoading] = useState<"stripe" | "paypal" | null>(null);
@@ -27,19 +30,24 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
   }, []);
 
   function remove(slug: string) {
-    const u = cart.filter(i => i.slug !== slug); setCart(u);
+    const u = cart.filter(i => itemKey(i) !== slug); setCart(u);
     sessionStorage.setItem("cart", JSON.stringify(u)); window.dispatchEvent(new Event("storage"));
   }
 
   function updateAmount(slug: string, amount: number) {
     if (amount < 1) return;
-    const u = cart.map(i => i.slug === slug ? { ...i, amount } : i);
+    const u = cart.map(i => itemKey(i) === slug ? { ...i, amount } : i);
     setCart(u); sessionStorage.setItem("cart", JSON.stringify(u));
   }
 
   const total = cart.reduce((s, i) => s + i.amount, 0);
 
+  const separateCampaigns = cart.length > 1 && cart.some(item => item.kindnessBox);
+
+  const checkoutAmount = separateCampaigns ? (cart.find(item => itemKey(item) === selectedCampaign)?.amount || 0) : total;
+
   async function checkout(provider: "stripe" | "paypal") {
+    if (separateCampaigns && !cart.some(item => itemKey(item) === selectedCampaign)) { setError(t("cart.choose_campaign", "اختر الحملة التي تريد دفع تبرعها", "Choose a campaign to pay", "Choisissez une campagne", "Ödenecek kampanyayı seçin")); return; }
     if (!name.trim() || !email.trim()) {
       setError(t("cart.name_email_required", "الاسم والبريد مطلوبان", "Name and email required", "Nom et email requis", "Ad ve e-posta gerekli"));
       return;
@@ -53,9 +61,9 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
     // Per-item donations — each campaign gets its own donation record
     const endpoint = provider === "stripe" ? "/api/donations/checkout" : "/api/donations/paypal";
 
-    if (cart.length === 1) {
+    if (cart.length === 1 || separateCampaigns) {
       // Single item — normal flow
-      const item = cart[0];
+      const item = separateCampaigns ? cart.find(item => itemKey(item) === selectedCampaign)! : cart[0];
       try {
         const res = await fetch(endpoint, {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -68,7 +76,7 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
         });
         const d = await res.json();
         if (d.url) {
-          sessionStorage.removeItem("cart"); window.dispatchEvent(new Event("storage"));
+          sessionStorage.setItem("cart", JSON.stringify(cart.filter(candidate => itemKey(candidate) !== itemKey(item)))); window.dispatchEvent(new Event("storage"));
           window.location.href = d.url;
         } else {
           setError(d.error || t("common.error", "حدث خطأ", "An error occurred", "Une erreur s'est produite", "Bir hata oluştu"));
@@ -123,7 +131,7 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
       ) : (
         <div className="space-y-4">
           {cart.map(item => (
-            <div key={item.slug} className="flex items-center justify-between bg-white rounded-xl border border-line p-4 gap-4">
+            <div key={itemKey(item)} className="flex items-center justify-between bg-white rounded-xl border border-line p-4 gap-4">
               <div className="flex-1">
                 <p className="font-bold text-ink text-sm">{item.title}</p>
                 <p className="text-xs text-muted mt-0.5">
@@ -135,11 +143,11 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
               </div>
               {/* Editable amount */}
               <div className="flex items-center gap-1">
-                <button onClick={() => updateAmount(item.slug, item.amount - 5)} className="w-7 h-7 rounded-lg border border-line text-muted hover:border-brand hover:text-brand flex items-center justify-center text-sm">−</button>
+                <button onClick={() => updateAmount(itemKey(item), item.amount - 5)} className="w-7 h-7 rounded-lg border border-line text-muted hover:border-brand hover:text-brand flex items-center justify-center text-sm">−</button>
                 <span className="font-bold text-brand min-w-[48px] text-center text-sm">${item.amount}</span>
-                <button onClick={() => updateAmount(item.slug, item.amount + 5)} className="w-7 h-7 rounded-lg border border-line text-muted hover:border-brand hover:text-brand flex items-center justify-center text-sm">+</button>
+                <button onClick={() => updateAmount(itemKey(item), item.amount + 5)} className="w-7 h-7 rounded-lg border border-line text-muted hover:border-brand hover:text-brand flex items-center justify-center text-sm">+</button>
               </div>
-              <button onClick={() => remove(item.slug)} aria-label={D["cart.remove_item"]} className="text-danger hover:text-danger/70"><Icon name="trash" size={16} /></button>
+              <button onClick={() => remove(itemKey(item))} aria-label={(D["cart.remove_item"] || "Remove") + ": " + item.title} className="text-danger hover:text-danger/70"><Icon name="trash" size={16} /></button>
             </div>
           ))}
 
@@ -148,6 +156,7 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
             <span className="font-display text-2xl font-extrabold text-brand">${total}</span>
           </div>
 
+          {separateCampaigns && <div className="border border-line rounded-xl p-4"><label htmlFor="campaign-to-pay" className="block font-bold mb-2">{t("cart.pay_separately","ادفع لكل حملة على حدة لضمان تخصيص تبرعك لها","Pay each campaign separately to allocate your donation correctly","Payez chaque campagne séparément","Bağışınızın doğru kampanyaya ulaşması için her kampanyayı ayrı ödeyin")}</label><select id="campaign-to-pay" value={selectedCampaign} onChange={e=>setSelectedCampaign(e.target.value)} className="w-full p-3 rounded border"><option value="">{t("cart.choose_campaign","اختر حملة","Choose a campaign","Choisissez une campagne","Kampanya seçin")}</option>{cart.map(item=><option key={itemKey(item)} value={itemKey(item)}>{item.title} — {item.amount}</option>)}</select></div>}
           <div className="bg-cream border border-line rounded-xl p-5 space-y-3 mt-6">
             <h2 className="font-display font-bold text-ink mb-2">
               {t("cart.donor_info", "بيانات المتبرع", "Donor Information", "Informations du Donateur", "Bağışçı Bilgileri")}
@@ -159,24 +168,24 @@ export default function CartClient({ locale, dict: D }: { locale: string; dict: 
 
             <button
               onClick={() => checkout("stripe")}
-              disabled={!!loading}
+              disabled={!!loading || (separateCampaigns && !checkoutAmount)}
               className="w-full bg-brand hover:bg-brand-dark disabled:opacity-60 text-white font-bold rounded-xl py-3.5 transition flex items-center justify-center gap-2"
             >
               <Icon name="wallet" size={18} />
               {loading === "stripe"
                 ? t("cart.processing", "جاري المعالجة...", "Processing...", "Traitement...", "İşleniyor...")
-                : `${t("cart.pay_card", "الدفع بالبطاقة", "Pay with Card", "Payer par Carte", "Kart ile Öde")} — $${total}`}
+                : `${t("cart.pay_card", "الدفع بالبطاقة", "Pay with Card", "Payer par Carte", "Kart ile Öde")} — $${checkoutAmount}`}
             </button>
 
             <button
               onClick={() => checkout("paypal")}
-              disabled={!!loading}
+              disabled={!!loading || (separateCampaigns && !checkoutAmount)}
               className="w-full bg-[#FFC439] hover:bg-[#f0b429] disabled:opacity-60 text-[#003087] font-bold rounded-xl py-3.5 transition flex items-center justify-center gap-2"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="#003087"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.968.382-1.05.9l-1.12 7.106z"/></svg>
               {loading === "paypal"
                 ? t("cart.processing", "جاري المعالجة...", "Processing...", "Traitement...", "İşleniyor...")
-                : `PayPal — $${total}`}
+                : `PayPal — $${checkoutAmount}`}
             </button>
 
             <p className="text-xs text-muted text-center">
