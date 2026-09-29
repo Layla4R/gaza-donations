@@ -181,16 +181,16 @@ function getLegalSubtitle(slug: string, locale: string, brandName: string): stri
 function getCommonPageTitle(slug: string, locale: string, fullName: string, brandName: string): string | null {
   const titles: Record<string, Record<string, string>> = {
     about: {
-      ar: `من نحن | ${fullName}`,
-      en: `About Us | ${fullName}`,
-      fr: `À Propos | ${fullName}`,
-      tr: `Hakkımızda | ${fullName}`,
+      ar: "من نحن",
+      en: "About Us",
+      fr: "À propos",
+      tr: "Hakkımızda",
     },
     "about-us": {
-      ar: `من نحن | ${fullName}`,
-      en: `About Us | ${fullName}`,
-      fr: `À Propos | ${fullName}`,
-      tr: `Hakkımızda | ${fullName}`,
+      ar: "من نحن",
+      en: "About Us",
+      fr: "À propos",
+      tr: "Hakkımızda",
     },
     "our-work": {
       ar: `مجالات عملنا | ${brandName}`,
