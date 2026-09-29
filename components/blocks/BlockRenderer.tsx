@@ -1,5 +1,6 @@
 import KindnessBox from "@/components/site/KindnessBox";
 import DestekolAchievements from "@/components/site/DestekolAchievements";
+import DestekolProjectsSection from "@/components/site/DestekolProjectsSection";
 import CardDescription from "@/components/site/CardDescription";
 import CardCarousel from "@/components/site/CardCarousel";
 import { officialEmail, normalizePublicContact } from "@/lib/public-contact";
@@ -279,6 +280,11 @@ export default function BlockRenderer({
     }
 
     case "projects": {
+      if (context?.isDestekol) {
+        // This section's copy and project cards come directly from the Page builder's CMS data.
+        return <DestekolProjectsSection data={p} locale={locale} />;
+      }
+
       const defaultProjects = [
         {
           title: locale === "ar" ? "مشروع صهاريج مياه الشرب المعقمة" : "Clean Water Tankers Project",
@@ -843,6 +849,13 @@ export default function BlockRenderer({
     }
 
     case "contact_form": {
+      const contactEyebrow = locale === "fr"
+        ? "Nous contacter"
+        : locale === "tr"
+          ? "Bize ulaşın"
+          : locale === "en"
+            ? "Contact us"
+            : "تواصل معنا";
       const contactSchema = {
         "@context": "https://schema.org",
         "@type": "NGO",
@@ -864,7 +877,7 @@ export default function BlockRenderer({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(contactSchema) }}
           />
           <div className="max-w-screen-xl mx-auto px-6 text-center mb-10">
-            <Eyebrow className="justify-center">تواصل معنا</Eyebrow>
+            <Eyebrow className="justify-center">{contactEyebrow}</Eyebrow>
             {p.title && <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">{p.title}</h2>}
             {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
           </div>

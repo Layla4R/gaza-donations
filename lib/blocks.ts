@@ -255,10 +255,12 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       eyebrow: "مشاريعنا الميدانية",
       title: "نُحوّل العطاء إلى أثرٍ تنموي ملموس",
       subtitle: "أعدّت محفظة مشاريعنا الاستراتيجية لتلبية الاحتياجات الأساسية وإعادة بناء المجتمعات المتأثرة بالأزمات بكرامة وشفافية.",
+      pageSize: 8,
       items: [
         {
           title: "مشروع صهاريج مياه الشرب المعقمة",
           category: "الإصحاح المائي (WASH)",
+          icon: "droplet",
           location: "المناطق الحرجة والبؤر الأشد احتياجاً",
           status: "قيد التنفيذ المستمر",
           image: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=800&q=80",
@@ -269,6 +271,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         {
           title: "المخبز الآلي المجتمعي للوجبات اليومية",
           category: "الأمن الغذائي",
+          icon: "utensils",
           location: "المناطق الحرجة والبؤر الأشد احتياجاً",
           status: "استجابة عاجلة",
           image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80",
@@ -279,6 +282,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         {
           title: "النقاط الطبية والمستشفيات الميدانية",
           category: "الرعاية الصحية",
+          icon: "heart-pulse",
           location: "المناطق الحرجة والبؤر الأشد احتياجاً",
           status: "دعم مباشر",
           image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&q=80",
@@ -292,6 +296,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       { key: "eyebrow", label: "Eyebrow Text / Tag", type: "text" },
       { key: "title", label: "Section Title", type: "text" },
       { key: "subtitle", label: "Section Subtitle", type: "textarea" },
+      { key: "pageSize", label: "Projects per Page", type: "number" },
       {
         key: "items",
         label: "Projects List",
@@ -299,6 +304,14 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
         itemFields: [
           { key: "title", label: "Project Title", type: "text" },
           { key: "category", label: "Category", type: "text" },
+          { key: "icon", label: "Category Icon", type: "select", options: [
+            { label: "Food", value: "utensils" },
+            { label: "Water", value: "droplet" },
+            { label: "Health", value: "heart-pulse" },
+            { label: "Education", value: "book-open" },
+            { label: "Shelter", value: "home" },
+            { label: "Community", value: "hand-heart" },
+          ] },
           { key: "location", label: "Location", type: "text" },
           { key: "status", label: "Status Badge", type: "text" },
           { key: "image", label: "Project Image", type: "image" },

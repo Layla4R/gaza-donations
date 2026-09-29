@@ -26,6 +26,7 @@ export function normalizeDestekolBrandText(value: string, locale = "en"): string
   const organizationName = getDestekolOrganizationName(locale);
 
   return text
+    .replace(/(?:4Relief|For\s+Relief|Destekol)\s+is\s+an?\s+independent\s+humanitarian\s+and\s+development\s+(?:organization|organisation|foundation)\b/gi, "Destekol is a charitable non-profit association")
     .replace(/(?:مؤسسة|منظمة)\s*(?:4Relief|For\s+Relief|Destekol|Destek\s+ol\s+non\s+profit\s+NGO|فور\s*ريليف)(?:\s+(?:Humanitarian\s+Foundation|الإنسانية))?(?:\s*\(\s*4Relief\s*\))?/gi, organizationName)
     .replace(/For\s+Relief\s+Humanitarian\s+Foundation\s*\(\s*4Relief\s*\)/gi, organizationName)
     .replace(/(?:4Relief|For\s+Relief)\s+Humanitarian\s+Foundation/gi, organizationName)
