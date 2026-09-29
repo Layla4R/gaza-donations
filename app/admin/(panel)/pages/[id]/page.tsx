@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import PageEditor from "@/components/editor/PageEditor";
 import { PageSection } from "@/lib/blocks";
+import { prepareDestekolHomeSections } from "@/lib/destekol-homepage";
 
 export const revalidate = 0;
 
@@ -24,6 +25,7 @@ export default async function EditPagePage({
   const { data: page } = await supabase
     .from("Page").select("*").eq("id", params.id).maybeSingle();
   if (!page) notFound();
+  const isDestekol = getRequestSite().id === "destekol";
 
   let editPage = { ...page };
   let editTitle = page.title;
@@ -54,9 +56,17 @@ export default async function EditPagePage({
     }
   }
 
+  const originalSections = editSections;
+  if (isDestekol && page.slug === "home") {
+    editSections = prepareDestekolHomeSections(editSections);
+  }
+  const initialChangesPending = isDestekol && page.slug === "home"
+    && JSON.stringify(originalSections) !== JSON.stringify(editSections)
+    && (locale === "ar" || hasTranslation);
+
   return (
     <PageEditor
-      isDestekol={getRequestSite().id === "destekol"}
+      isDestekol={isDestekol}
       page={{
         id: page.id,
         title: editTitle,
@@ -77,6 +87,7 @@ export default async function EditPagePage({
       locale={locale}
       isTranslation={locale !== "ar"}
       hasExistingTranslation={hasTranslation}
+      initialChangesPending={initialChangesPending}
     />
   );
 }

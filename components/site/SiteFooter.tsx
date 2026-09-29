@@ -228,10 +228,11 @@ export default function SiteFooter({
   const safeNavItems = Array.isArray(navItems)
     ? navItems
     : [];
+  const legalItems = isDestekol ? LEGAL_SLUGS.filter((item) => ["privacy", "terms", "cookie-policy", "financial-transparency"].includes(item.slug)) : LEGAL_SLUGS;
 
   return (
     <footer
-      className="relative bg-sidebar-gradient text-white mt-auto overflow-hidden"
+      className={`relative bg-sidebar-gradient text-white mt-auto overflow-hidden${isDestekol ? " destekol-footer" : ""}`}
       role="contentinfo"
     >
       {/* =====================================================
@@ -335,7 +336,9 @@ export default function SiteFooter({
             href={`${p}/donate`}
             className="inline-flex items-center gap-2 hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition shadow-md"
             style={{
-              background: `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
+              background: isDestekol
+                ? "linear-gradient(135deg, #D9A750, #C79239)"
+                : `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
             }}
           >
             <Icon
@@ -367,8 +370,8 @@ export default function SiteFooter({
           </h2>
 
           <ul className="space-y-2.5 text-sm text-white/80">
-            {/* Why organization */}
-            <li>
+            {/* 4Relief-specific quick links */}
+            {!isDestekol && <li>
               <Link
                 href={`${p}/why-4relief`}
                 className="flex items-center gap-2 hover:text-white transition group font-semibold text-emerald-300"
@@ -385,10 +388,10 @@ export default function SiteFooter({
                   tr: `Neden ${siteName}?`,
                 })}
               </Link>
-            </li>
+            </li>}
 
             {/* Institutional partnerships */}
-            <li>
+            {!isDestekol && <li>
               <Link
                 href={`${p}/institutional-partnerships`}
                 className="flex items-center gap-2 hover:text-white transition group font-semibold text-amber-300"
@@ -408,7 +411,7 @@ export default function SiteFooter({
                   }
                 )}
               </Link>
-            </li>
+            </li>}
 
             {/* Dynamic navigation */}
             {safeNavItems.map((item) => {
@@ -571,7 +574,7 @@ export default function SiteFooter({
           </h2>
 
           <ul className="space-y-2.5 text-sm text-white/80">
-            {LEGAL_SLUGS.map((item) => (
+            {legalItems.map((item) => (
               <li key={item.slug}>
                 <Link
                   href={`${p}/${item.slug}`}

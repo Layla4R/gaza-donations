@@ -746,6 +746,8 @@ export default function BlockRenderer({
           dict={context?.dict || {}}
           data={p}
           compact={context?.isHomePage}
+          destekolFeatured={context?.isDestekol === true && context?.isHomePage === true}
+          isDestekol={context?.isDestekol === true}
         />
       );
     }
@@ -811,23 +813,27 @@ export default function BlockRenderer({
       );
     }
 
-    case "newsletter":
+    case "newsletter": {
+      const destekolNewsletter = context?.isDestekol === true && context?.isHomePage === true;
       return (
-        <section 
-          className="relative py-16 sm:py-20 text-white overflow-hidden bg-brand transition-colors"
-          style={{ backgroundColor: primary }}
+        <section
+          className={destekolNewsletter ? "destekol-newsletter-section" : "relative py-16 sm:py-20 text-white overflow-hidden bg-brand transition-colors"}
+          style={destekolNewsletter ? undefined : { backgroundColor: primary }}
         >
-          <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-          <div className="relative z-10 max-w-screen-xl mx-auto px-6 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <Icon name="mail" size={22} className="text-white" />
+          {destekolNewsletter && <svg className="destekol-newsletter-wave" aria-hidden="true" viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 29C180 71 300 5 502 28s313 56 497 12 294-15 441 11v29H0Z" fill="currentColor"/></svg>}
+          {!destekolNewsletter && <div className="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none" />}
+          <div className={destekolNewsletter ? "destekol-newsletter-inner" : "relative z-10 max-w-screen-xl mx-auto px-6 text-center"}>
+            {!destekolNewsletter && <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm"><Icon name="mail" size={22} className="text-white" /></div>}
+            <div className={destekolNewsletter ? "destekol-newsletter-copy" : ""}>
+              {p.title && <h2 className={destekolNewsletter ? "" : "font-display text-2xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight"}>{p.title}</h2>}
+              {p.subtitle && <p className={destekolNewsletter ? "" : "text-white/80 mb-8 text-xs sm:text-sm max-w-lg mx-auto"}>{p.subtitle}</p>}
             </div>
-            {p.title && <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">{p.title}</h2>}
-            {p.subtitle && <p className="text-white/80 mb-8 text-xs sm:text-sm max-w-lg mx-auto">{p.subtitle}</p>}
-            <NewsletterForm />
+            <NewsletterForm buttonText={p.buttonText} placeholder={p.placeholder} successText={p.successText} />
           </div>
+          {destekolNewsletter && <svg className="destekol-newsletter-wave destekol-newsletter-wave--bottom" aria-hidden="true" viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 42c196-59 300 17 492 4 175-12 287-48 474-14s308 37 474-3v51H0Z" fill="currentColor"/></svg>}
         </section>
       );
+    }
 
     case "spacer":
       return <div style={{ height: `${p.height || 48}px` }} />;

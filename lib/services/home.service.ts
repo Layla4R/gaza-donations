@@ -18,7 +18,7 @@ export async function getHomeData(locale: string) {
     getPageBySlug("home", locale),
     supabase.from("SiteSettings").select("accentColor, primaryColor, siteName, footerDescription, defaultCurrency").eq("id", "default").maybeSingle(),
     supabase.from("Campaign").select("id, slug, title, summary, coverImage, goalAmount, raisedAmount, donorCount, category, isFeatured").eq("isActive", true).order("isFeatured", { ascending: false }).limit(12),
-    supabase.from("NewsPost").select("id, title, excerpt, coverImage, slug, publishedAt").eq("isPublished", true).order("publishedAt", { ascending: false }).limit(3),
+    supabase.from("NewsPost").select("id, title, excerpt, coverImage, videoUrl, slug, publishedAt").eq("isPublished", true).order("publishedAt", { ascending: false }).limit(3),
     supabase.rpc("get_dashboard_stats"),
   ]);
 

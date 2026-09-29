@@ -5,10 +5,11 @@ import Icon from "@/components/icons";
 const AMOUNTS = [5, 10, 25, 50, 100];
 
 export default function DonateClient({
-  locale, dict: D, initialAmount, initialFreq,
+  locale, dict: D, initialAmount, initialFreq, campaignId, storyId,
 }: {
   locale: string; dict: Record<string, string>;
   initialAmount?: number; initialFreq?: "ONE_TIME" | "MONTHLY";
+  campaignId?: string; storyId?: string;
 }) {
   const [amount, setAmount] = useState(initialAmount || 25);
   const [custom, setCustom] = useState(initialAmount && ![5,10,25,50,100].includes(initialAmount) ? String(initialAmount) : "");
@@ -26,7 +27,7 @@ export default function DonateClient({
     try {
       const endpoint = provider === "stripe" ? "/api/donations/checkout" : "/api/donations/paypal";
       const res = await fetch(endpoint, { method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ amount: final, frequency: freq, donorName: name, donorEmail: email, message: msg, isAnonymous: anon }) });
+        body: JSON.stringify({ amount: final, frequency: freq, donorName: name, donorEmail: email, message: msg, isAnonymous: anon, campaignId, storyId }) });
       const d = await res.json();
       if (d.url) window.location.href = d.url;
       else setError(d.error || D["common.error"] || "Error");

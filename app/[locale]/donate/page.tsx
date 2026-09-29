@@ -7,7 +7,7 @@ export default async function DonatePage({
   searchParams,
 }: {
   params: { locale: string };
-  searchParams: { amount?: string; freq?: string; campaign?: string };
+  searchParams: { amount?: string; freq?: string; campaign?: string; story?: string };
 }) {
   const dict = await loadTranslations(locale);
   return (
@@ -16,6 +16,8 @@ export default async function DonatePage({
       dict={dict}
       initialAmount={searchParams?.amount ? Number(searchParams.amount) : undefined}
       initialFreq={(searchParams?.freq as "ONE_TIME" | "MONTHLY") || "ONE_TIME"}
+      campaignId={searchParams?.campaign}
+      storyId={searchParams?.story}
     />
   );
 }

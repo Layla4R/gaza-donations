@@ -39,12 +39,14 @@ export default function PageEditor({
   isTranslation = false,
   hasExistingTranslation = false,
   isDestekol = false,
+  initialChangesPending = false,
 }: {
   page: PageData;
   locale?: string;
   isTranslation?: boolean;
   hasExistingTranslation?: boolean;
   isDestekol?: boolean;
+  initialChangesPending?: boolean;
 }) {
   const [sections, setSections] = useState<PageSection[]>(page.sections);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -67,7 +69,7 @@ export default function PageEditor({
   const [translationProgress, setTranslationProgress] = useState("");
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<string>("");
-  const [isDirty, setIsDirty] = useState(false);
+  const [isDirty, setIsDirty] = useState(initialChangesPending);
   const [saveError, setSaveError] = useState<string>("");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [history, setHistory] = useState<PageSection[][]>([page.sections]);

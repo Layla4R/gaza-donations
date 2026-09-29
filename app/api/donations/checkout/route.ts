@@ -7,7 +7,7 @@ import { generateReceiptNumber } from "@/lib/format";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { frequency, donorName, donorEmail, message, isAnonymous, campaignId } = body;
+    const { frequency, donorName, donorEmail, message, isAnonymous, campaignId, storyId } = body;
     const amount = Number(body.amount); // coerce string to number
 
     if (!amount || amount <= 0) {
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       customer_email: donorEmail,
       success_url: `${siteUrl}/donate/success?donation=${donation.id}`,
       cancel_url: `${siteUrl}/donate/cancel?donation=${donation.id}`,
-      metadata: { donationId: donation.id },
+      metadata: { donationId: donation.id, ...(typeof storyId === "string" && storyId ? { storyId: storyId.slice(0, 120) } : {}) },
       // For subscriptions: also set metadata on the subscription object
       // so customer.subscription.deleted webhook can find the donation
       ...(isMonthly ? {

@@ -18,6 +18,8 @@ interface NewsSectionProps {
   dict: Record<string, string>;
   data?: any;
   compact?: boolean;
+  destekolFeatured?: boolean;
+  isDestekol?: boolean;
 }
 
 function cleanMarkdown(text: string) {
@@ -28,9 +30,13 @@ function cleanMarkdown(text: string) {
 function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: string; title: string }) {
   if (videoUrl) {
     if (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be")) {
-      const embedId = videoUrl.includes("v=")
-        ? videoUrl.split("v=")[1]?.split("&")[0]
-        : videoUrl.split("/").pop();
+      let embedId = "";
+      try {
+        const parsed = new URL(videoUrl);
+        embedId = parsed.searchParams.get("v") || parsed.pathname.split("/").filter(Boolean).pop() || "";
+      } catch {
+        embedId = videoUrl.includes("v=") ? videoUrl.split("v=")[1]?.split("&")[0] : videoUrl.split("/").pop() || "";
+      }
       return (
         <iframe
           src={`https://www.youtube.com/embed/${embedId}`}
@@ -72,18 +78,113 @@ function CardMedia({ videoUrl, image, title }: { videoUrl?: string; image?: stri
   );
 }
 
-export default function NewsSection({ posts, locale, dict, data, compact = false }: NewsSectionProps) {
+function FeaturedMedia({ videoUrl, image, title }: { videoUrl?: string; image?: string; title: string }) {
+  const [playing, setPlaying] = useState(false);
+  const isYoutube = !!videoUrl && (videoUrl.includes("youtube.com") || videoUrl.includes("youtu.be"));
+  let videoId = "";
+  if (isYoutube && videoUrl) {
+    try {
+      const parsed = new URL(videoUrl);
+      videoId = parsed.searchParams.get("v") || parsed.pathname.split("/").filter(Boolean).pop() || "";
+    } catch {}
+  }
+  if (isYoutube && !playing) {
+    const poster = image || (videoId ? `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg` : "");
+    return (
+      <button
+        type="button"
+        className="destekol-story-poster"
+        style={poster ? { backgroundImage: `linear-gradient(0deg, #001b2f40, #001b2f12), url("${poster}")` } : undefined}
+        onClick={() => setPlaying(true)}
+        aria-label={`${title} — play video`}
+      >
+        <span aria-hidden="true">▶</span>
+      </button>
+    );
+  }
+  return <CardMedia videoUrl={videoUrl} image={image} title={title} />;
+}
+
+export default function NewsSection({ posts, locale, dict, data, compact = false, destekolFeatured = false, isDestekol = false }: NewsSectionProps) {
   const p = locale === "ar" ? "" : `/${locale}`;
   const isRTL = locale === "ar";
   const t = (key: string, ar: string, en: string, fr: string, tr: string) =>
     dict[key] || (locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en);
 
-  const sectionTitle = data?.title || t("news.title","قصص الأثر والأخبار","Stories of Impact & News","Impact & Actualités","Etki Hikayeleri ve Haberler");
-  const sectionEyebrow = data?.subtitle || data?.eyebrow || t("news.eyebrow","من ميدان العمل","From the Field","Du Terrain","Sahadan");
+  const sectionTitle = data?.title || (destekolFeatured ? "" : t("news.title","قصص الأثر والأخبار","Stories of Impact & News","Impact & Actualités","Etki Hikayeleri ve Haberler"));
+  const sectionEyebrow = data?.subtitle || data?.eyebrow || (destekolFeatured ? "" : t("news.eyebrow","من ميدان العمل","From the Field","Du Terrain","Sahadan"));
 
   const adminStories = data?.items || [];
   const hasAdminStories = adminStories.length > 0;
   const displayItems = hasAdminStories ? adminStories : posts;
+
+  const getDonationHref = (item: any, index: number) => {
+    const key = String(item?.id || item?.slug || `story-${index + 1}`).trim().replace(/[^a-zA-Z0-9_-]+/g, "-");
+    const params = new URLSearchParams();
+    if (isDestekol) params.set("story", key || `story-${index + 1}`);
+    if (item?.campaignId) params.set("campaign", item.campaignId);
+    const fallback = isDestekol ? `/donate?${params.toString()}` : hasAdminStories ? "" : `${p}/donate`;
+    let destination = item?.buttonLink || fallback;
+    if (destination && item?.campaignId) {
+      try {
+        const parsed = new URL(destination, "https://destekol.invalid");
+        if (parsed.pathname.replace(/\/$/, "").endsWith("/donate")) {
+          parsed.searchParams.set("story", key || `story-${index + 1}`);
+          parsed.searchParams.set("campaign", item.campaignId);
+          destination = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+        }
+      } catch {}
+    }
+    return storyLink(destination, locale);
+  };
+
+  const getDonationLabel = (item: any) => item?.buttonText || (destekolFeatured ? "" : t("news.contribute_now", "تبرع لهذه القصة", "Support this story", "Soutenir cette histoire", "Bu hikâyeye destek olun"));
+
+  if (displayItems.length === 0 || (destekolFeatured && !hasAdminStories)) return null;
+
+  if (destekolFeatured) {
+    const item: any = displayItems.find((candidate: any) => candidate.videoUrl) || displayItems[0];
+    const title = item.title || item.name || "";
+    const rawDesc = hasAdminStories ? (item.body || item.text) : item.excerpt;
+    const description = cleanMarkdown(rawDesc);
+    const image = hasAdminStories ? (item.image || item.photo) : item.coverImage;
+    const donationHref = getDonationHref(item, displayItems.indexOf(item));
+    const storyHref = item.storyUrl ? storyLink(item.storyUrl, locale) : item.slug ? storyLink(`/news/${item.slug}`, locale) : null;
+    const storyReadLabel = item.readButtonText || data?.readButtonText || "";
+    const storyKicker = item.eyebrow || data?.storyEyebrow || "";
+
+    return (
+      <section className="destekol-story-section" dir={isRTL ? "rtl" : "ltr"}>
+        <svg className="destekol-story-wave destekol-story-wave--top" aria-hidden="true" viewBox="0 0 1440 90" preserveAspectRatio="none">
+          <path d="M0 0h1440v34c-160 34-250 5-405 18S760 82 573 51 270 13 0 55Z" fill="currentColor" />
+        </svg>
+        <div className="destekol-story-inner">
+          <header className="destekol-story-heading">
+            <span>{sectionEyebrow}</span>
+            <h2>{sectionTitle}</h2>
+          </header>
+          <div className="destekol-story-feature">
+            <div className="destekol-story-media">
+              <FeaturedMedia videoUrl={item.videoUrl} image={image} title={title} />
+              {item.duration && <span className="destekol-story-duration">{item.duration}</span>}
+            </div>
+            <article className="destekol-story-copy">
+              {storyKicker && <span className="destekol-story-kicker">{storyKicker}</span>}
+              <h3>{title}</h3>
+              {description && <p>{description}</p>}
+              <div className="destekol-story-actions">
+                {storyHref && storyReadLabel && <Link href={storyHref} className="destekol-story-read">{storyReadLabel} <span aria-hidden="true">{isRTL ? "←" : "→"}</span></Link>}
+                {donationHref && getDonationLabel(item) && <Link href={donationHref} className="destekol-story-donate"><Icon name="heart" size={16} />{getDonationLabel(item)}</Link>}
+              </div>
+            </article>
+          </div>
+        </div>
+        <svg className="destekol-story-wave destekol-story-wave--bottom" aria-hidden="true" viewBox="0 0 1440 90" preserveAspectRatio="none">
+          <path d="M0 42c180-34 286 7 448 2s255-44 441-14 336 19 551-12v72H0Z" fill="currentColor" />
+        </svg>
+      </section>
+    );
+  }
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -122,8 +223,6 @@ export default function NewsSection({ posts, locale, dict, data, compact = false
       behavior: "smooth",
     });
   };
-
-  if (displayItems.length === 0) return null;
 
   return (
     <section className="py-12 bg-white border-t border-slate-100 overflow-hidden">
@@ -168,10 +267,8 @@ export default function NewsSection({ posts, locale, dict, data, compact = false
             const description = cleanMarkdown(rawDesc);
             const image = hasAdminStories ? (item.image || item.photo) : item.coverImage;
             const videoUrl = item.videoUrl;
-            const donationHref = hasAdminStories
-              ? storyLink(item.buttonLink, locale)
-              : `${p}/donate`;
-            const donationLabel = item.buttonText || t("news.contribute_now", "ساهم معنا الآن", "Donate Now", "Faites un don", "Şimdi Bağış Yapın");
+            const donationHref = getDonationHref(item, i);
+            const donationLabel = getDonationLabel(item);
             const donationClass = "w-full inline-flex items-center justify-center gap-2 bg-brand hover:opacity-90 text-white font-bold text-xs rounded-xl py-2.5 transition-all shadow-sm";
 
             return (

@@ -94,7 +94,10 @@ export default async function HomePage({ params }: PageProps) {
   const posts = data.posts || [];
   const stats = data.stats || { total: 0, families: 0 };
   const pageSections = data.pageSections || [];
-  const sections = Array.isArray(pageSections) ? pageSections : [];
+  const rawSections = Array.isArray(pageSections) ? pageSections : [];
+  const sections = isDestekol
+    ? rawSections.filter((section: any) => section.type !== "projects")
+    : rawSections;
 
   const primaryColor = settings?.primaryColor || "#0069D2";
   const accentColor = settings?.accentColor || "#F00F5A";
