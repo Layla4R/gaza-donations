@@ -211,3 +211,96 @@ p.editable-field, div.editable-field, h2.editable-field, h3.editable-field {
 .home-carousel-slide .story-card .p-5 { padding: 16px; }
 .home-carousel-slide .story-card h3 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; min-height: 2.75em; }
 @media (prefers-reduced-motion: reduce) { .home-carousel-slide * { transition: none !important; } }
+/* Destekol has its own visual language; 4Relief retains the shared layout. */
+body[data-site="destekol"] { background: #eef9fc; color: #063962; }
+body[data-site="destekol"] .home-layout { max-width: 1440px; margin: auto; padding: 0 0 64px; background: white; }
+body[data-site="destekol"] .site-home-header { background: white; max-width: 1440px; width: 100%; margin: auto; }
+body[data-site="destekol"] .site-home-header > div:first-child { display: none; }
+body[data-site="destekol"] .home-header-container { padding-inline: 5%; height: 78px; }
+body[data-site="destekol"] .home-header-container > a img { width: 190px; height: 62px; }
+body[data-site="destekol"] .home-header-container nav { gap: 22px; }
+body[data-site="destekol"] .home-header-container nav ul { gap: 22px; }
+body[data-site="destekol"] .home-header-container nav a { font-size: 13px; color: #063962; }
+body[data-site="destekol"] .home-section + .home-section { margin-top: 32px; }
+body[data-site="destekol"] .home-section--hero > section { border-radius: 0; }
+body[data-site="destekol"] .home-layout .hero-stage { height: clamp(400px, 36vw, 520px); min-height: 0; border-radius: 0; }
+body[data-site="destekol"] .hero-stage > img { display: none; }
+body[data-site="destekol"] .hero-stage img { object-fit: cover; object-position: center 48%; }
+body[data-site="destekol"] .home-layout .hero-stage::after { inset: 0; background: linear-gradient(90deg, #f4fcffeb 0%, #f4fcffc7 28%, #f4fcff20 60%, transparent 75%); }
+body[data-site="destekol"] [dir="rtl"] .hero-stage::after { transform: scaleX(-1); }
+body[data-site="destekol"] .home-layout .hero-caption { text-align: start; align-items: center; padding: 28px 6% 70px; }
+body[data-site="destekol"] .hero-caption > div > div { max-width: 49%; margin-inline: 0; }
+body[data-site="destekol"] .hero-caption h1 { color: #063962; font-size: clamp(30px, 3.3vw, 48px) !important; line-height: 1.13; letter-spacing: -.035em; text-shadow: none; filter: none; margin-bottom: 16px; }
+body[data-site="destekol"] .hero-caption p { color: #0a5171; font-size: clamp(14px, 1.35vw, 19px) !important; line-height: 1.5; font-weight: 500; filter: none; margin-bottom: 20px; }
+body[data-site="destekol"] .hero-caption .inline-flex.backdrop-blur-md { background: none; border: none; padding: 0; margin-bottom: 14px; }
+body[data-site="destekol"] .hero-caption .inline-flex.backdrop-blur-md > span:first-child { display: none; }
+body[data-site="destekol"] .hero-caption .inline-flex.backdrop-blur-md > span { color: #063962; font-size: 11px; letter-spacing: .2em; font-weight: 800; }
+body[data-site="destekol"] .home-layout .hero-actions { justify-content: flex-start; }
+body[data-site="destekol"] .hero-actions > :is(a,button) { border-radius: 9px; padding: 12px 28px; font-size: 16px; box-shadow: none; }
+body[data-site="destekol"] .home-layout .hero-controls { display: flex; flex-direction: row; align-items: center; inset-inline-start: 4%; inset-inline-end: auto; bottom: 58px; gap: 9px; }
+body[data-site="destekol"] .hero-controls > button:not(.destekol-slide-arrow) { width: 7px; height: 7px; background: #09849466; }
+body[data-site="destekol"] .hero-controls > button[aria-current="true"] { background: #066090; }
+.destekol-slide-arrow { display: grid; place-items: center; border-radius: 50%; background: white; color: #066090; height: 32px; width: 32px; font-size: 22px; }
+body[data-site="destekol"] .home-section--destekol_achievements { margin-top: 0; position: relative; z-index: 21; }
+.destekol-achievements { position: relative; background: linear-gradient(180deg, white, #f2fbfc); border-radius: 0 0 40% 12% / 0 0 20px 10px !important; }
+.destekol-waves { position: absolute; bottom: calc(100% - 1px); left: 0; width: 100%; height: 85px; pointer-events: none; }
+.destekol-impact-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); padding: 10px 4% 24px; gap: 28px; }
+.destekol-impact { display: flex; align-items: center; gap: 16px; position: relative; }
+.destekol-impact:not(:last-child)::after { content: ""; position: absolute; inset-inline-end: -14px; width: 1px; height: 44px; background: #e0edf2; }
+.destekol-impact-icon { flex-shrink: 0; display: grid; place-items: center; width: 70px; height: 70px; border-radius: 50%; background: #e1f4f6; color: #098494; }
+.destekol-impact-icon > :is(svg,img) { width: 43px; height: 43px; object-fit: contain; }
+.destekol-impact strong { display: block; text-align: start; color: #063962; font-size: 25px; font-weight: 800; }
+.destekol-impact div > span { display: block; color: #0a5171; font-size: 14px; line-height: 1.4; }
+body[data-site="destekol"] .home-section--quick_donate { margin: 10px 2% 0; }
+body[data-site="destekol"] .home-layout .hero-quick-donate { margin-top: 0; border-radius: 16px; background: linear-gradient(110deg,#0a5171,#066090); }
+body[data-site="destekol"] .hero-quick-donate > div { padding: 14px 20px; }
+body[data-site="destekol"] .hero-quick-donate > div > div:first-child { gap: 12px; }
+body[data-site="destekol"] .hero-quick-donate button { min-height: 36px; }
+body[data-site="destekol"] .hero-quick-donate > div > div:first-child > button { background: #d9a750 !important; }
+@media(min-width: 768px) and (max-width: 1200px) {
+ body[data-site="destekol"] .home-header-container nav ul { gap: 10px; }
+ body[data-site="destekol"] .home-header-container { padding-inline: 24px; }
+ body[data-site="destekol"] .home-header-container > a img { width: 155px; }
+ .destekol-impact-icon { width: 52px; height: 52px; }
+ .destekol-impact { gap: 9px; }
+ .destekol-impact strong { font-size: 20px; }
+}
+@media(max-width:767px) {
+ body[data-site="destekol"] .home-header-container { height: 66px; padding-inline: 20px; }
+ body[data-site="destekol"] .home-header-container > a img { width: 150px; height: 48px; }
+ body[data-site="destekol"] .home-header-container > div > a { display: none; }
+ body[data-site="destekol"] .home-layout .hero-stage { height: 555px; }
+ body[data-site="destekol"] .hero-stage img { object-position: 70% bottom; }
+ body[data-site="destekol"] .home-layout .hero-stage::after { background: linear-gradient(180deg,#f4fcff 0%,#f4fcfff5 31%,#f4fcff15 57%,transparent 70%); }
+ body[data-site="destekol"] .home-layout .hero-caption { align-items: flex-start; padding: 26px 24px; }
+ body[data-site="destekol"] .hero-caption > div > div { max-width: 100%; }
+ body[data-site="destekol"] .hero-caption h1 { font-size: 31px !important; max-width: 340px; }
+ body[data-site="destekol"] .hero-caption p { font-size: 13px !important; max-width: 320px; margin-inline: 0; }
+ body[data-site="destekol"] .hero-actions > :is(a,button) { padding: 9px 20px; font-size: 13px; }
+ body[data-site="destekol"] .home-layout .hero-controls { bottom: 45px; }
+ .destekol-waves { height: 52px; }
+ .destekol-impact-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px 12px; padding: 12px 18px 22px; }
+ .destekol-impact { gap: 8px; }
+ .destekol-impact::after { display: none; }
+ .destekol-impact-icon { width: 45px; height: 45px; }
+ .destekol-impact-icon > :is(svg,img) { width: 29px; height: 29px; }
+ .destekol-impact strong { font-size: 18px; }
+ .destekol-impact div > span { font-size: 11px; }
+ body[data-site="destekol"] .home-section--quick_donate { margin: 10px 16px 0; }
+ body[data-site="destekol"] .hero-quick-donate > div > div:first-child { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+ body[data-site="destekol"] .hero-quick-donate > div > div:first-child > div:first-child { display: block; grid-column: 1/-1; }
+ body[data-site="destekol"] .hero-quick-donate > div > div:first-child > div:nth-child(2) { grid-column: 1/-1; }
+ body[data-site="destekol"] .hero-quick-donate > div > div:first-child > div:nth-child(2) button { flex: 1; }
+ body[data-site="destekol"] .hero-quick-donate > div > div:first-child > div:nth-child(3) { display: contents; }
+ body[data-site="destekol"] .hero-quick-donate input[type="number"] { width: 100%; min-height: 36px; }
+ body[data-site="destekol"] .hero-quick-donate > div > div:first-child > button { grid-column: 1/-1; justify-content: center; width: 100%; }
+}
+.destekol-hero-badge { position: absolute; bottom: 85px; inset-inline-end: 4%; z-index: 12; display: flex; align-items: center; gap: 12px; max-width: 235px; padding: 16px 22px; border-radius: 18px; color: #063962; background: white; box-shadow: 0 5px 24px #06396214; font-size: 14px; font-weight: 750; line-height: 1.3; }
+.destekol-hero-badge svg { color: #d9a750; flex-shrink: 0; }
+@media(max-width:767px) { .destekol-hero-badge { font-size: 11px; max-width: 185px; padding: 12px 14px; bottom: 58px; } }
+body[data-site="destekol"] .home-header-container > a img { object-fit: cover; object-position: center; }
+body[data-site="destekol"] .hero-caption h1 { white-space: pre-line; }
+body[data-site="destekol"] .hero-quick-donate button:focus-visible, body[data-site="destekol"] .hero-controls button:focus-visible { outline: 3px solid #d9a750; outline-offset: 3px; }
+@media(prefers-reduced-motion:reduce) { body[data-site="destekol"] .hero-stage * { transition: none !important; animation: none !important; } }
+body[data-site="destekol"] .home-layout .home-section--destekol_achievements { margin-top: 0; }
+body[data-site="destekol"] .home-layout .home-section--quick_donate { margin-top: 10px; }

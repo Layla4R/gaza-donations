@@ -1,3 +1,4 @@
+import DestekolAchievements from "@/components/site/DestekolAchievements";
 import CardDescription from "@/components/site/CardDescription";
 import CardCarousel from "@/components/site/CardCarousel";
 import { officialEmail, normalizePublicContact } from "@/lib/public-contact";
@@ -74,9 +75,14 @@ export default function BlockRenderer({
   };
 
   switch (section.type) {
+    case "quick_donate":
+      return <HeroSection mode="quick" locale={locale} dict={context?.dict || {}} data={p} isDestekol={context?.isDestekol} primaryColor={primary} accentColor={accent} />;
+    case "destekol_achievements":
+      return <DestekolAchievements data={p} />;
     case "hero":
       return (
         <HeroSection
+          mode={context?.isDestekol ? "hero" : "full"}
           locale={locale}
           dict={context?.dict || {}}
           primaryColor={primary}

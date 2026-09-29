@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import HomeTrustContent from "@/components/site/HomeTrustContent";
 import { COMPANY_RECORD_URL, getHomeTrustContent } from "@/lib/home-trust-content";
 import { officialEmail } from "@/lib/public-contact";
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale } = params;
   const headerList = await headers();
   const host = headerList.get("host") || "";
-  const isDestekol = host.includes("destekol");
+  const isDestekol = getRequestSite().id === "destekol";
 
   const [dict, data] = await Promise.all([
     loadTranslations(locale),
@@ -80,7 +81,7 @@ export default async function HomePage({ params }: PageProps) {
   const { locale } = params;
   const headerList = await headers();
   const host = headerList.get("host") || "";
-  const isDestekol = host.includes("destekol");
+  const isDestekol = getRequestSite().id === "destekol";
 
   const [dict, homeData] = await Promise.all([
     loadTranslations(locale),

@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { PUBLIC_SITE_SETTINGS_SELECT, pickPublicSiteSettings, type PublicSiteSettings } from "@/lib/public-site-settings";
 import { notFound } from "next/navigation";
 import Script from "next/script";
@@ -60,7 +61,7 @@ const LOCALE_METADATA: Record<
 async function getDomainInfo() {
   const headerList = await headers();
   const host = headerList.get("host") || "";
-  const isDestekol = host.includes("destekol");
+  const isDestekol = getRequestSite().id === "destekol";
   
   const siteUrl = isDestekol
     ? "https://destekol.org"
@@ -333,8 +334,8 @@ export default async function LocaleLayout({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} />
 
-      <SiteHeader navItems={pages} settings={settings} locale={locale} dict={dict} transparent={false} />
-      <CookieBanner locale={locale} />
+      <SiteHeader isDestekol={isDestekol} navItems={pages} settings={settings} locale={locale} dict={dict} transparent={false} />
+      <CookieBanner isDestekol={isDestekol} locale={locale} />
 
       <main className="flex-1 pt-20">{children}</main>
 

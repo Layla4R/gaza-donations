@@ -38,11 +38,13 @@ export default function PageEditor({
   locale = "ar",
   isTranslation = false,
   hasExistingTranslation = false,
+  isDestekol = false,
 }: {
   page: PageData;
   locale?: string;
   isTranslation?: boolean;
   hasExistingTranslation?: boolean;
+  isDestekol?: boolean;
 }) {
   const [sections, setSections] = useState<PageSection[]>(page.sections);
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -319,6 +321,7 @@ export default function PageEditor({
   }
 
   const filteredBlocks = BLOCK_DEFINITIONS.filter((def) => {
+    if (!isDestekol && ["quick_donate", "destekol_achievements"].includes(def.type)) return false;
     if (blockSearch)
       return (
         def.label.toLowerCase().includes(blockSearch.toLowerCase()) ||

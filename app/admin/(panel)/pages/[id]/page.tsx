@@ -1,3 +1,4 @@
+import { getRequestSite } from "@/lib/request-site";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { notFound } from "next/navigation";
@@ -55,6 +56,7 @@ export default async function EditPagePage({
 
   return (
     <PageEditor
+      isDestekol={getRequestSite().id === "destekol"}
       page={{
         id: page.id,
         title: editTitle,

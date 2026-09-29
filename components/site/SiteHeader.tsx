@@ -19,32 +19,27 @@ export default function SiteHeader({
   locale,
   dict,
   transparent = false,
+  isDestekol = false,
 }: {
   navItems: NavItem[];
   settings: PublicSiteSettings | null;
   locale: string;
   dict: Record<string, string>;
   transparent?: boolean;
+  isDestekol?: boolean;
 }) {
-  const p = locale === "ar" ? "" : `/${locale}`;
+  const p = isDestekol ? `/${locale}` : locale === "ar" ? "" : `/${locale}`;
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDestekol, setIsDestekol] = useState(false);
+
 
   const isHomePage =
     pathname === "/" || pathname === `/${locale}` || pathname === `/${locale}/`;
   const canBeTransparent = transparent && isHomePage;
 
   useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      window.location.hostname.includes("destekol")
-    ) {
-      setIsDestekol(true);
-    }
-
-    const onScroll = () => setScrolled(window.scrollY > 20);
+const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -110,7 +105,7 @@ export default function SiteHeader({
           aria-label="Main Navigation"
         >
           <ul className="flex items-center gap-7">
-            {navItems.map((item) => {
+            {(isDestekol ? navItems.filter(item => ["home", "about", "about-us", "projects"].includes(item.slug)) : navItems).map((item) => {
               const navKey = `nav.${item.slug}`;
               const translatedTitle =
                 dict[navKey] ||
@@ -139,22 +134,23 @@ export default function SiteHeader({
                 </li>
               );
             })}
-            <li>
+            {!isDestekol && <li>
               <Link href={`${p}/campaigns`} className={navLinkCls}>
                 {t("nav.campaigns", "الحملات", "Campaigns", "Campagnes", "Kampanyalar")}
               </Link>
-            </li>
+            </li>}
             <li>
               <Link href={`${p}/news`} className={navLinkCls}>
                 {t("nav.news", "الأخبار", "News", "Actualités", "Haberler")}
               </Link>
             </li>
+            {isDestekol && <li><Link href={`${p}/contact`} className={navLinkCls}>{t("nav.contact", "اتصل بنا", "Contact", "Contact", "İletişim")}</Link></li>}
           </ul>
         </nav>
 
         {/* Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <LanguageSwitcher currentLocale={locale} transparent={isTransparent} />
+          <LanguageSwitcher isDestekol={isDestekol} currentLocale={locale} transparent={isTransparent} />
           <CartIcon prefix={p} transparent={isTransparent} />
 
           <Link
@@ -200,6 +196,8 @@ export default function SiteHeader({
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle mobile menu"
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
             className={`md:hidden p-1.5 sm:p-2 rounded-xl transition ${
               isTransparent ? "text-white hover:bg-white/15" : "text-ink/70 hover:text-brand"
             }`}
@@ -216,6 +214,12 @@ export default function SiteHeader({
           </button>
         </div>
       </div>
+      {mobileOpen && <nav id="mobile-navigation" className="md:hidden border-t bg-white p-5 grid gap-4" aria-label="Mobile Navigation">
+        {navItems.map(item => <Link onClick={() => setMobileOpen(false)} key={item.slug} href={item.slug === "home" ? p + "/" : p + "/" + item.slug}>{dict["nav." + item.slug] || item.title}</Link>)}
+        <Link href={p + "/campaigns"} onClick={() => setMobileOpen(false)}>{t("nav.campaigns","الحملات","Campaigns","Campagnes","Kampanyalar")}</Link>
+        <Link href={p + "/news"} onClick={() => setMobileOpen(false)}>{t("nav.news","الأخبار","News","Actualités","Haberler")}</Link>
+        <Link href={p + "/account"}>{t("nav.account","حسابي","My Account","Mon Compte","Hesabım")}</Link>
+      </nav>}
     </header>
   );
 }

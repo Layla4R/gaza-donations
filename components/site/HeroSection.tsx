@@ -40,6 +40,7 @@ interface Props {
 
   data?: any;
   isDestekol?: boolean;
+  mode?: "full" | "hero" | "quick";
 }
 
 const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
@@ -114,8 +115,9 @@ export default function HeroSection({
   primaryColor,
   data,
   isDestekol: isDestekolProp,
+  mode = "full",
 }: Props) {
-  const [isDestekol, setIsDestekol] = useState(false);
+  const [isDestekol, setIsDestekol] = useState(!!isDestekolProp);
 
   useEffect(() => {
     if (typeof isDestekolProp === "boolean") {
@@ -541,7 +543,7 @@ export default function HeroSection({
       }
   className="hero-section relative flex flex-col justify-between overflow-hidden bg-slate-900 -mt-20 pt-20"
     >
-      <div className="hero-stage relative w-full overflow-hidden">
+      {mode !== "quick" && <div className="hero-stage relative w-full overflow-hidden">
 
   {/* يحافظ على النسبة الأصلية للصورة ويحدد ارتفاع السلايدر تلقائياً */}
   <img
@@ -599,7 +601,7 @@ export default function HeroSection({
           />
 
           <span className="text-xs font-medium uppercase tracking-wider text-white/90">
-            {t(
+            {data?.eyebrow || t(
               "hero.eyebrow",
               isDestekol
                 ? "مؤسسة Destekol الإنسانية"
@@ -670,9 +672,11 @@ export default function HeroSection({
     </div>
   </div>
 
+  {isDestekol && data?.badgeText && <div className="destekol-hero-badge"><Icon name="heart" size={28} /><span>{data.badgeText}</span></div>}
   {/* Slider Controls */}
   {slides.length > 1 && (
     <div className="hero-controls absolute right-6 top-1/2 z-20 hidden -translate-y-1/2 flex-col gap-2 md:flex">
+      {isDestekol && <button type="button" aria-label="Previous slide" onClick={() => goTo((current - 1 + slides.length) % slides.length)} className="destekol-slide-arrow">←</button>}
       {slides.map((_, index) => (
         <button
           key={index}
@@ -691,13 +695,14 @@ export default function HeroSection({
           }`}
         />
       ))}
+      {isDestekol && <button type="button" aria-label="Next slide" onClick={next} className="destekol-slide-arrow">→</button>}
     </div>
   )}
 
-</div>
+</div>}
       {/* Quick Donation */}
 
-      <div
+      {mode !== "hero" && <div
         className="hero-quick-donate relative z-20 w-full border-t border-white/15 shadow-2xl backdrop-blur-xl"
         style={{
           backgroundColor: primary,
@@ -777,8 +782,8 @@ export default function HeroSection({
             {/* Amounts */}
 
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-              {QUICK_AMOUNTS.map(
-                (value) => (
+              {(Array.isArray(data?.amounts) && data.amounts.length ? data.amounts.map((v: any) => Number(v.value ?? v)).filter((v: number) => Number.isFinite(v) && v > 0) : QUICK_AMOUNTS).map(
+                (value: number) => (
                   <button
                     key={value}
                     type="button"
@@ -1035,7 +1040,7 @@ export default function HeroSection({
             </div>
           )}
         </div>
-      </div>
+      </div>}
     </section>
   );
 }

@@ -295,7 +295,7 @@ export default async function RootLayout({
         />
       </head>
 
-      <body className="font-sans min-h-screen antialiased bg-cream text-ink">
+      <body data-site={isDestekol ? "destekol" : "forrelief"} className="font-sans min-h-screen antialiased bg-cream text-ink">
         {gtmId && (
           <>
             <Script

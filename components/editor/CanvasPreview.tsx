@@ -121,6 +121,7 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
       </div>
     );
 
+    case "destekol_achievements":
     case "stats": return (
       <div className="bg-white px-10 py-10">
         {p.title && <h2 className="font-bold text-xl text-center mb-6" style={{ color: "#111" }}>{p.title}</h2>}
@@ -318,6 +319,7 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
       </div>
     );
 
+    case "quick_donate": return <div className="p-6 flex flex-wrap gap-3 text-white" style={{background:"#066090"}}><strong>التبرع السريع</strong>{(p.amounts || []).map((item: any, i: number) => <span key={i} className="rounded-lg bg-white/20 px-4 py-2">$ {item.value ?? item}</span>)}</div>;
     case "spacer": return (
       <div className="bg-white flex items-center justify-center relative" style={{ height: `${p.height || 48}px` }}>
         <div className="absolute inset-0 mx-8 border-t border-dashed" style={{ borderColor: "#E5E7EB", top: "50%" }} />

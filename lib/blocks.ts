@@ -28,6 +28,16 @@ export interface PageSection {
 
 export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   {
+    type: "destekol_achievements", label: "Destekol — إنجازاتنا", description: "أرقام الإنجازات مع الأيقونات والتمويج", icon: "bar-chart", category: "content",
+    defaultProps: { title: "إنجازاتنا", items: [{title:"عدد الدول", value:"0", icon:"globe"},{title:"المستفيدون",value:"0",icon:"users"},{title:"المتطوعون",value:"0",icon:"heart"},{title:"المشاريع المكتملة",value:"0",icon:"projects"}] },
+    fields: [{key:"title",label:"اسم القسم",type:"text"},{key:"items",label:"الإنجازات",type:"list",itemFields:[{key:"title",label:"العنوان",type:"text"},{key:"value",label:"الرقم (مثال 20+)",type:"text"},{key:"icon",label:"الأيقونة",type:"select",options:[{label:"الدول",value:"globe"},{label:"المستفيدون",value:"users"},{label:"التطوع",value:"heart"},{label:"المشاريع",value:"projects"}]},{key:"image",label:"صورة أيقونة اختيارية",type:"image"}]}]
+  },
+  {
+    type: "quick_donate", label: "Destekol — التبرع السريع", description: "التبرع لمرة واحدة أو شهرياً", icon: "heart", category: "fundraising",
+    defaultProps: { amounts: [{value:10},{value:25},{value:50},{value:100},{value:250}] },
+    fields: [{key:"amounts",label:"المبالغ المقترحة بالدولار",type:"list",itemFields:[{key:"value",label:"المبلغ",type:"number"}]}]
+  },
+  {
     type: "hero",
     label: "Hero Slider",
     description: "Full-width image slider with text and CTA buttons",
@@ -60,7 +70,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       ]
     },
     fields: [
-
+      {key: "eyebrow", label: "النص أعلى العنوان", type: "text"},
+      {key: "badgeText", label: "عبارة شارة السلايدر", type: "text"},
       {
         key: "slides", 
         label: "Slider Images", 
@@ -69,7 +80,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
           { key: "title", label: "Headline", type: "text", placeholder: "Main hero title" },
           { key: "subtitle", label: "Subheading", type: "textarea", placeholder: "Supporting description text" },
           { key: "buttonText", label: "Button Label", type: "text" },
-          { key: "buttonLink", label: "Campaign Donation URL", type: "text", hint: "Enter the donation link for this slide’s campaign. The pink button stays visible but is disabled until a link is entered." },
+          { key: "buttonLink", label: "Campaign Donation URL", type: "text", hint: "Enter the donation link for this slide’s campaign. The donation button stays visible but is disabled until a link is entered." },
           { key: "backgroundImage", label: "Background Image", type: "image", hint: "Use high-res image (1920×1080 recommended)" }
         ]
       }
