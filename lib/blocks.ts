@@ -349,6 +349,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
     fields: [
       { key: "title", label: "Title", type: "text" },
       { key: "body", label: "Body Text", type: "textarea" },
+      { key: "image", label: "Optional Image", type: "image" },
+      { key: "imagePosition", label: "Image Position", type: "select", options: [{ label: "Left", value: "left" }, { label: "Right", value: "right" }] },
       {
         key: "align", label: "Text Alignment", type: "select",
         options: [
@@ -536,6 +538,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       subtitle: "Contribute now and be part of the solution",
       buttonText: "Donate Now",
       buttonLink: "/donate",
+      image: "",
+      imageAlt: "",
       style: "brand",
     },
     fields: [
@@ -543,6 +547,8 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       { key: "subtitle", label: "Subheading", type: "text" },
       { key: "buttonText", label: "Button Label", type: "text" },
       { key: "buttonLink", label: "Button URL", type: "text" },
+      { key: "image", label: "Optional Illustration", type: "image" },
+      { key: "imageAlt", label: "Illustration Description", type: "text" },
       {
         key: "style", label: "Background Style", type: "select",
         options: [

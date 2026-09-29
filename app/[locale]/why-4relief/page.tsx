@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { headers } from "next/headers";
 import Icon from "@/components/icons";
 import { LOCALES } from "@/lib/i18n";
+import { getRequestSite } from "@/lib/request-site";
 
 export const revalidate = 300;
 
@@ -10,14 +10,14 @@ interface PageProps {
   params: { locale: string };
 }
 
-async function getDomainContext() {
-  const headerList = await headers();
-  const host = headerList.get("host") || "";
-  const isDestekol = host.includes("destekol");
+async function getDomainContext(locale = "en") {
+  const isDestekol = getRequestSite().id === "destekol";
   
   const siteUrl = isDestekol ? "https://destekol.org" : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
   const brandName = isDestekol ? "Destekol" : "4Relief";
-  const fullName = isDestekol ? "Destekol Humanitarian Foundation" : "4Relief Humanitarian Foundation";
+  const fullName = isDestekol
+    ? ({ ar: "جمعية Destekol الخيرية غير الربحية", en: "Destekol Charitable Non-Profit Association", fr: "Association caritative Destekol à but non lucratif", tr: "Destekol kâr amacı gütmeyen hayır derneği" } as Record<string, string>)[locale] || "Destekol Charitable Non-Profit Association"
+    : "4Relief Humanitarian Foundation";
 
   return { isDestekol, siteUrl, brandName, fullName };
 }
@@ -30,7 +30,7 @@ const t = (loc: string, ar: string, en: string, fr: string, tr: string) => {
 };
 
 export async function generateMetadata({ params: { locale } }: PageProps): Promise<Metadata> {
-  const { siteUrl, brandName, fullName } = await getDomainContext();
+  const { siteUrl, brandName, fullName } = await getDomainContext(locale);
 
   const title = t(
     locale,
@@ -69,7 +69,7 @@ export async function generateMetadata({ params: { locale } }: PageProps): Promi
 
 export default async function Why4ReliefPage({ params: { locale } }: PageProps) {
   const prefix = locale === "ar" ? "" : `/${locale}`;
-  const { siteUrl, brandName, fullName } = await getDomainContext();
+  const { isDestekol, siteUrl, brandName, fullName } = await getDomainContext(locale);
   
   const pageUrl = `${siteUrl}/${locale}/why-${brandName.toLowerCase()}`;
 
@@ -122,7 +122,7 @@ export default async function Why4ReliefPage({ params: { locale } }: PageProps) 
           <p className="font-medium mb-4">
             {t(
               locale,
-              `تعتمد مؤسسة ${fullName} نموذج حوكمة رقمي وشراكات ميدانية مباشرة يضمن أعلى مستويات الكفاءة وتقليل المصاريف الإدارية والتشغيلية إلى الحد الأدنى. بالمقارنة مع المؤسسات الإنسانية التقليدية التي تعتمد على طبقات إدارية معقدة، نوجه تركيزنا نحو الدعم القائم على الاحتياج، التوثيق الميداني المستمر، وتمكين المجتمعات المحلية لضمان وصول مساعداتك مباشرة لمستحقيها بفعالية وشفافية مطلقة.`,
+              `${isDestekol ? fullName : `تعتمد مؤسسة ${fullName}`} نموذج حوكمة رقمي وشراكات ميدانية مباشرة يضمن أعلى مستويات الكفاءة وتقليل المصاريف الإدارية والتشغيلية إلى الحد الأدنى. بالمقارنة مع المؤسسات الإنسانية التقليدية التي تعتمد على طبقات إدارية معقدة، نوجه تركيزنا نحو الدعم القائم على الاحتياج، التوثيق الميداني المستمر، وتمكين المجتمعات المحلية لضمان وصول مساعداتك مباشرة لمستحقيها بفعالية وشفافية مطلقة.`,
               `${fullName} operates on a digital governance and direct field partnership model, ensuring the highest levels of efficiency and minimizing administrative overhead. Compared to traditional humanitarian organizations with complex administrative layers, we focus on needs-based support, continuous field verification, and local community empowerment to guarantee your aid reaches those who need it most directly and transparently.`,
               `${fullName} fonctionne sur un modèle de gouvernance numérique et de partenariats directs sur le terrain, garantissant une efficacité maximale et minimisant les frais administratifs. Contrairement aux organisations traditionnelles aux couches administratives complexes, nous privilégions le soutien basé sur les besoins, la vérification continue et l'autonomisation locale.`,
               `${fullName}, dijital yönetişim ve doğrudan saha ortaklığı modeliyle çalışarak en yüksek verimlilik seviyelerini sağlar ve idari genel giderleri en aza indirir. Karmaşık idari katmanlara sahip geleneksel kuruluşların aksine, yardımlarınızın en çok ihtiyacı olanlara ulaşmasını garanti etmek için ihtiyaç odaklı desteğe ve sürekli saha doğrulamasına odaklanıyoruz.`
@@ -136,7 +136,7 @@ export default async function Why4ReliefPage({ params: { locale } }: PageProps) 
             <thead>
               <tr className="bg-slate-900 text-white text-xs sm:text-sm">
                 <th className="p-4 border-b border-slate-800 text-start">{t(locale, "معيار المقارنة", "Comparison Metric", "Critère de Comparaison", "Karşılaştırma Kriteri")}</th>
-                <th className="p-4 border-b border-slate-800 text-start text-brand bg-slate-800/80">{t(locale, `مؤسسة ${brandName}`, `${brandName} Foundation`, `Fondation ${brandName}`, `${brandName} Vakfı`)}</th>
+                <th className="p-4 border-b border-slate-800 text-start text-brand bg-slate-800/80">{t(locale, isDestekol ? fullName : `مؤسسة ${brandName}`, isDestekol ? fullName : `${brandName} Foundation`, isDestekol ? fullName : `Fondation ${brandName}`, isDestekol ? fullName : `${brandName} Vakfı`)}</th>
                 <th className="p-4 border-b border-slate-800 text-start text-slate-300">{t(locale, "المؤسسات الإغاثية التقليدية", "Traditional Relief NGOs", "ONG Traditionnelles", "Geleneksel STK'lar")}</th>
               </tr>
             </thead>

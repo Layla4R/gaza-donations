@@ -2,14 +2,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { loadTranslations } from "@/lib/i18n";
+import { getPageBySlug } from "@/lib/pageData";
+import { getRequestSite } from "@/lib/request-site";
+import DestekolPageIntro from "@/components/site/DestekolPageIntro";
+import { normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 0;
 
 export default async function NewsPage({ params: { locale } }: { params: { locale: string } }) {
   const supabase = getSupabaseOrNull();
-  const [postsRes, dict] = await Promise.all([
+  const [postsRes, dict, page] = await Promise.all([
     supabase ? supabase.from("NewsPost").select("*").eq("isPublished", true).order("publishedAt", { ascending: false }) : Promise.resolve({ data: [] }),
     loadTranslations(locale),
+    getPageBySlug("news", locale),
   ]);
   const posts = postsRes?.data || [];
 
@@ -30,23 +35,29 @@ export default async function NewsPage({ params: { locale } }: { params: { local
   }
 
   const p = locale === "ar" ? "" : `/${locale}`;
+  const isDestekol = getRequestSite().id === "destekol";
+  const rawTitle = page?.title || dict["news.title"] || "News";
+  const rawDescription = page?.description || dict["news.subtitle"] || dict["news.eyebrow"] || "";
+  const { title, description, brandedPosts } = isDestekol
+    ? normalizeDestekolBrandCopy({ title: rawTitle, description: rawDescription, brandedPosts: displayPosts }, locale)
+    : { title: rawTitle, description: rawDescription, brandedPosts: displayPosts };
   const dateLocale = locale === "ar" ? "ar-EG" : locale === "tr" ? "tr-TR" : locale === "fr" ? "fr-FR" : "en-GB";
 
   return (
     <div>
-      <header className="relative py-16 sm:py-20 bg-brand-gradient text-center overflow-hidden">
+      {isDestekol ? <DestekolPageIntro locale={locale} title={title} description={description} /> : <header className="relative py-16 sm:py-20 bg-brand-gradient text-center overflow-hidden">
         <div className="relative max-w-screen-xl mx-auto px-6">
           <span className="inline-flex items-center gap-2 text-white/70 font-display font-semibold text-xs tracking-[0.3em] uppercase mb-4">
             <span className="inline-block w-6 h-px bg-white/40" />{dict["news.eyebrow"]}
           </span>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white">{dict["news.title"]}</h1>
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white">{title}</h1>
         </div>
-      </header>
+      </header>}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
-        {displayPosts.length === 0
+        {brandedPosts.length === 0
           ? <p className="text-center text-muted py-20">{dict["news.no_posts"]}</p>
           : <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(displayPosts as any[]).map(post => (
+              {(brandedPosts as any[]).map(post => (
                 <Link key={post.id} href={`${p}/news/${post.slug}`} className="group bg-white rounded-xl2 border border-line overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col">
                   {post.coverImage && (
                     <div className="relative h-44 overflow-hidden bg-beige">

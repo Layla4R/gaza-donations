@@ -7,6 +7,7 @@ import { OFFICIAL_EMAIL, DESTEKOL_ADDRESS } from "@/lib/public-contact";
 import Link from "next/link";
 import Image from "next/image";
 import Icon from "@/components/icons";
+import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 interface NavItem {
   slug: string;
@@ -175,11 +176,13 @@ export default function SiteFooter({
   const d = (
     key: string,
     fallbacks: Record<string, string> = {}
-  ) =>
-    (dict && dict[key]) ||
+  ) => {
+    const value = (dict && dict[key]) ||
     fallbacks[loc] ||
     fallbacks["en"] ||
     "";
+    return isDestekol ? normalizeDestekolBrandText(value, loc) : value;
+  };
 
   /* =========================================================
      Social Links
@@ -285,10 +288,10 @@ export default function SiteFooter({
               ? d(
                   "footer.description_destekol",
                   {
-                    ar: "Destekol منظمة غير ربحية مسجلة رسمياً، تعمل في المجال الإنساني والتنموي بشفافية ومسؤولية.",
-                    en: "Destekol is an officially registered non-profit NGO working in humanitarian and development fields with transparency and accountability.",
-                    fr: "Destekol est une ONG à but non lucratif officiellement enregistrée, active dans les domaines humanitaire et du développement avec transparence et responsabilité.",
-                    tr: "Destekol, insani yardım ve kalkınma alanlarında şeffaflık ve sorumlulukla faaliyet gösteren resmî kayıtlı, kâr amacı gütmeyen bir sivil toplum kuruluşudur.",
+                    ar: "جمعية Destekol الخيرية غير الربحية مسجلة رسمياً، وتعمل في المجال الإنساني والتنموي بشفافية ومسؤولية.",
+                    en: "Destekol is an officially registered charitable association with non-profit status, working in humanitarian and development fields with transparency and accountability.",
+                    fr: "Destekol est une association caritative à but non lucratif officiellement enregistrée, active dans les domaines humanitaire et du développement avec transparence et responsabilité.",
+                    tr: "Destekol, insani yardım ve kalkınma alanlarında şeffaflık ve sorumlulukla faaliyet gösteren resmî kayıtlı, kâr amacı gütmeyen bir hayır derneğidir.",
                   }
                 )
               : settings?.footerDescription ||
@@ -690,10 +693,10 @@ export default function SiteFooter({
                 {d(
                   "footer.destekol_registered",
                   {
-                    ar: "Destekol — منظمة غير ربحية مسجلة رسمياً:",
-                    en: "Destekol — Officially Registered Non-Profit NGO:",
-                    fr: "Destekol — ONG à but non lucratif officiellement enregistrée :",
-                    tr: "Destekol — Resmî Kayıtlı Kâr Amacı Gütmeyen Sivil Toplum Kuruluşu:",
+                    ar: "جمعية Destekol الخيرية غير الربحية، مسجلة رسمياً:",
+                    en: "Destekol — Registered Charitable Non-Profit Association:",
+                    fr: "Destekol — association caritative à but non lucratif enregistrée :",
+                    tr: "Destekol — Resmî Kayıtlı, Kâr Amacı Gütmeyen Hayır Derneği:",
                   }
                 )}
               </span>

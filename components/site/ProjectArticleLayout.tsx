@@ -1,10 +1,12 @@
 import { getRequestSite } from "@/lib/request-site";
 import { normalizePublicContact, officialEmail } from "@/lib/public-contact";
+import { normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
 import Image from "next/image";
 import Link from "next/link";
 import Icon from "@/components/icons";
 
 interface ProjectArticleLayoutProps {
+  hideHeader?: boolean;
   data: {
     title: string;
     excerpt: string;
@@ -39,8 +41,9 @@ function getYouTubeEmbedUrl(url?: string | null): string | null {
   return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}` : null;
 }
 
-export default function ProjectArticleLayout({ data, context }: ProjectArticleLayoutProps) {
-  data = normalizePublicContact(data, officialEmail(getRequestSite().id === "destekol"));
+export default function ProjectArticleLayout({ data, context, hideHeader = false }: ProjectArticleLayoutProps) {
+  const isDestekol = getRequestSite().id === "destekol";
+  data = normalizePublicContact(isDestekol ? normalizeDestekolBrandCopy(data, context.locale) : data, officialEmail(isDestekol));
   const { locale, dict, isAr, backLink, backText, categoryLabel, donateUrl } = context;
   const youtubeEmbed = getYouTubeEmbedUrl(data.videoUrl);
 
@@ -93,7 +96,7 @@ export default function ProjectArticleLayout({ data, context }: ProjectArticleLa
       </nav>
 
       {/* 2. Header */}
-      <header className="max-w-4xl mb-8">
+      {!hideHeader && <header className="max-w-4xl mb-8">
         <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-brand mb-3">
           <span className="w-2.5 h-2.5 rounded-full bg-brand animate-pulse shadow-[0_0_8px_rgba(var(--brand-rgb),0.6)]" />
           <span>{categoryLabel}</span>
@@ -130,7 +133,7 @@ export default function ProjectArticleLayout({ data, context }: ProjectArticleLa
             )}
           </div>
         </div>
-      </header>
+      </header>}
 
       {/* 3. Cover Image */}
       {data.coverImage && (
@@ -227,7 +230,9 @@ export default function ProjectArticleLayout({ data, context }: ProjectArticleLa
               </div>
 
               <p className="text-xs text-slate-400 mt-4 px-1 leading-relaxed font-medium">
-                {isAr ? "تقرير توثيقي مصور يستعرض استجابة فرق 4Relief الميدانية للأزمة ومجريات العمل على الأرض." : "Documentary video highlighting 4Relief's field response to the crisis."}
+                {isDestekol
+                  ? (isAr ? "تقرير توثيقي مصور يستعرض استجابة فرق Destekol الميدانية للأزمة ومجريات العمل على الأرض." : "Documentary video highlighting Destekol's field response to the crisis.")
+                  : isAr ? "تقرير توثيقي مصور يستعرض استجابة فرق 4Relief الميدانية للأزمة ومجريات العمل على الأرض." : "Documentary video highlighting 4Relief's field response to the crisis."}
               </p>
             </div>
           </aside>

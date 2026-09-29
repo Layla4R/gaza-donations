@@ -8,10 +8,10 @@ import type { Metadata } from "next";
 import { getSupabase } from "@/lib/supabase";
 import { LOCALES, loadTranslations } from "@/lib/i18n";
 import Icon from "@/components/icons";
+import DestekolPageIntro from "@/components/site/DestekolPageIntro";
+import { getDestekolOrganizationName, normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 0;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
 
 function cleanText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -102,7 +102,7 @@ async function getPostWithTranslation(slug: string, locale: string) {
     }
   }
 
-  return {
+  const result = {
     ...post,
     displayTitle,
     displayExcerpt,
@@ -110,6 +110,7 @@ async function getPostWithTranslation(slug: string, locale: string) {
     displayBody2,
     displayVideoUrl,
   };
+  return getRequestSite().id === "destekol" ? normalizeDestekolBrandCopy(result, locale) : result;
 }
 
 export async function generateMetadata({
@@ -120,9 +121,11 @@ export async function generateMetadata({
   const post = await getPostWithTranslation(params.slug, params.locale);
 
   if (!post) return {};
+  const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = getRequestSite().url;
 
-  const url = `${SITE_URL}/${params.locale}/news/${post.slug}`;
-  const image = post.coverImage || `${SITE_URL}/brand/og-image.png`;
+  const url = `${siteUrl}/${params.locale}/news/${post.slug}`;
+  const image = post.coverImage || `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "og-image.png"}`;
   const title = cleanText(post.displayTitle);
   const description = cleanText(post.displayExcerpt) || cleanText(post.displayBody).slice(0, 160);
 
@@ -138,13 +141,13 @@ export async function generateMetadata({
     alternates: {
       canonical: url,
       languages: Object.fromEntries(
-        LOCALES.map((locale) => [locale, `${SITE_URL}/${locale}/news/${post.slug}`])
+        LOCALES.map((locale) => [locale, `${siteUrl}/${locale}/news/${post.slug}`])
       ),
     },
     openGraph: {
       type: "article",
       url,
-      siteName: "4Relief",
+      siteName: isDestekol ? "Destekol" : "4Relief",
       title,
       description,
       publishedTime: publishedDateISO,
@@ -166,6 +169,8 @@ export default async function NewsPostPage({
   params: { slug: string; locale: string };
 }) {
   const { slug, locale } = params;
+  const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = getRequestSite().url;
 
   const [post, dict] = await Promise.all([
     getPostWithTranslation(slug, locale),
@@ -206,17 +211,18 @@ export default async function NewsPostPage({
   const txtAuthorName =
     post.authorName ||
     post.author_name ||
-    (isEn ? "4Relief Field Editorial Team" : isTr ? "4Relief Saha Editör Ekibi" : isFr ? "Équipe de Rédaction 4Relief" : "فريق التحرير الميداني — 4Relief");
+    (isDestekol
+      ? (isAr ? "فريق Destekol للتحرير الميداني" : "Destekol Field Editorial Team")
+      : (isEn ? "4Relief Field Editorial Team" : isTr ? "4Relief Saha Editör Ekibi" : isFr ? "Équipe de Rédaction 4Relief" : "فريق التحرير الميداني — 4Relief"));
 
-  const txtTrustBadge =
-    post.authorRole ||
-    post.author_role ||
-    (isEn ? "Registered Independent NGO | Verified Field Report" : isTr ? "Kayıtlı Bağımsız STK | Doğrulanmış Saha Raporu" : isFr ? "ONG indépendante enregistrée | Rapport de terrain vérifié" : "منظمة إنسانية مسجلة ومستقلة | تقرير ميداني موثق 100%");
+  const txtTrustBadge = post.authorRole || post.author_role || (isDestekol
+    ? (isAr ? "جمعية Destekol الخيرية المسجلة | تقرير ميداني موثق 100%" : isTr ? "Kayıtlı Destekol hayır derneği | Doğrulanmış saha raporu" : isFr ? "Association caritative Destekol enregistrée | Rapport de terrain vérifié" : "Registered Destekol charitable association | Verified field report")
+    : (isEn ? "Registered Independent NGO | Verified Field Report" : isTr ? "Kayıtlı Bağımsız STK | Doğrulanmış Saha Raporu" : isFr ? "ONG indépendante enregistrée | Rapport de terrain vérifié" : "منظمة إنسانية مسجلة ومستقلة | تقرير ميداني موثق 100%"));
 
   const txtPublishedAt = isEn ? "Published:" : isTr ? "Yayınlanma:" : isFr ? "Publié:" : "تاريخ النشر:";
   const txtUpdatedAt = isEn ? "Last Updated:" : isTr ? "Son Güncelleme:" : isFr ? "Dernière mise à jour:" : "آخر تحديث:";
 
-  const pageUrl = `${SITE_URL}/${locale}/news/${post.slug}`;
+  const pageUrl = `${siteUrl}/${locale}/news/${post.slug}`;
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -227,13 +233,13 @@ export default async function NewsPostPage({
         "@type": "ListItem",
         position: 1,
         name: isAr ? "الرئيسية" : isTr ? "Ana Sayfa" : isFr ? "Accueil" : "Home",
-        item: `${SITE_URL}/${locale}`,
+        item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: isAr ? "الأخبار" : isTr ? "Haberler" : isFr ? "Actualités" : "News",
-        item: `${SITE_URL}/${locale}/news`,
+        item: `${siteUrl}/${locale}/news`,
       },
       {
         "@type": "ListItem",
@@ -251,7 +257,7 @@ export default async function NewsPostPage({
     "@id": `${pageUrl}/#article`,
     headline: displayTitle,
     description: displayExcerpt || cleanText(displayBody).slice(0, 160),
-    image: imagesArray.length > 0 ? imagesArray : [`${SITE_URL}/brand/og-image.png`],
+    image: imagesArray.length > 0 ? imagesArray : [`${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "og-image.png"}`],
     datePublished: publishedDateISO,
     dateModified: updatedDateISO,
     inLanguage: locale,
@@ -262,18 +268,18 @@ export default async function NewsPostPage({
     author: {
       "@type": "Organization",
       name: txtAuthorName,
-      url: `${SITE_URL}/${locale}/about`,
+      url: `${siteUrl}/${locale}/about`,
     },
     publisher: {
       "@type": "Organization",
-      "@id": `${SITE_URL}/#organization`,
-      name: "4Relief Humanitarian Foundation",
-      legalName: "FOR RELIEF LTD",
+      "@id": `${siteUrl}/#organization`,
+      name: isDestekol ? getDestekolOrganizationName(locale) : "4Relief Humanitarian Foundation",
+      ...(!isDestekol ? { legalName: "FOR RELIEF LTD" } : {}),
       iso6523Code: "17306194",
-      url: SITE_URL,
+      url: siteUrl,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/brand/logo.png`,
+        url: `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "logo.png"}`,
       },
       contactPoint: {
         "@type": "ContactPoint",
@@ -314,6 +320,8 @@ export default async function NewsPostPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbSchema) }} />
 
+      {isDestekol && <DestekolPageIntro locale={locale} title={displayTitle} description={displayExcerpt || cleanText(displayBody).slice(0, 180)} />}
+
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 text-xs font-semibold text-slate-500">
         <Link href={`${p}/`} className="transition hover:text-brand">
@@ -335,11 +343,11 @@ export default async function NewsPostPage({
         </div>
 
         {/* 🌟 تعديل الخط لمنع التداخل والقطع */}
-        <h1
+        {!isDestekol && <h1
           className="mb-4 text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 leading-snug sm:leading-normal tracking-normal"
         >
           {displayTitle}
-        </h1>
+        </h1>}
 
         {/* E-E-A-T Visible Dates & Author Metadata Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 p-3 text-xs">
@@ -482,9 +490,11 @@ export default async function NewsPostPage({
               </div>
 
               <p className="text-[11px] text-slate-300 mt-2.5 px-1 leading-relaxed">
-                {isAr
-                  ? "تقرير توثيقي مصور يستعرض استجابة فرق 4Relief الميدانية للأزمة."
-                  : "Documentary video highlighting 4Relief field team response."}
+                {isDestekol
+                  ? (isAr ? "تقرير توثيقي مصور يستعرض استجابة فرق Destekol الميدانية للأزمة." : "Documentary video highlighting Destekol's field response.")
+                  : isAr
+                    ? "تقرير توثيقي مصور يستعرض استجابة فرق 4Relief الميدانية للأزمة."
+                    : "Documentary video highlighting 4Relief field team response."}
               </p>
             </div>
           </aside>

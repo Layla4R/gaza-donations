@@ -9,10 +9,11 @@ import { getCampaignDetails } from "@/lib/services/campaign.service";
 import CampaignCard from "@/components/blocks/CampaignCard";
 import Icon from "@/components/icons";
 import { categoryMeta } from "@/lib/categories";
+import { getRequestSite } from "@/lib/request-site";
+import DestekolPageIntro from "@/components/site/DestekolPageIntro";
+import { getDestekolOrganizationName, normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 300;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
 
 function cleanText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -37,14 +38,17 @@ export async function generateMetadata({
     return {};
   }
 
-  const url = `${SITE_URL}/${params.locale}/campaigns/${campaign.slug}`;
-  const image = campaign.coverImage || `${SITE_URL}/brand/og-image.png`;
-  const title = campaign.displayTitle || campaign.title;
+  const isDestekol = getRequestSite().id === "destekol";
+  const displayCampaign = isDestekol ? normalizeDestekolBrandCopy(campaign, params.locale) : campaign;
+  const siteUrl = getRequestSite().url;
+  const url = `${siteUrl}/${params.locale}/campaigns/${displayCampaign.slug}`;
+  const image = displayCampaign.coverImage || `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "og-image.png"}`;
+  const title = displayCampaign.displayTitle || displayCampaign.title;
   const description = cleanText(
-    campaign.displaySummary ||
-      campaign.summary ||
-      campaign.displayDescription ||
-      campaign.description
+    displayCampaign.displaySummary ||
+      displayCampaign.summary ||
+      displayCampaign.displayDescription ||
+      displayCampaign.description
   );
 
   return {
@@ -55,14 +59,14 @@ export async function generateMetadata({
       languages: Object.fromEntries(
         LOCALES.map((locale) => [
           locale,
-          `${SITE_URL}/${locale}/campaigns/${campaign.slug}`,
+          `${siteUrl}/${locale}/campaigns/${campaign.slug}`,
         ])
       ),
     },
     openGraph: {
       type: "article",
       url,
-      siteName: "4Relief",
+      siteName: isDestekol ? "Destekol" : "4Relief",
       title,
       description,
       images: [
@@ -92,20 +96,24 @@ export default async function CampaignDetailPage({
   };
 }) {
   const { slug, locale } = params;
+  const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = getRequestSite().url;
 
-  const [campaign, dict] = await Promise.all([
+  const [rawCampaign, dict] = await Promise.all([
     getCampaignDetails(slug, locale),
     loadTranslations(locale),
   ]);
 
-  if (!campaign) {
+  if (!rawCampaign) {
     notFound();
   }
+
+  const campaign = isDestekol ? normalizeDestekolBrandCopy(rawCampaign, locale) : rawCampaign;
 
   const title = campaign.displayTitle || campaign.title;
   const summary = cleanText(campaign.displaySummary || campaign.summary);
   const description = cleanText(
-    campaign.displayDescription || campaign.description
+    campaign.displaySummary || campaign.summary || campaign.displayDescription || campaign.description
   );
   const raised = Number(campaign.raisedAmount) || 0;
   const goal = Number(campaign.goalAmount) || 0;
@@ -121,7 +129,9 @@ export default async function CampaignDetailPage({
   const isFr = locale === "fr";
 
   // 🌟 الربط الديناميكي مع بيانات قاعدة البيانات والحقول الجديدة من الأدمن
-  const authorName = campaign.authorName || (isEn
+  const authorName = campaign.authorName || (isDestekol
+    ? (locale === "ar" ? "فريق Destekol للمتابعة والشفافية" : "Destekol Monitoring & Transparency Team")
+    : isEn
     ? "4Relief Field Audit & Transparency Team"
     : isTr
     ? "4Relief Saha Denetim ve Şeffaflık Ekibi"
@@ -129,7 +139,15 @@ export default async function CampaignDetailPage({
     ? "Équipe d'audit sur le terrain et de transparence 4Relief"
     : "فريق الرقابة الميدانية والشفافية — 4Relief");
 
-  const authorRole = campaign.authorRole || (isEn
+  const authorRole = campaign.authorRole || (isDestekol
+    ? locale === "ar"
+      ? "جمعية Destekol الخيرية غير الربحية | تدقيق مالي وشفافية 100%"
+      : locale === "tr"
+      ? "Destekol kayıtlı hayır derneği | %100 mali şeffaflık"
+      : locale === "fr"
+      ? "Association caritative Destekol enregistrée | Transparence financière à 100%"
+      : "Registered Destekol charitable association | 100% Financial Transparency"
+    : isEn
     ? "Registered Independent NGO | 100% Financial Transparency"
     : isTr
     ? "Kayıtlı Bağımsız STK | %100 Finansal Şeffaflık"
@@ -205,7 +223,7 @@ export default async function CampaignDetailPage({
   const categoryLabel =
     categoryLabels[campaign.category]?.[locale] || cat.label;
 
-  const pageUrl = `${SITE_URL}/${locale}/campaigns/${campaign.slug}`;
+  const pageUrl = `${siteUrl}/${locale}/campaigns/${campaign.slug}`;
 
   // 🌟 معالجة التواريخ الديناميكية لـ ISO Schema و وسوم <time>
   const rawPublishedDate = campaign.publishedAt || campaign.createdAt;
@@ -226,7 +244,7 @@ export default async function CampaignDetailPage({
     "@id": `${pageUrl}/#article`,
     headline: title,
     description: summary || description || title,
-    image: [campaign.coverImage || `${SITE_URL}/brand/og-image.png`],
+    image: [campaign.coverImage || `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "og-image.png"}`],
     datePublished: publishedDateISO,
     dateModified: updatedDateISO,
     mainEntityOfPage: pageUrl,
@@ -234,15 +252,15 @@ export default async function CampaignDetailPage({
     author: {
       "@type": "Organization",
       name: authorName,
-      url: `${SITE_URL}/${locale}/about`,
+      url: `${siteUrl}/${locale}/about`,
     },
     publisher: {
       "@type": "NGO",
-      name: "4Relief Humanitarian Foundation",
-      url: SITE_URL,
+      name: isDestekol ? getDestekolOrganizationName(locale) : "4Relief Humanitarian Foundation",
+      url: siteUrl,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/brand/logo.png`,
+        url: `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "logo.png"}`,
       },
     },
   };
@@ -258,13 +276,13 @@ export default async function CampaignDetailPage({
     datePublished: publishedDateISO,
     dateModified: updatedDateISO,
     isPartOf: {
-      "@id": `${SITE_URL}/#website`,
+      "@id": `${siteUrl}/#website`,
     },
     about: {
-      "@id": `${SITE_URL}/#organization`,
+      "@id": `${siteUrl}/#organization`,
     },
     publisher: {
-      "@id": `${SITE_URL}/#organization`,
+      "@id": `${siteUrl}/#organization`,
     },
     breadcrumb: {
       "@id": `${pageUrl}/#breadcrumb`,
@@ -287,13 +305,13 @@ export default async function CampaignDetailPage({
         "@type": "ListItem",
         position: 1,
         name: t("nav.home", "الرئيسية"),
-        item: `${SITE_URL}/${locale}`,
+        item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("nav.campaigns", "الحملات"),
-        item: `${SITE_URL}/${locale}/campaigns`,
+        item: `${siteUrl}/${locale}/campaigns`,
       },
       {
         "@type": "ListItem",
@@ -321,6 +339,8 @@ export default async function CampaignDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbSchema) }}
       />
+
+      {isDestekol && <DestekolPageIntro locale={locale} title={title} description={description || summary} />}
 
       <div className="mx-auto max-w-screen-xl px-6 pt-10">
         {/* Breadcrumb Navigation */}
@@ -363,9 +383,9 @@ export default async function CampaignDetailPage({
           {/* Main Column */}
           <div className="space-y-10 lg:col-span-8">
             <div className="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
-              <h1 className="font-display text-2xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
+              {!isDestekol && <h1 className="font-display text-2xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
                 {title}
-              </h1>
+              </h1>}
 
               {/* 🌟 Dynamic E-E-A-T Block */}
               <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-slate-50 p-4 text-xs sm:text-sm">
@@ -404,8 +424,8 @@ export default async function CampaignDetailPage({
                 className="space-y-2 rounded-2xl border border-slate-200/80 bg-slate-50 p-4 text-xs text-slate-700 sm:text-sm"
               >
                 <p>
-                  <strong>{t("campaigns.organization", "المؤسسة المنظمة")}:</strong>{" "}
-                  4Relief Humanitarian Foundation
+                  <strong>{isDestekol ? (locale === "ar" ? "الجمعية" : locale === "fr" ? "Association" : locale === "tr" ? "Dernek" : "Association") : t("campaigns.organization", "المؤسسة المنظمة")}:</strong>{" "}
+                  {isDestekol ? getDestekolOrganizationName(locale) : "4Relief Humanitarian Foundation"}
                 </p>
                 <p>
                   <strong>{t("campaigns.category_label", "التصنيف")}:</strong>{" "}

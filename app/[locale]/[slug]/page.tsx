@@ -3,17 +3,19 @@ import { normalizePublicContact, officialEmail, launchCopy } from "@/lib/public-
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { headers } from "next/headers";
 import Icon from "@/components/icons";
 
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import LegalPageContent from "@/components/site/LegalPageContent";
 import ProjectArticleLayout from "@/components/site/ProjectArticleLayout";
+import DestekolPageIntro from "@/components/site/DestekolPageIntro";
 
 import { getCampaignsLite } from "@/lib/pageData";
 import { LOCALES, loadTranslations } from "@/lib/i18n";
 import { PageSection } from "@/lib/blocks";
 import { getSupabaseOrNull } from "@/lib/supabase";
+import { getRequestSite } from "@/lib/request-site";
+import { normalizeDestekolBrandCopy, normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 0;
 
@@ -22,17 +24,17 @@ interface PageProps {
 }
 
 // دالة مساعدة لجلب معلومات الدومين
-async function getDomainContext() {
-  const headerList = await headers();
-  const host = headerList.get("host") || "";
-  const isDestekol = host.includes("destekol");
+async function getDomainContext(locale = "en") {
+  const isDestekol = getRequestSite().id === "destekol";
   
   const siteUrl = isDestekol 
     ? "https://destekol.org" 
     : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
 
   const brandName = isDestekol ? "Destekol" : "4Relief";
-  const fullName = isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation";
+  const fullName = isDestekol
+    ? ({ ar: "جمعية Destekol الخيرية غير الربحية", en: "Destekol Charitable Non-Profit Association", fr: "Association caritative Destekol à but non lucratif", tr: "Destekol kâr amacı gütmeyen hayır derneği" } as Record<string, string>)[locale] || "Destekol Charitable Non-Profit Association"
+    : "4Relief Humanitarian Foundation";
 
   return { isDestekol, siteUrl, brandName, fullName };
 }
@@ -318,7 +320,7 @@ async function getFullPageData(slug: string, locale: string) {
     }
   }
 
-  return {
+  const result = {
     ...page,
     title,
     description,
@@ -331,6 +333,7 @@ async function getFullPageData(slug: string, locale: string) {
     videoUrl,
     sections,
   };
+  return getRequestSite().id === "destekol" ? normalizeDestekolBrandCopy(result, locale) : result;
 }
 
 export async function generateMetadata({
@@ -339,7 +342,7 @@ export async function generateMetadata({
   params: { slug: string; locale: string };
 }): Promise<Metadata> {
   const { slug, locale } = params;
-  const { siteUrl, brandName, fullName } = await getDomainContext();
+  const { siteUrl, brandName, fullName } = await getDomainContext(locale);
   const page = await getFullPageData(slug, locale);
 
   if (!page) return {};
@@ -391,7 +394,7 @@ export default async function DynamicPage({
   params: { slug: string; locale: string };
 }) {
   const { slug, locale } = params;
-  const { isDestekol, siteUrl, brandName, fullName } = await getDomainContext();
+  const { isDestekol, siteUrl, brandName, fullName } = await getDomainContext(locale);
   const supabase = getSupabaseOrNull();
 
   const [appearanceResult, page, campaigns, dict] = await Promise.all([
@@ -416,10 +419,12 @@ export default async function DynamicPage({
 
   const isAr = locale === "ar";
   const isLegalPage = LEGAL_SLUGS.includes(slug);
+  const isDestekolAboutPage = isDestekol && ["about", "about-us"].includes(slug);
 
   // 🌟 التوجيه المباشر للتصميم الصحفي إذا احتوت الصفحة على نصوص أو ميديا المشروع
   const hasProjectArticleContent =
     !isLegalPage &&
+    !isDestekolAboutPage &&
     Boolean(
       page.body || page.body2 || page.body3 || page.coverImage || page.videoUrl || page.secondaryImage || (Array.isArray(page.gallery) && page.gallery.length > 0)
     );
@@ -427,33 +432,37 @@ export default async function DynamicPage({
   if (hasProjectArticleContent) {
     const p = isAr ? "" : `/${locale}`;
     return (
-      <ProjectArticleLayout
-        data={{
-          title: page.title,
-          excerpt: page.description || "",
-          body: page.body || "",
-          body2: page.body2 || "",
-          body3: page.body3 || "",
-          coverImage: page.coverImage || null,
-          secondaryImage: page.secondaryImage || null,
-          gallery: page.gallery || [],
-          videoUrl: page.videoUrl || null,
-          publishedAtISO: page.createdAt || new Date().toISOString(),
-          updatedAtISO: page.updatedAt || new Date().toISOString(),
-          authorName: isAr ? "فريق المتابعة والتوثيق الميداني" : "Field Monitoring Team",
-          trustBadge: isAr ? "مشروع إغاثي موثق ميدانياً | شفافية 100%" : "Verified Field Project | 100% Audited",
-        }}
-        context={{
-          locale,
-          dict,
-          isAr,
-          brandName: fullName,
-          backLink: `${p}/projects`,
-          backText: dict["projects.back"] || (isAr ? "العودة إلى المشاريع" : "Back to Projects"),
-          categoryLabel: isAr ? "مشروع إغاثي ميداني" : "Relief Project",
-          donateUrl: `${p}/donate`,
-        }}
-      />
+      <>
+        {isDestekol && <DestekolPageIntro locale={locale} title={page.title} description={cleanText(page.description) || null} />}
+        <ProjectArticleLayout
+          hideHeader={isDestekol}
+          data={{
+            title: page.title,
+            excerpt: page.description || "",
+            body: page.body || "",
+            body2: page.body2 || "",
+            body3: page.body3 || "",
+            coverImage: page.coverImage || null,
+            secondaryImage: page.secondaryImage || null,
+            gallery: page.gallery || [],
+            videoUrl: page.videoUrl || null,
+            publishedAtISO: page.createdAt || new Date().toISOString(),
+            updatedAtISO: page.updatedAt || new Date().toISOString(),
+            authorName: isAr ? "فريق المتابعة والتوثيق الميداني" : "Field Monitoring Team",
+            trustBadge: isAr ? "مشروع إغاثي موثق ميدانياً | شفافية 100%" : "Verified Field Project | 100% Audited",
+          }}
+          context={{
+            locale,
+            dict,
+            isAr,
+            brandName: fullName,
+            backLink: `${p}/projects`,
+            backText: dict["projects.back"] || (isAr ? "العودة إلى المشاريع" : "Back to Projects"),
+            categoryLabel: isAr ? "مشروع إغاثي ميداني" : "Relief Project",
+            donateUrl: `${p}/donate`,
+          }}
+        />
+      </>
     );
   }
 
@@ -463,7 +472,10 @@ export default async function DynamicPage({
   const accentColor = appearance?.accentColor || "#F00F5A";
 
   const rawSections = (page.sections as unknown as PageSection[]) || [];
-  const sections = rawSections.map((sec, idx) => ({
+  const visibleSections = isDestekol
+    ? rawSections.filter((section) => !["hero", "destekol_achievements"].includes(section.type))
+    : rawSections;
+  const sections = visibleSections.map((sec, idx) => ({
     ...sec,
     id: sec.id || `section-${idx}`,
   }));
@@ -475,24 +487,45 @@ export default async function DynamicPage({
     slug === "sectors" ||
     slug === "transparency" ||
     slug === "financial-transparency");
+  const showTrustCredentials = isTrustPage && !isDestekolAboutPage;
 
   const hasCustomSections = !isLegalPage && sections.length > 0;
 
   const commonTitle = getCommonPageTitle(slug, locale, fullName, brandName);
 
-  const displayTitle = isLegalPage
+  const rawDisplayTitle = isLegalPage
     ? getPolicyMetadata(slug, locale).title
     : dict[`nav.${slug}`] || commonTitle || page.title;
 
-  const displaySubtitle = isLegalPage
+  const rawDisplaySubtitle = isLegalPage
     ? (launchCopy[locale] || launchCopy.ar).status
     : cleanText(page.description) || null;
+  const displayTitle = isDestekol ? normalizeDestekolBrandText(rawDisplayTitle, locale) : rawDisplayTitle;
+  const displaySubtitle = isDestekol && rawDisplaySubtitle ? normalizeDestekolBrandText(rawDisplaySubtitle, locale) : rawDisplaySubtitle;
 
   const pageUrl = `${siteUrl}/${locale}/${slug}`;
   const schemaType = getSchemaType(slug);
 
-  const tTrust = (key: string) =>
-    TRUST_TRANSLATIONS[key]?.[locale] || TRUST_TRANSLATIONS[key]?.en || "";
+  const tTrust = (key: string) => {
+    if (isDestekol && key === "legalValue") {
+      return ({
+        ar: "جمعية Destekol الخيرية غير الربحية",
+        en: "Destekol Charitable Non-Profit Association",
+        fr: "Association caritative à but non lucratif",
+        tr: "Destekol kâr amacı gütmeyen hayır derneği",
+      } as Record<string, string>)[locale] || "Destekol Charitable Non-Profit Association";
+    }
+    if (isDestekol && key === "verifiedSubtitle") {
+      return ({
+        ar: "جمعية Destekol مسجلة وموثقة | تدقيق مالي وشفافية 100%",
+        en: "Registered charitable association | 100% financial governance",
+        fr: "Association caritative enregistrée | Gouvernance financière à 100%",
+        tr: "Kayıtlı hayır derneği | %100 mali şeffaflık",
+      } as Record<string, string>)[locale] || "Registered charitable association | 100% financial governance";
+    }
+    const value = TRUST_TRANSLATIONS[key]?.[locale] || TRUST_TRANSLATIONS[key]?.en || "";
+    return isDestekol ? normalizeDestekolBrandText(value, locale) : value;
+  };
 
   const dynamicPageSchema = {
     "@context": "https://schema.org",
@@ -518,7 +551,7 @@ export default async function DynamicPage({
               "@id": `${siteUrl}/#organization`,
               name: fullName,
               alternateName: isDestekol
-                ? ["Destekol", "Destekol NGO"]
+                ? ["Destekol", fullName]
                 : [
                     "4Relief",
                     "4Relief NGO",
@@ -584,7 +617,9 @@ export default async function DynamicPage({
         }}
       />
 
-      <header
+      {isDestekol ? (
+        <DestekolPageIntro locale={locale} title={page.title} description={cleanText(page.description) || null} />
+      ) : !isDestekolAboutPage && <header
         className="relative overflow-hidden py-12 text-center transition-colors sm:py-20"
         style={{ backgroundColor: primaryColor }}
       >
@@ -596,9 +631,9 @@ export default async function DynamicPage({
             suppressHydrationWarning
           >
             <span className="inline-block h-px w-6 bg-white/40" />
-            {isAr
-              ? `مؤسسة ${brandName} الإنسانية`
-              : `${brandName} Humanitarian Foundation`}
+            {isDestekol
+              ? fullName
+              : isAr ? `مؤسسة ${brandName} الإنسانية` : `${brandName} Humanitarian Foundation`}
           </span>
 
           <h1 className="font-display text-2xl font-extrabold text-white sm:text-4xl md:text-5xl">
@@ -611,9 +646,9 @@ export default async function DynamicPage({
             </p>
           )}
         </div>
-      </header>
+      </header>}
 
-      {isTrustPage && (
+      {showTrustCredentials && (
         <section className="mx-auto max-w-screen-xl px-6 pt-8">
           <div className="flex items-center gap-3 p-4 mb-6 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm">
             <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
@@ -666,12 +701,14 @@ export default async function DynamicPage({
 
       <div className="bg-white py-6">
         {hasCustomSections ? (
-          sections.map((section) => (
+            sections.map((section, index) => (
             <BlockRenderer
               key={section.id}
               section={section}
               context={{
                 isDestekol,
+                  isDestekolAboutPage,
+                  aboutRowIndex: sections.slice(0, index).filter((item) => item.type === section.type).length,
                 campaigns,
                 whiteBackground: true,
                 locale,

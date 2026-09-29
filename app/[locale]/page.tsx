@@ -8,6 +8,7 @@ import { getHomeData } from "@/lib/services/home.service";
 import { headers } from "next/headers";
 import ChatWidget from "@/components/site/ChatWidget";
 import BlockRenderer from "@/components/blocks/BlockRenderer"; // استيراد BlockRenderer
+import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 300;
 
@@ -26,6 +27,13 @@ const OPTIMIZED_HOME_TITLES: Record<string, string> = {
   tr: "4Relief | Uluslararası İnsani Yardım Vakfı",
 };
 
+const DESTEKOL_IDENTITY: Record<string, string> = {
+  ar: "جمعية Destekol الخيرية غير الربحية",
+  en: "Destekol Charitable Non-Profit Association",
+  fr: "Association caritative Destekol à but non lucratif",
+  tr: "Destekol kâr amacı gütmeyen hayır derneği",
+};
+
 function cleanSchemaText(value: unknown): string {
   if (typeof value !== "string") return "";
   return value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -36,6 +44,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const headerList = await headers();
   const host = headerList.get("host") || "";
   const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = isDestekol ? "https://destekol.org" : SITE_URL;
+  const identity = DESTEKOL_IDENTITY[locale] || DESTEKOL_IDENTITY.en;
 
   const [dict, data] = await Promise.all([
     loadTranslations(locale),
@@ -45,12 +55,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const settings: any = data?.settings || {};
 
   const siteTitle = isDestekol
-    ? "Destekol | Uluslararası İnsani Yardım Vakfı"
+    ? identity
     : (OPTIMIZED_HOME_TITLES[locale] || OPTIMIZED_HOME_TITLES.en);
 
-  const description = getHomeTrustContent(locale).intro;
+  const description = isDestekol
+    ? normalizeDestekolBrandText(getHomeTrustContent(locale).intro, locale)
+    : getHomeTrustContent(locale).intro;
 
-  const currentUrl = `${SITE_URL}/${locale}`;
+  const currentUrl = `${siteUrl}/${locale}`;
 
   return {
     title: { absolute: siteTitle },
@@ -58,13 +70,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     alternates: {
       canonical: currentUrl,
-      languages: Object.fromEntries(["ar", "en", "fr", "tr"].map(language => [language, `${SITE_URL}/${language}`])),
+      languages: Object.fromEntries(["ar", "en", "fr", "tr"].map(language => [language, `${siteUrl}/${language}`])),
     },
 
     openGraph: {
       type: "website",
       url: currentUrl,
-      siteName: isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation",
+      siteName: isDestekol ? identity : "4Relief Humanitarian Foundation",
       title: siteTitle,
       description,
     },
@@ -82,6 +94,8 @@ export default async function HomePage({ params }: PageProps) {
   const headerList = await headers();
   const host = headerList.get("host") || "";
   const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = isDestekol ? "https://destekol.org" : SITE_URL;
+  const identity = DESTEKOL_IDENTITY[locale] || DESTEKOL_IDENTITY.en;
 
   const [dict, homeData] = await Promise.all([
     loadTranslations(locale),
@@ -102,9 +116,11 @@ export default async function HomePage({ params }: PageProps) {
   const primaryColor = settings?.primaryColor || "#0069D2";
   const accentColor = settings?.accentColor || "#F00F5A";
 
-  const pageUrl = `${SITE_URL}/${locale}`;
+  const pageUrl = `${siteUrl}/${locale}`;
 
-  const description = getHomeTrustContent(locale).intro;
+  const description = isDestekol
+    ? normalizeDestekolBrandText(getHomeTrustContent(locale).intro, locale)
+    : getHomeTrustContent(locale).intro;
 
   const publishedDateISO = data.page?.createdAt;
   const updatedDateISO = data.page?.updatedAt;
@@ -116,26 +132,26 @@ export default async function HomePage({ params }: PageProps) {
         "@type": "WebPage",
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: isDestekol ? "Destekol | Uluslararası İnsani Yardım Vakfı" : "4Relief | International Humanitarian Foundation & Emergency Relief",
+        name: isDestekol ? identity : "4Relief | International Humanitarian Foundation & Emergency Relief",
         description,
         inLanguage: locale,
         ...(publishedDateISO ? { datePublished: publishedDateISO } : {}),
         ...(updatedDateISO ? { dateModified: updatedDateISO } : {}),
-        author: { "@id": `${SITE_URL}/#organization` },
-        isPartOf: { "@id": `${SITE_URL}/#website` },
-        about: { "@id": `${SITE_URL}/#organization` },
-        publisher: { "@id": `${SITE_URL}/#organization` },
+        author: { "@id": `${siteUrl}/#organization` },
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        about: { "@id": `${siteUrl}/#organization` },
+        publisher: { "@id": `${siteUrl}/#organization` },
       },
       {
         "@type": ["NGO", "Organization"],
-        "@id": `${SITE_URL}/#organization`,
-        name: isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation",
-        alternateName: isDestekol ? ["Destekol", "Destekol NGO"] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
-        url: SITE_URL,
+        "@id": `${siteUrl}/#organization`,
+        name: isDestekol ? identity : "4Relief Humanitarian Foundation",
+        alternateName: isDestekol ? ["Destekol", identity] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+        url: siteUrl,
         ...(!isDestekol ? { legalName: "FOR RELIEF LTD", identifier: { "@type": "PropertyValue", propertyID: "Companies House company number", value: "17306194" }, sameAs: [COMPANY_RECORD_URL] } : {}),
         logo: {
           "@type": "ImageObject",
-          url: `${SITE_URL}${isDestekol ? "/brand/destekol-logo.png" : "/brand/logo.png"}`,
+          url: `${siteUrl}${isDestekol ? "/brand/destekol-logo.png" : "/brand/logo.png"}`,
         },
 
         areaServed: [
@@ -199,7 +215,7 @@ export default async function HomePage({ params }: PageProps) {
         <div key={section.id} className={`home-section home-section--${section.type}`}><BlockRenderer section={section} context={context} /></div>
       ))}
       
-      {!isDestekol && <div className="home-section"><HomeTrustContent locale={locale} siteUrl={SITE_URL} /></div>}
+      {!isDestekol && <div className="home-section"><HomeTrustContent locale={locale} siteUrl={siteUrl} /></div>}
 
       {/* عرض مكون الدردشة بشكل منفصل إذا كان يجب أن يظهر دائماً */}
       <ChatWidget key={locale} locale={locale} />

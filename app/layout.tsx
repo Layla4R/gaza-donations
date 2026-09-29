@@ -33,83 +33,54 @@ export const viewport: Viewport = {
   themeColor: "#0069D2",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+export async function generateMetadata(): Promise<Metadata> {
+  const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = isDestekol ? "https://destekol.org" : SITE_URL;
+  const name = isDestekol ? "Destekol" : "4Relief";
+  const fullName = isDestekol ? "جمعية Destekol الخيرية غير الربحية" : "4Relief Humanitarian Foundation";
+  const description = isDestekol
+    ? "Destekol is a registered charitable non-profit association connecting supporters with transparent humanitarian campaigns."
+    : "4Relief is an independent humanitarian foundation connecting donors with transparent relief and humanitarian campaigns.";
 
-  applicationName: "4Relief",
-
-  title: {
-    default: "4Relief Humanitarian Foundation",
-    template: "%s | 4Relief",
-  },
-
-  description:
-    "4Relief is an independent humanitarian foundation connecting donors with transparent relief and humanitarian campaigns.",
-
-  keywords: [
-    "4Relief",
-    "humanitarian aid",
-    "humanitarian foundation",
-    "donations",
-    "charity",
-    "relief campaigns",
-    "emergency aid",
-    "Gaza donations",
-    "humanitarian crowdfunding",
-  ],
-
-  authors: [
-    {
-      name: "4Relief Humanitarian Foundation",
-      url: SITE_URL,
+  return {
+    metadataBase: new URL(siteUrl),
+    applicationName: name,
+    title: { default: fullName, template: `%s | ${name}` },
+    description,
+    keywords: [name, "humanitarian aid", "humanitarian foundation", "donations", "charity", "relief campaigns", "emergency aid", "Gaza donations", "humanitarian crowdfunding"],
+    authors: [{ name: fullName, url: siteUrl }],
+    creator: fullName,
+    publisher: fullName,
+    alternates: {
+      canonical: siteUrl,
+      languages: { ar: `${siteUrl}/ar`, en: `${siteUrl}/en`, tr: `${siteUrl}/tr` },
     },
-  ],
-
-  creator: "4Relief Humanitarian Foundation",
-
-  publisher: "4Relief Humanitarian Foundation",
-
-  alternates: {
-    canonical: SITE_URL,
-    languages: {
-      ar: `${SITE_URL}/ar`,
-      en: `${SITE_URL}/en`,
-      tr: `${SITE_URL}/tr`,
+    openGraph: {
+      type: "website",
+      url: siteUrl,
+      siteName: name,
+      title: fullName,
+      description: isDestekol
+        ? "Support Destekol, a charitable non-profit association delivering transparent humanitarian aid."
+        : "Connecting donors with transparent humanitarian and relief campaigns.",
+      locale: "ar",
+      alternateLocale: ["en", "tr"],
     },
-  },
-
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: "4Relief",
-    title: "4Relief Humanitarian Foundation",
-    description:
-      "Connecting donors with transparent humanitarian and relief campaigns.",
-    locale: "ar",
-    alternateLocale: ["en", "tr"],
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "4Relief Humanitarian Foundation",
-    description:
-      "Connecting donors with transparent humanitarian and relief campaigns.",
-  },
-
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    twitter: {
+      card: "summary_large_image",
+      title: fullName,
+      description: isDestekol
+        ? "Support Destekol, a charitable non-profit association delivering transparent humanitarian aid."
+        : "Connecting donors with transparent humanitarian and relief campaigns.",
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
     },
-  },
-
-  category: "Humanitarian Organization",
-};
+    category: "Humanitarian Organization",
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -140,6 +111,7 @@ export default async function RootLayout({
     : null;
 
   const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = isDestekol ? "https://destekol.org" : SITE_URL;
   const primaryColor = settings?.primaryColor || (isDestekol ? "#066090" : "#0069D2");
   const accentColor = settings?.accentColor || (isDestekol ? "#D9A750" : "#F00F5A");
 
@@ -155,9 +127,9 @@ export default async function RootLayout({
    * Main Entity IDs
    */
 
-  const organizationId = `${SITE_URL}/#organization`;
+  const organizationId = `${siteUrl}/#organization`;
 
-  const websiteId = `${SITE_URL}/#website`;
+  const websiteId = `${siteUrl}/#website`;
 
   /*
    * Complete semantic graph
@@ -172,28 +144,29 @@ export default async function RootLayout({
 
         "@id": organizationId,
 
-        name: "4Relief Humanitarian Foundation",
+        name: isDestekol ? "جمعية Destekol الخيرية غير الربحية" : "4Relief Humanitarian Foundation",
 
-        alternateName: [
+        alternateName: isDestekol ? ["Destekol", "جمعية Destekol"] : [
           "4Relief",
           "For Relief",
           "فور ريليف",
         ],
 
-        url: SITE_URL,
+        url: siteUrl,
 
-        description:
-          "4Relief is an independent humanitarian foundation connecting donors with transparent humanitarian and relief campaigns.",
+        description: isDestekol
+          ? "Destekol is a registered charitable non-profit association connecting supporters with transparent humanitarian campaigns."
+          : "4Relief is an independent humanitarian foundation connecting donors with transparent relief and humanitarian campaigns.",
 
         logo: {
           "@type": "ImageObject",
 
-          "@id": `${SITE_URL}/#logo`,
+          "@id": `${siteUrl}/#logo`,
 
-          url: `${SITE_URL}/brand/logo.png`,
+          url: `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "logo.png"}`,
         },
 
-        image: `${SITE_URL}/brand/logo.png`,
+        image: `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "logo.png"}`,
 
         sameAs: sameAsLinks,
 
@@ -214,11 +187,11 @@ export default async function RootLayout({
 
         "@id": websiteId,
 
-        url: SITE_URL,
+        url: siteUrl,
 
-        name: "4Relief",
+        name: isDestekol ? "Destekol" : "4Relief",
 
-        alternateName: "4Relief Humanitarian Foundation",
+        alternateName: isDestekol ? "جمعية Destekol" : "4Relief Humanitarian Foundation",
 
         publisher: {
           "@id": organizationId,
@@ -236,7 +209,7 @@ export default async function RootLayout({
           target: {
             "@type": "EntryPoint",
 
-            urlTemplate: `${SITE_URL}/en/campaigns?search={search_term_string}`,
+            urlTemplate: `${siteUrl}/en/campaigns?search={search_term_string}`,
           },
 
           "query-input":

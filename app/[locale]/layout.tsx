@@ -10,6 +10,7 @@ import SiteFooter from "@/components/site/SiteFooter";
 import WhatsAppButton from "@/components/site/WhatsAppButton";
 import SocialSidebar from "@/components/site/SocialSidebar";
 import CookieBanner from "@/components/site/CookieBanner";
+import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 import { getSupabaseOrNull } from "@/lib/supabase";
 import {
@@ -58,7 +59,7 @@ const LOCALE_METADATA: Record<
   },
 };
 
-async function getDomainInfo() {
+async function getDomainInfo(locale = "en") {
   const headerList = await headers();
   const host = headerList.get("host") || "";
   const isDestekol = getRequestSite().id === "destekol";
@@ -68,7 +69,9 @@ async function getDomainInfo() {
     : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
 
   const brandName = isDestekol ? "Destekol" : "4Relief";
-  const fullName = isDestekol ? "Destekol İnsani Yardım Vakfı" : "4Relief Humanitarian Foundation";
+  const fullName = isDestekol
+    ? ({ ar: "جمعية Destekol الخيرية غير الربحية", en: "Destekol Charitable Non-Profit Association", fr: "Association caritative Destekol à but non lucratif", tr: "Destekol kâr amacı gütmeyen hayır derneği" } as Record<string, string>)[locale] || "Destekol Charitable Non-Profit Association"
+    : "4Relief Humanitarian Foundation";
 
   return { isDestekol, siteUrl, brandName, fullName };
 }
@@ -79,14 +82,18 @@ export async function generateMetadata({
   params: { locale: string };
 }): Promise<Metadata> {
   const { locale } = params;
-  const { siteUrl, brandName, fullName } = await getDomainInfo();
+  const { isDestekol, siteUrl, brandName, fullName } = await getDomainInfo(locale);
 
   const localeData =
     LOCALE_METADATA[locale] ||
     LOCALE_METADATA.en;
 
   const currentUrl = `${siteUrl}/${locale}`;
-  const titleText = localeData.title(brandName);
+  const rawTitleText = localeData.title(brandName);
+  const titleText = isDestekol ? normalizeDestekolBrandText(rawTitleText, locale) : rawTitleText;
+  const description = isDestekol
+    ? normalizeDestekolBrandText(localeData.description, locale)
+    : localeData.description;
 
   return {
     title: {
@@ -94,7 +101,7 @@ export async function generateMetadata({
       template: `%s | ${fullName}`,
     },
 
-    description: localeData.description,
+    description,
 
     alternates: {
       canonical: currentUrl,
@@ -113,14 +120,14 @@ export async function generateMetadata({
       url: currentUrl,
       siteName: fullName,
       title: titleText,
-      description: localeData.description,
+      description,
       locale: localeData.ogLocale,
     },
 
     twitter: {
       card: "summary_large_image",
       title: titleText,
-      description: localeData.description,
+      description,
     },
   };
 }
@@ -223,7 +230,7 @@ function buildSiteSchemas(
     "@type": ["NGO", "Organization"],
     "@id": `${siteUrl}/#organization`,
     name: fullName,
-    alternateName: isDestekol ? ["Destekol", "Destekol NGO"] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+    alternateName: isDestekol ? ["Destekol", fullName] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
@@ -277,7 +284,7 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const { isDestekol, siteUrl, brandName, fullName } = await getDomainInfo();
+  const { isDestekol, siteUrl, brandName, fullName } = await getDomainInfo(locale);
   const { pages, settings, dict } = await getSiteData(locale);
   const localeData = LOCALE_METADATA[locale] || LOCALE_METADATA.en;
   
@@ -337,7 +344,9 @@ export default async function LocaleLayout({
       <SiteHeader isDestekol={isDestekol} navItems={pages} settings={settings} locale={locale} dict={dict} transparent={false} />
       <CookieBanner isDestekol={isDestekol} locale={locale} />
 
-      <main className="flex-1 pt-20">{children}</main>
+      <main className="flex-1 pt-20">
+        {children}
+      </main>
 
       <SiteFooter isDestekol={isDestekol} navItems={pages} settings={settings} locale={locale} dict={dict} />
       <WhatsAppButton phone={settings?.whatsappNumber} />

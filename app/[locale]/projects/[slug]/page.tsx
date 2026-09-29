@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { LOCALES, loadTranslations } from "@/lib/i18n";
 import ProjectArticleLayout from "@/components/site/ProjectArticleLayout";
+import DestekolPageIntro from "@/components/site/DestekolPageIntro";
+import { getRequestSite } from "@/lib/request-site";
+import { normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 0;
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org";
 
 function cleanText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -125,7 +126,9 @@ async function getProjectData(slug: string, locale: string) {
     }
   }
 
-  return { project, isCampaign };
+  return getRequestSite().id === "destekol"
+    ? normalizeDestekolBrandCopy({ project, isCampaign }, locale)
+    : { project, isCampaign };
 }
 
 export async function generateMetadata({
@@ -137,11 +140,14 @@ export async function generateMetadata({
   if (!data) return {};
 
   const { project } = data;
-  const title = `${cleanText(project.title)} | 4Relief`;
+  const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = getRequestSite().url;
+  const brand = isDestekol ? "Destekol" : "4Relief";
+  const title = `${cleanText(project.title)} | ${brand}`;
   const description = cleanText(project.excerpt) || cleanText(project.body).slice(0, 160);
   const cleanSlug = project.slug.replace(/^projects\//, "");
-  const url = `${SITE_URL}/${params.locale}/projects/${cleanSlug}`;
-  const image = project.coverImage || `${SITE_URL}/brand/og-image.png`;
+  const url = `${siteUrl}/${params.locale}/projects/${cleanSlug}`;
+  const image = project.coverImage || `${siteUrl}/brand/${isDestekol ? "destekol-logo.png" : "og-image.png"}`;
 
   return {
     title,
@@ -149,14 +155,14 @@ export async function generateMetadata({
     alternates: {
       canonical: url,
       languages: Object.fromEntries(
-        LOCALES.map((l) => [l, `${SITE_URL}/${l}/projects/${cleanSlug}`])
+        LOCALES.map((l) => [l, `${siteUrl}/${l}/projects/${cleanSlug}`])
       ),
     },
     openGraph: {
       title,
       description,
       url,
-      siteName: "4Relief",
+      siteName: brand,
       images: [{ url: image, width: 1200, height: 630, alt: title }],
     },
     twitter: {
@@ -185,10 +191,12 @@ export default async function ProjectDetailPage({
   }
 
   const { project, isCampaign } = data;
+  const isDestekol = getRequestSite().id === "destekol";
+  const siteUrl = getRequestSite().url;
   const isAr = locale === "ar";
   const p = isAr ? "" : `/${locale}`;
   const cleanSlug = project.slug.replace(/^projects\//, "");
-  const pageUrl = `${SITE_URL}/${locale}/projects/${cleanSlug}`;
+  const pageUrl = `${siteUrl}/${locale}/projects/${cleanSlug}`;
 
   // Schema.org Structured Data
   const breadcrumbSchema = {
@@ -199,13 +207,13 @@ export default async function ProjectDetailPage({
         "@type": "ListItem",
         position: 1,
         name: dict["nav.home"] || (isAr ? "الرئيسية" : "Home"),
-        item: `${SITE_URL}/${locale}`,
+        item: `${siteUrl}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: dict["nav.projects"] || (isAr ? "المشاريع الإنسانية" : "Projects"),
-        item: `${SITE_URL}/${locale}/projects`,
+        item: `${siteUrl}/${locale}/projects`,
       },
       {
         "@type": "ListItem",
@@ -225,7 +233,9 @@ export default async function ProjectDetailPage({
         }}
       />
 
+      {isDestekol && <DestekolPageIntro locale={locale} title={project.title} description={cleanText(project.excerpt) || null} />}
       <ProjectArticleLayout
+        hideHeader={isDestekol}
         data={{
           title: project.title,
           excerpt: project.excerpt,
@@ -245,7 +255,7 @@ export default async function ProjectDetailPage({
           locale,
           dict,
           isAr,
-          brandName: "4Relief",
+          brandName: isDestekol ? "Destekol" : "4Relief",
           backLink: `${p}/projects`,
           backText: dict["projects.back"] || (isAr ? "العودة إلى المشاريع" : "Back to Projects"),
           categoryLabel: isAr ? "مشروع إغاثي تنموي" : "Relief Project",

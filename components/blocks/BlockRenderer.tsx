@@ -18,6 +18,7 @@ import HeroSection from "@/components/site/HeroSection";
 import NewsSection from "@/components/site/NewsSection"; // 🌟 تم استيراد مكون الأخبار/القصص
 import type { CampaignLite } from "@/lib/pageData";
 import FaqSection from "../site/FaqSection";
+import { normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
 
 interface RendererContext {
   isHomePage?: boolean;
@@ -32,6 +33,8 @@ interface RendererContext {
   stats?: any;
   settings?: any;
   isDestekol?: boolean;
+  isDestekolAboutPage?: boolean;
+  aboutRowIndex?: number;
 }
 
 function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -52,11 +55,16 @@ export default function BlockRenderer({
 }) {
   const email = officialEmail(!!context?.isDestekol);
   const rawProps = section.props || (section as any).data || {};
+  const brandedProps = context?.isDestekol ? normalizeDestekolBrandCopy(rawProps, context.locale || "ar") : rawProps;
+  const dict = context?.dict
+    ? context?.isDestekol ? normalizeDestekolBrandCopy(context.dict, context.locale || "ar") : context.dict
+    : {};
   // FAQ questions and answers belong to the site's admin, including their wording and links.
-  const p = section.type === "faq" ? rawProps : normalizePublicContact(rawProps, email);
+  const p = section.type === "faq" ? brandedProps : normalizePublicContact(brandedProps, email);
 
   const primary = context?.primaryColor || "var(--color-brand, #0069D2)";
   const accent = context?.accentColor || "var(--color-accent, #F00F5A)";
+  const siteUrl = context?.isDestekol ? "https://destekol.org" : "https://forrelief.org";
   const isRTL = context?.locale === "ar";
   const locale = context?.locale || "ar";
 
@@ -94,7 +102,7 @@ export default function BlockRenderer({
       return <KindnessBox data={p} rows={rows} locale={locale} currency={(context.settings?.defaultCurrency || "USD").toUpperCase()} buttonHref={p.buttonLink ? getLocalizedLink(p.buttonLink) : undefined} />;
     }
     case "quick_donate":
-      return <HeroSection mode="quick" locale={locale} dict={context?.dict || {}} data={p} isDestekol={context?.isDestekol} primaryColor={primary} accentColor={accent} />;
+      return <HeroSection mode="quick" locale={locale} dict={dict} data={p} isDestekol={context?.isDestekol} primaryColor={primary} accentColor={accent} />;
     case "destekol_achievements":
       return <DestekolAchievements data={p} />;
     case "hero":
@@ -102,7 +110,7 @@ export default function BlockRenderer({
         <HeroSection
           mode={context?.isDestekol ? "hero" : "full"}
           locale={locale}
-          dict={context?.dict || {}}
+          dict={dict}
           primaryColor={primary}
           accentColor={accent}
           data={p}
@@ -115,6 +123,7 @@ export default function BlockRenderer({
         <AboutOverviewSection 
           data={p} 
           locale={locale} 
+          isDestekol={context?.isDestekolAboutPage === true}
         />
       );
 
@@ -205,9 +214,9 @@ export default function BlockRenderer({
         "@graph": [
           {
             "@type": "NGO",
-            "@id": "https://forrelief.org/#organization",
-            "name": "4Relief",
-            "url": "https://forrelief.org"
+            "@id": `${siteUrl}/#organization`,
+            "name": context?.isDestekol ? "Destekol" : "4Relief",
+            "url": siteUrl
           },
           {
             "@type": "ItemList",
@@ -220,7 +229,7 @@ export default function BlockRenderer({
                 "@type": "Service",
                 "name": item.title,
                 "description": item.description || item.body,
-                "provider": { "@id": "https://forrelief.org/#organization" }
+                "provider": { "@id": `${siteUrl}/#organization` }
               }
             }))
           }
@@ -313,9 +322,9 @@ export default function BlockRenderer({
         "@graph": [
           {
             "@type": "NGO",
-            "@id": "https://forrelief.org/#organization",
-            "name": "4Relief",
-            "url": "https://forrelief.org"
+            "@id": `${siteUrl}/#organization`,
+            "name": context?.isDestekol ? "Destekol" : "4Relief",
+            "url": siteUrl
           },
           {
             "@type": "ItemList",
@@ -334,7 +343,7 @@ export default function BlockRenderer({
                   "name": item.location || "Gaza"
                 },
                 "keywords": item.category,
-                "fundraiser": { "@id": "https://forrelief.org/#organization" }
+                "fundraiser": { "@id": `${siteUrl}/#organization` }
               }
             }))
           }
@@ -451,6 +460,46 @@ export default function BlockRenderer({
 
     case "text": {
       const align = p.align || "right";
+      const isDestekolAbout = context?.isDestekolAboutPage === true;
+      const availableImages = (context?.campaigns || []).filter((campaign) => campaign.coverImage);
+      const fallbackCampaignImage = availableImages.length
+        ? availableImages[(context?.aboutRowIndex || 0) % availableImages.length]?.coverImage
+        : "";
+      const aboutImage = p.image || fallbackCampaignImage;
+      const aboutImageFirst = p.imagePosition
+        ? p.imagePosition === "left"
+        : (context?.aboutRowIndex || 0) % 2 === 0;
+      const aboutText = (
+        <div className="destekol-about-copy-content" dir={isRTL ? "rtl" : "ltr"}>
+          {p.title && (
+            <div className="mb-4">
+              <span className="inline-block w-12 h-1.5 rounded-full mb-3 bg-brand" style={{ backgroundColor: "#d9a750" }} />
+              <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 leading-snug tracking-tight">
+                {p.title}
+              </h2>
+            </div>
+          )}
+          {p.body && <p className="text-slate-600 leading-relaxed text-base sm:text-lg whitespace-pre-line">{p.body}</p>}
+        </div>
+      );
+      const aboutImageBlock = aboutImage ? (
+        <figure className="destekol-about-copy-image">
+          <Image src={aboutImage} alt={p.title || ""} fill sizes="(max-width: 768px) 100vw, 42vw" className="object-cover" />
+        </figure>
+      ) : null;
+
+      if (isDestekolAbout) {
+        return (
+          <section className="destekol-about-copy-section">
+            <div className={`destekol-about-copy-card${aboutImage ? " has-image" : ""}`} dir="ltr">
+              {aboutImageFirst && aboutImageBlock}
+              {aboutText}
+              {!aboutImageFirst && aboutImageBlock}
+            </div>
+          </section>
+        );
+      }
+
       return (
         <section className="py-16 sm:py-20 bg-white">
           <div className={`max-w-screen-xl mx-auto px-6 text-${align}`}>
@@ -471,7 +520,10 @@ export default function BlockRenderer({
     }
 
     case "image_text": {
-      const imageFirst = p.imagePosition !== "right";
+      const isDestekolAbout = context?.isDestekolAboutPage === true;
+      const imageFirst = isDestekolAbout
+        ? (context?.aboutRowIndex || 0) % 2 === 0
+        : p.imagePosition !== "right";
 
       const imageBlock = (
         <div className="relative">
@@ -490,7 +542,7 @@ export default function BlockRenderer({
       );
 
       const textBlock = (
-        <div>
+        <div dir={isDestekolAbout ? (isRTL ? "rtl" : "ltr") : undefined}>
           <span className="inline-block w-10 h-1.5 rounded-full mb-4 bg-accent" style={{ backgroundColor: accent }} />
           {p.title && <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">{p.title}</h2>}
           <p className="text-slate-600 leading-relaxed text-sm sm:text-base whitespace-pre-line">{p.body}</p>
@@ -498,8 +550,8 @@ export default function BlockRenderer({
       );
 
       return (
-        <section className="py-16 sm:py-24 bg-slate-50/50 border-t border-slate-100">
-          <div className="max-w-screen-xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center">
+        <section className={`py-16 sm:py-24 bg-slate-50/50 border-t border-slate-100${isDestekolAbout ? " destekol-about-row" : ""}`}>
+          <div className={`max-w-screen-xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 items-center${isDestekolAbout ? " destekol-about-row-inner" : ""}`} dir={isDestekolAbout ? "ltr" : undefined}>
             {imageFirst ? (
               <>
                 {imageBlock}
@@ -520,15 +572,17 @@ export default function BlockRenderer({
       return (
         <DonationWidget
           locale={locale}
-          dict={context?.dict || {}}
+          dict={dict}
           primaryColor={context?.primaryColor}
           accentColor={context?.accentColor}
           data={p}
+          isDestekol={context?.isDestekol}
         />
       );
 
     case "campaigns_grid": {
       let campaigns = context?.campaigns || [];
+      if (context?.isDestekol) campaigns = normalizeDestekolBrandCopy(campaigns, locale);
       if (p.onlyFeatured) campaigns = campaigns.filter((c) => c.isFeatured);
       campaigns = campaigns.slice(0, p.limit || 6);
 
@@ -563,7 +617,7 @@ export default function BlockRenderer({
       const campaignsListSchema = {
         "@context": "https://schema.org",
         "@type": "ItemList",
-        "name": p.title || "4Relief Campaigns",
+        "name": p.title || (context?.isDestekol ? "Destekol Campaigns" : "4Relief Campaigns"),
         "itemListElement": campaigns.map((c, index) => ({
           "@type": "ListItem",
           "position": index + 1,
@@ -572,7 +626,7 @@ export default function BlockRenderer({
             "name": c.title,
             "description": c.summary,
             "image": c.coverImage,
-            "url": `https://forrelief.org/${locale}/campaigns/${c.slug}`
+            "url": `${siteUrl}/${locale}/campaigns/${c.slug}`
           }
         }))
       };
@@ -605,7 +659,7 @@ export default function BlockRenderer({
                   donorCount={c.donorCount}
                   category={c.category}
                   locale={locale}
-                  dict={context?.dict || {}}
+                  dict={dict}
                 />
               ))}
               {campaigns.length === 0 && (
@@ -736,14 +790,15 @@ export default function BlockRenderer({
     // 🌟 التعديل الخاص بقسم القصص والأخبار (stories / news)
     case "stories": {
       const posts = context?.posts || [];
-      if (!posts.length && !p.items?.length) return null;
+      const displayPosts = context?.isDestekol ? normalizeDestekolBrandCopy(posts, locale) : posts;
+      if (!displayPosts.length && !p.items?.length) return null;
 
       return (
         <NewsSection
           key={section.id}
-          posts={posts}
+          posts={displayPosts}
           locale={locale}
-          dict={context?.dict || {}}
+          dict={dict}
           data={p}
           compact={context?.isHomePage}
           destekolFeatured={context?.isDestekol === true && context?.isHomePage === true}
@@ -753,17 +808,21 @@ export default function BlockRenderer({
     }
 
     case "faq": {
-      return <FaqSection email={email} locale={locale} dict={context?.dict || {}} data={p} />;
+      return <FaqSection email={email} locale={locale} dict={dict} data={p} />;
     }
 
-    case "cta":
+    case "cta": {
+      const isDestekolAbout = context?.isDestekolAboutPage === true;
       return (
         <section 
-          className="relative overflow-hidden py-20 sm:py-24 text-white text-center bg-brand transition-colors"
+          className={`relative overflow-hidden py-20 sm:py-24 text-white text-center bg-brand transition-colors${isDestekolAbout ? " destekol-about-cta" : ""}`}
           style={{ backgroundColor: primary }}
         >
+          {isDestekolAbout && <svg className="destekol-about-cta-wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0 32C170 84 284 10 474 36s320 53 486 8 303-11 480 10v36H0Z" fill="currentColor" /></svg>}
           <div className="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-          <div className="relative max-w-screen-xl mx-auto px-6 z-10">
+          <div className={`relative max-w-screen-xl mx-auto px-6 z-10${isDestekolAbout ? " destekol-about-cta-inner" : ""}`}>
+            {isDestekolAbout && <div className="destekol-about-cta-art" aria-hidden={!p.image}>{p.image ? <Image src={p.image} alt={p.imageAlt || ""} fill sizes="(max-width: 768px) 35vw, 260px" className="object-contain" /> : <Icon name="hand-heart" size={128} strokeWidth={1.3} />}</div>}
+            <div className={isDestekolAbout ? "destekol-about-cta-copy" : ""} dir={isDestekolAbout ? (isRTL ? "rtl" : "ltr") : undefined}>
             {p.title && <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">{p.title}</h2>}
             {p.subtitle && <p className="text-white/80 mb-8 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">{p.subtitle}</p>}
             {p.buttonText && (
@@ -776,17 +835,20 @@ export default function BlockRenderer({
                 {p.buttonText}
               </Link>
             )}
+            </div>
           </div>
+          {isDestekolAbout && <svg className="destekol-about-cta-wave destekol-about-cta-wave--bottom" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true"><path d="M0 38C168 1 300 65 483 48s309-47 483-10 318 34 474-13v65H0Z" fill="currentColor" /></svg>}
         </section>
       );
+    }
 
     case "contact_form": {
       const contactSchema = {
         "@context": "https://schema.org",
         "@type": "NGO",
-        "@id": "https://forrelief.org/#organization",
-        "name": "4Relief",
-        "url": "https://forrelief.org",
+        "@id": `${siteUrl}/#organization`,
+        "name": context?.isDestekol ? "Destekol" : "4Relief",
+        "url": siteUrl,
         "contactPoint": {
           "@type": "ContactPoint",
           "email": email,
@@ -807,7 +869,7 @@ export default function BlockRenderer({
             {p.subtitle && <p className="text-slate-500 text-sm sm:text-base">{p.subtitle}</p>}
           </div>
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-            <ContactForm locale={locale} dict={context?.dict || {}} email={email} />
+            <ContactForm locale={locale} dict={dict} email={email} />
           </div>
         </section>
       );

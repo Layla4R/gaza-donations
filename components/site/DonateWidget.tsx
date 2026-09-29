@@ -4,12 +4,13 @@ import Icon from "@/components/icons";
 
 const AMOUNTS = [5, 10, 25, 50, 100, 250];
 
-export default function DonateWidget({ locale, dict, primaryColor, accentColor, data }: { 
+export default function DonateWidget({ locale, dict, primaryColor, accentColor, data, isDestekol = false }: {
   locale: string; 
   dict: Record<string, string>; 
   primaryColor?: string | null; 
   accentColor?: string | null; 
-  data?: any 
+  data?: any;
+  isDestekol?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
   const [amount, setAmount] = useState(25);
@@ -113,7 +114,7 @@ export default function DonateWidget({ locale, dict, primaryColor, accentColor, 
                     </p>
                   </div>
                   <span className="text-xs font-extrabold tracking-wider bg-white/10 px-3 py-1 rounded-full text-white/90 border border-white/15">
-                    4Relief
+                    {isDestekol ? "Destekol" : "4Relief"}
                   </span>
                 </header>
 

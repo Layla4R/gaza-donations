@@ -139,6 +139,7 @@ export default function CanvasPreview({ section }: { section: PageSection }) {
 
     case "text": return (
       <div className="bg-white px-10 py-10" style={{ textAlign: (p.align as any) || "right" }}>
+        {p.image && <img src={p.image} alt="" className="w-full max-h-56 object-cover rounded-xl mb-5" />}
         {p.title && <h2 className="font-bold text-2xl mb-4" style={{ color: "#111" }}>{p.title}</h2>}
         <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "#4B5563" }}>{p.body}</p>
       </div>

@@ -604,16 +604,16 @@ export default function HeroSection({
             {data?.eyebrow || t(
               "hero.eyebrow",
               isDestekol
-                ? "مؤسسة Destekol الإنسانية"
+                ? "جمعية Destekol الخيرية غير الربحية"
                 : "مؤسسة 4Relief الإنسانية",
               isDestekol
-                ? "Destekol Humanitarian Foundation"
+                ? "Destekol Charitable Non-Profit Association"
                 : "4Relief Humanitarian Foundation",
               isDestekol
-                ? "Fondation Humanitaire Destekol"
+                ? "Association caritative Destekol à but non lucratif"
                 : "Fondation Humanitaire 4Relief",
               isDestekol
-                ? "Destekol İnsani Yardım Vakfı"
+                ? "Destekol kâr amacı gütmeyen hayır derneği"
                 : "4Relief İnsani Yardım Vakfı"
             )}
           </span>

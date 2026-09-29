@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 export default function CookieBanner({ locale = "ar", isDestekol = false }: { locale?: string; isDestekol?: boolean }) {
   const [showBanner, setShowBanner] = useState(false);
@@ -64,14 +65,17 @@ export default function CookieBanner({ locale = "ar", isDestekol = false }: { lo
     },
   };
 
-  const text = t[locale as keyof typeof t] || t.en;
+  const rawText = t[locale as keyof typeof t] || t.en;
+  const text = isDestekol
+    ? { ...rawText, title: normalizeDestekolBrandText(rawText.title, locale), desc: normalizeDestekolBrandText(rawText.desc, locale) }
+    : rawText;
 
   return (
     <div className="fixed bottom-6 left-6 right-6 sm:left-auto sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
       <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-2xl border border-slate-800">
-        <h3 className="font-display font-extrabold text-base mb-2 text-white">{isDestekol ? text.title.replace(/4Relief/g, "Destekol") : text.title}</h3>
+        <h3 className="font-display font-extrabold text-base mb-2 text-white">{text.title}</h3>
         <p className="text-xs text-white/80 leading-relaxed mb-5">
-          {isDestekol ? text.desc.replace(/4Relief/g, "Destekol") : text.desc}{" "}
+          {text.desc}{" "}
           <Link href={`/${locale}/cookie-policy`} className="text-brand-light font-bold underline">
             {text.policy}
           </Link>.

@@ -6,6 +6,8 @@ import { getSupabaseOrNull } from "@/lib/supabase";
 import ContactForm from "@/components/blocks/ContactForm";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import Icon from "@/components/icons";
+import DestekolPageIntro from "@/components/site/DestekolPageIntro";
+import { getDestekolOrganizationName, normalizeDestekolBrandCopy, normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 0;
 
@@ -49,7 +51,10 @@ export async function generateMetadata({
   };
 
   // الأوصاف المترجمة (Description)
-  const descriptions: Record<string, string> = Object.fromEntries(Object.entries(launchCopy).map(([language, copy]) => [language, normalizePublicContact(copy.contact + " " + copy.response, officialEmail(site.id === "destekol"))]));
+  const descriptions: Record<string, string> = Object.fromEntries(Object.entries(launchCopy).map(([language, copy]) => {
+    const description = normalizePublicContact(copy.contact + " " + copy.response, officialEmail(site.id === "destekol"));
+    return [language, site.id === "destekol" ? normalizeDestekolBrandText(description, language) : description];
+  }));
 
   const title = titles[locale] || titles.en;
   const description = descriptions[locale] || descriptions.en;
@@ -89,6 +94,8 @@ export default async function ContactPage({
   const copy = normalizePublicContact(launchCopy[locale] || launchCopy.ar, officialEmail(isDestekol));
   const dict = await loadTranslations(locale);
   const supabase = getSupabaseOrNull();
+  const t = (ar: string, en: string, fr: string, tr: string) =>
+    locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
 
   // 1. جلب الإعدادات الأساسية والصفحة الرئيسية
   const [{ data: settings }, { data: appearance }, { data: pageData }] = await Promise.all([
@@ -106,18 +113,20 @@ export default async function ContactPage({
       .maybeSingle() || { data: null },
     supabase
       ?.from("Page")
-      .select("id, sections")
+      .select("id, title, description, sections")
       .eq("slug", "contact")
       .maybeSingle() || { data: null },
   ]);
 
   // 2. جلب الأقسام المترجمة من جدول PageTranslation إذا كانت اللغة ليست العربية
   let sections: any[] = Array.isArray(pageData?.sections) ? pageData.sections : [];
+  let pageTitle = pageData?.title || t("تواصل معنا", "Contact Us", "Nous Contacter", "Bize Ulaşın");
+  let pageDescription = pageData?.description || copy.contact;
 
   if (pageData?.id && locale !== "ar" && supabase) {
     const { data: translation } = await supabase
       .from("PageTranslation")
-      .select("sections")
+      .select("title, description, sections")
       .eq("pageId", pageData.id)
       .eq("locale", locale)
       .maybeSingle();
@@ -125,6 +134,16 @@ export default async function ContactPage({
     if (translation?.sections && Array.isArray(translation.sections) && translation.sections.length > 0) {
       sections = translation.sections;
     }
+    if (translation?.title) pageTitle = translation.title;
+    if (translation?.description) pageDescription = translation.description;
+  }
+
+  if (isDestekol) {
+    ({ title: pageTitle, description: pageDescription, sections } = normalizeDestekolBrandCopy({
+      title: pageTitle,
+      description: pageDescription,
+      sections,
+    }, locale));
   }
 
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
@@ -135,9 +154,6 @@ export default async function ContactPage({
   const country = isDestekol ? "TÜRKİYE" : "United Kingdom";
   const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "";
 
-  const t = (ar: string, en: string, fr: string, tr: string) =>
-    locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
-
   const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(isDestekol ? DESTEKOL_ADDRESS : "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, UK")}&z=15&output=embed`;
   const pageUrl = `${SITE_URL}/${locale}/contact`;
 
@@ -145,8 +161,9 @@ export default async function ContactPage({
   const faqSection = sections.find(
     (s: any) => s.type?.toLowerCase() === "faq"
   );
-  const faqItems: Array<{ question?: string; q?: string; title?: string; answer?: string; a?: string; content?: string; body?: string }> =
+  const rawFaqItems: Array<{ question?: string; q?: string; title?: string; answer?: string; a?: string; content?: string; body?: string }> =
     faqSection?.props?.items || faqSection?.data?.items || faqSection?.items || [];
+  const faqItems = isDestekol ? normalizeDestekolBrandCopy(rawFaqItems, locale) : rawFaqItems;
 
   const contactSchema: any = {
     "@context": "https://schema.org",
@@ -156,7 +173,7 @@ export default async function ContactPage({
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
         name: t("تواصل معنا", "Contact Us", "Nous Contacter", "Bize Ulaşın"),
-        description: t(
+        description: isDestekol ? `${getDestekolOrganizationName(locale)} — معلومات التواصل الرسمية` : t(
           "معلومات التواصل مع مؤسسة فور ريليف الإنسانية",
           "Contact details for 4Relief Humanitarian Foundation",
           "Détails de contact de la Fondation 4Relief",
@@ -168,7 +185,7 @@ export default async function ContactPage({
       {
         "@type": ["Organization", "NGO"],
         "@id": `${SITE_URL}/#organization`,
-        name: isDestekol ? "Destekol" : "4Relief Humanitarian Foundation",
+        name: isDestekol ? getDestekolOrganizationName(locale) : "4Relief Humanitarian Foundation",
         alternateName: site.name,
         url: SITE_URL,
         logo: `${SITE_URL}/brand/${isDestekol ? "destekol-logo.png" : "logo.png"}`,
@@ -223,6 +240,7 @@ export default async function ContactPage({
 
   return (
     <div className="bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100">
+      {isDestekol && <DestekolPageIntro locale={locale} title={pageTitle} description={pageDescription} />}
       <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section>
       <script
         type="application/ld+json"
@@ -230,7 +248,7 @@ export default async function ContactPage({
       />
 
       {/* Header Banner */}
-      <div
+      {!isDestekol && <div
         className="py-14 sm:py-20 text-center text-white relative overflow-hidden transition-colors shadow-sm"
         style={{ backgroundColor: primaryColor }}
       >
@@ -256,7 +274,7 @@ export default async function ContactPage({
             )}
           </p>
         </div>
-      </div>
+      </div>}
 
       <div className="max-w-screen-xl mx-auto px-6 pt-8 pb-4">
         {/* Direct Summary Block (SEO / E-E-A-T) */}
@@ -266,7 +284,7 @@ export default async function ContactPage({
           itemType="http://schema.org/Organization"
           className="mb-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm"
         >
-          <meta itemProp="name" content="4Relief Humanitarian Foundation" />
+          <meta itemProp="name" content={isDestekol ? getDestekolOrganizationName(locale) : "4Relief Humanitarian Foundation"} />
           
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
