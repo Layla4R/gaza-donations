@@ -5,7 +5,7 @@ const titles: Record<string, string[]> = {
     "شروط استخدام الموقع",
     "سياسة التبرعات والاسترداد",
     "سياسة ملفات الارتباط",
-    "مكافحة غسل الأموال وتمويل الإرهاب",
+    "مكافحة غسل الأموال",
     "الشكاوى والتواصل الرسمي",
     "الشفافية المالية والتقارير",
     "كيفية استخدام التبرعات",
@@ -16,7 +16,7 @@ const titles: Record<string, string[]> = {
     "Website terms of use",
     "Donation and refund policy",
     "Cookie policy",
-    "Anti-money laundering and counter-terrorist financing",
+    "Anti-Money Laundering Policy",
     "Complaints and official contact",
     "Financial transparency and reports",
     "How donations are used",
@@ -27,7 +27,7 @@ const titles: Record<string, string[]> = {
     "Conditions d’utilisation du site",
     "Politique de dons et de remboursement",
     "Politique de cookies",
-    "Lutte contre le blanchiment et le financement du terrorisme",
+    "Lutte contre le blanchiment",
     "Réclamations et contact officiel",
     "Transparence financière et rapports",
     "Utilisation des dons",
@@ -38,7 +38,7 @@ const titles: Record<string, string[]> = {
     "Site kullanım koşulları",
     "Bağış ve iade politikası",
     "Çerez politikası",
-    "Kara para aklama ve terörün finansmanıyla mücadele",
+    "Kara Para Aklamayla Mücadele",
     "Şikâyetler ve resmî iletişim",
     "Mali şeffaflık ve raporlar",
     "Bağışların kullanımı",
@@ -49,6 +49,15 @@ const slugs = ['privacy','terms','refund-policy','cookie-policy','aml-policy','c
 export function getPolicyMetadata(slug: string, locale: string) {
   const language = titles[locale] ? locale : 'ar';
   const title = titles[language][slugs.indexOf(slug)] || slug;
+  if (slug === 'aml-policy') {
+    const descriptions: Record<string, string> = {
+      ar: 'نطبق ضوابط للحد من غسل الأموال وتمويل الإرهاب والاحتيال.',
+      en: 'Our safeguards help prevent money laundering, terrorist financing and fraud.',
+      fr: 'Nos mesures préviennent le blanchiment d’argent, le financement du terrorisme et la fraude.',
+      tr: 'Önlemlerimiz kara para aklama, terörün finansmanı ve dolandırıcılığı önlemeyi amaçlar.',
+    };
+    return { title, description: descriptions[language] };
+  }
   const introduction = policies[language][slug]?.[0].text || '';
   return { title, description: title + ': ' + introduction.split(/[.!؟]/)[0] + '.' };
 }

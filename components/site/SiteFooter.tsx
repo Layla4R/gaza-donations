@@ -99,6 +99,16 @@ const LEGAL_SLUGS: Array<{
       tr: "Bağışları Nasıl Kullanıyoruz",
     },
   },
+  {
+    slug: "license",
+    key: "legal.license",
+    fallbacks: {
+      ar: "التسجيل والترخيص",
+      en: "Registration & Licensing",
+      fr: "Enregistrement et agrément",
+      tr: "Kayıt ve Ruhsat Bilgileri",
+    },
+  },
 ];
 
 const SOCIAL_ICONS: Record<
@@ -231,7 +241,7 @@ export default function SiteFooter({
   const safeNavItems = Array.isArray(navItems)
     ? navItems
     : [];
-  const legalItems = isDestekol ? LEGAL_SLUGS.filter((item) => ["privacy", "terms", "cookie-policy", "financial-transparency"].includes(item.slug)) : LEGAL_SLUGS;
+  const legalItems = LEGAL_SLUGS;
 
   return (
     <footer

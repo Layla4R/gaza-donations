@@ -1,5 +1,5 @@
 import { getPolicyMetadata } from "@/lib/policy-metadata";
-import { normalizePublicContact, officialEmail, launchCopy } from "@/lib/public-contact";
+import { normalizePublicContact, officialEmail } from "@/lib/public-contact";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -498,7 +498,7 @@ export default async function DynamicPage({
     : dict[`nav.${slug}`] || commonTitle || page.title;
 
   const rawDisplaySubtitle = isLegalPage
-    ? (launchCopy[locale] || launchCopy.ar).status
+    ? getPolicyMetadata(slug, locale).description
     : cleanText(page.description) || null;
   const displayTitle = isDestekol ? normalizeDestekolBrandText(rawDisplayTitle, locale) : rawDisplayTitle;
   const displaySubtitle = isDestekol && rawDisplaySubtitle ? normalizeDestekolBrandText(rawDisplaySubtitle, locale) : rawDisplaySubtitle;
@@ -618,7 +618,7 @@ export default async function DynamicPage({
       />
 
       {isDestekol ? (
-        <DestekolPageIntro locale={locale} title={page.title} description={cleanText(page.description) || null} />
+        <DestekolPageIntro locale={locale} title={displayTitle} description={displaySubtitle} />
       ) : !isDestekolAboutPage && <header
         className="relative overflow-hidden py-12 text-center transition-colors sm:py-20"
         style={{ backgroundColor: primaryColor }}
