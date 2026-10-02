@@ -192,18 +192,19 @@ function getCommonPageTitle(slug: string, locale: string, fullName: string, bran
       fr: "À propos",
       tr: "Hakkımızda",
     },
-    "our-work": {
-      ar: `مجالات عملنا | ${brandName}`,
-      en: `Our Sectors & Work | ${brandName}`,
-      fr: `Nos Domaines d'Action | ${brandName}`,
-      tr: `Faaliyet Alanlarımız | ${brandName}`,
-    },
-    sectors: {
-      ar: `مجالات عملنا | ${brandName}`,
-      en: `Our Sectors | ${brandName}`,
-      fr: `Nos Secteurs | ${brandName}`,
-      tr: `Faaliyet Alanlarımız | ${brandName}`,
-    },
+   "our-work": {
+  ar: "مجالات عملنا",
+  en: "Our Sectors & Work",
+  fr: "Nos Domaines d'Action",
+  tr: "Faaliyet Alanlarımız",
+},
+
+sectors: {
+  ar: "مجالات عملنا",
+  en: "Our Sectors",
+  fr: "Nos Secteurs",
+  tr: "Faaliyet Alanlarımız",
+},
     projects: {
       ar: `مشاريعنا | ${brandName}`,
       en: `Our Projects | ${brandName}`,
@@ -222,12 +223,12 @@ function getCommonPageTitle(slug: string, locale: string, fullName: string, bran
       fr: `Partenariats Corporate | ${fullName}`,
       tr: `Kurumsal Ortaklıklar | ${fullName}`,
     },
-    transparency: {
-      ar: `الشفافية والتقارير المالية | ${brandName}`,
-      en: `Financial Transparency | ${fullName}`,
-      fr: `Transparence Financière | ${fullName}`,
-      tr: `Mali Şeffافية | ${brandName}`,
-    },
+   transparency: {
+  ar: `الشفافية والتقارير المالية`,
+  en: `Financial Transparency`,
+  fr: `Transparence Financière`,
+  tr: `Mali Şeffaflık`,
+},
     contact: {
       ar: `اتصل بنا | ${fullName}`,
       en: `Contact Us | ${fullName}`,
@@ -493,13 +494,29 @@ export default async function DynamicPage({
 
   const commonTitle = getCommonPageTitle(slug, locale, fullName, brandName);
 
-  const rawDisplayTitle = isLegalPage
-    ? getPolicyMetadata(slug, locale).title
-    : dict[`nav.${slug}`] || commonTitle || page.title;
+ const rawDisplayTitle = isLegalPage
+  ? getPolicyMetadata(slug, locale).title
+  : commonTitle || dict[`nav.${slug}`] || page.title;
+const transparencySubtitles: Record<string, string> = {
+  ar: "تقارير الشفافية المالية لمنصة Destekol.",
+  en: "Financial transparency reports of Destekol.",
+  fr: "Rapports de transparence financière de Destekol.",
+  tr: "Destekol kâr amacı gütmeyen hayır derneğinin mali şeffaflık raporları.",
+};
+const workSubtitles: Record<string, string> = {
+  ar: "تعرّف على مجالات عمل Destekol في الاستجابة الإنسانية والصحة والمياه النظيفة والتمكين الاقتصادي وسبل العيش.",
+  en: "Discover Destekol's areas of work in humanitarian response, health, clean water, economic empowerment, and livelihoods.",
+  fr: "Découvrez les domaines d'action de Destekol dans l'aide humanitaire, la santé, l'eau potable, l'autonomisation économique et les moyens de subsistance.",
+  tr: "Destekol'un insani yardım, sağlık, temiz su, ekonomik güçlendirme ve geçim kaynakları alanlarındaki çalışmalarını keşfedin.",
+};
+ const rawDisplaySubtitle = isLegalPage
+  ? getPolicyMetadata(slug, locale).description
+  : ["transparency", "financial-transparency"].includes(slug)
+    ? transparencySubtitles[locale] || transparencySubtitles.en
+    : ["our-work", "sectors"].includes(slug)
+      ? workSubtitles[locale] || workSubtitles.en
+      : cleanText(page.description) || null;
 
-  const rawDisplaySubtitle = isLegalPage
-    ? getPolicyMetadata(slug, locale).description
-    : cleanText(page.description) || null;
   const displayTitle = isDestekol ? normalizeDestekolBrandText(rawDisplayTitle, locale) : rawDisplayTitle;
   const displaySubtitle = isDestekol && rawDisplaySubtitle ? normalizeDestekolBrandText(rawDisplaySubtitle, locale) : rawDisplaySubtitle;
 

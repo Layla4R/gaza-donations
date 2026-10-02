@@ -21,7 +21,7 @@ async function translateText(text: string, targetLang: string, signal: AbortSign
         if (!Array.isArray(data) || !Array.isArray(data[0]) || !data[0].length
           || data[0].some((part: unknown) => !Array.isArray(part) || typeof part[0] !== "string")) throw new Error("Invalid translation response");
         const result = data[0].map((part: string[]) => part[0]).join("");
-        if (!result.trim() || result.trim() === text.trim()) throw new Error("Google returned untranslated text");
+        if (!result.trim() || result.trim() === text.trim() || /[\u0621-\u064A\u066E-\u06D3]/.test(result)) throw new Error("Google returned untranslated text");
         return result;
       } finally { clearTimeout(timer); signal.removeEventListener("abort", abort); }
     } catch (error) {

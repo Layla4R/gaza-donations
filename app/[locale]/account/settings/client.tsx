@@ -208,7 +208,7 @@ export default function SettingsClient({
                   <span className="text-ink font-medium">{form.country}</span>
                 ) : (
                   <span className="text-muted">
-                    {locale === "ar" ? "اختر الدولة..." : "Select Country..."}
+                    {D["auth.select_country"]}
                   </span>
                 )}
               </span>
@@ -227,7 +227,7 @@ export default function SettingsClient({
                   <input
                     type="text"
                     placeholder={
-                      locale === "ar" ? "ابحث عن الدولة..." : "Search country..."
+                      D["auth.search_country"]
                     }
                     value={countrySearch}
                     onChange={(e) => setCountrySearch(e.target.value)}
@@ -268,7 +268,7 @@ export default function SettingsClient({
                     ))
                   ) : (
                     <div className="p-3 text-center text-xs text-muted">
-                      {locale === "ar" ? "لا توجد نتائج" : "No results found"}
+                      {D["common.no_results"]}
                     </div>
                   )}
                 </div>
