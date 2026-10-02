@@ -709,3 +709,164 @@ body[data-site="destekol"] .home-layout .home-section--stories { margin-top: 14p
   .destekol-footer > div:nth-of-type(2) > div:first-child { grid-column: 1 / -1; }
   .destekol-footer > div:last-child { padding: 12px 16px; align-items: flex-start; font-size: 9px; }
 }
+/* Contact content only: the shared Destekol header, page intro and statistics keep their existing styles. */
+.destekol-contact-page { background: linear-gradient(180deg, #fff 25%, #f3fafc 65%, #fff); }
+.destekol-contact-details,
+.destekol-contact-form-section,
+.destekol-contact-faq { width: calc(100% - 48px); max-width: 1232px; margin-inline: auto; }
+.destekol-contact-details { padding-top: 36px; margin-bottom: 22px; overflow: clip; }
+.destekol-contact-heading { text-align: center; margin-bottom: 22px; }
+.destekol-contact-summary { position: relative; isolation: isolate; }
+.destekol-contact-summary::before,
+.destekol-contact-summary::after { content: ""; position: absolute; z-index: -1; width: 82px; height: 190px; bottom: 0; pointer-events: none; opacity: .55; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 210'%3E%3Cpath d='M58 204Q15 123 49 9' fill='none' stroke='%2352956b' stroke-width='2'/%3E%3Cpath d='M45 66Q12 26 49 2Q61 33 45 66' fill='%2352956b'/%3E%3Cpath d='M37 107Q1 96 3 51Q37 70 37 107' fill='%23328970'/%3E%3Cpath d='M36 117Q44 66 85 61Q73 101 36 117' fill='%237ebba0'/%3E%3Cpath d='M44 155Q5 149 2 109Q34 117 44 155' fill='%238ebaab'/%3E%3Cpath d='M46 167Q43 126 82 114Q77 152 46 167' fill='%23d9c97d'/%3E%3Cpath d='M60 202Q17 203 7 168Q44 168 60 202' fill='%23098494'/%3E%3C/svg%3E") center/contain no-repeat; }
+.destekol-contact-summary::before { left: -18px; transform: rotate(-15deg); }
+.destekol-contact-summary::after { right: -18px; transform: scaleX(-1) rotate(-15deg); }
+.destekol-contact-heading > div:first-child { display: none; }
+.destekol-contact-heading h2,
+.destekol-contact-form-card h2,
+.destekol-contact-faq h2 { color: #063962; font-size: clamp(22px, 2.1vw, 30px); font-weight: 800; line-height: 1.4; margin-bottom: 6px; }
+.destekol-contact-heading p,
+.destekol-contact-form-card header p { color: #71859c; font-size: 14px; line-height: 1.7; }
+.destekol-contact-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.destekol-contact-cards > div { position: relative; min-width: 0; padding: 24px; padding-inline-start: 94px; border: 1px solid #e5f0f5; border-radius: 18px; background: #fff; box-shadow: 0 8px 25px #0a517105; display: flex; flex-direction: column; justify-content: center; min-height: 146px; }
+.destekol-contact-cards > div:nth-child(2) { order: 3; }
+.destekol-contact-icon { position: absolute; inset-inline-start: 20px; top: 24px; width: 56px; height: 56px; background: #eaf7f8; border-radius: 50%; color: #098494; display: grid; place-items: center; }
+.destekol-contact-cards > div > span { color: #063962; font-size: 14px; font-weight: 700; margin-bottom: 5px; }
+.destekol-contact-cards a { color: #066090; font-size: 15px; overflow-wrap: anywhere; white-space: normal; }
+.destekol-contact-cards strong { white-space: normal; font-size: 12px; line-height: 1.6; color: #62768e; font-weight: 500; direction: ltr; }
+.destekol-contact-notice { color: #71859c; font-size: 12px; line-height: 1.8; margin: 14px 12px 0; text-align: center; }
+.destekol-contact-form-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: stretch; direction: ltr; margin-block: 22px; }
+.destekol-contact-form-section.has-image { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+.destekol-contact-photo { position: relative; margin: 0; overflow: hidden; border-radius: 20px; min-height: 420px; background: #e7f3f5; }
+.destekol-contact-photo > img { object-position: center 58%; }
+.destekol-contact-photo > svg { position: absolute; bottom: -1px; left: 0; width: 100%; height: 62px; pointer-events: none; }
+.destekol-contact-form-card { min-width: 0; background: #fff; border: 1px solid #e5f0f5; border-radius: 22px; padding: 24px 30px 18px; box-shadow: 0 8px 25px #0a517105; }
+.destekol-contact-form-card header { text-align: center; margin-bottom: 18px; }
+.destekol-contact-form-card form { padding: 0; border: 0; border-radius: 0; box-shadow: none; max-width: none; }
+.destekol-contact-form-card form > :not([hidden]) ~ :not([hidden]) { margin-top: 12px; }
+.destekol-contact-form-card label { color: #063962; font-size: 12px; margin-bottom: 6px; }
+.destekol-contact-form-card input,
+.destekol-contact-form-card textarea { border-color: #e0eaf2; border-radius: 9px; font-size: 13px; padding: 10px 13px; color: #063962; background: #fff; }
+.destekol-contact-form-card textarea { min-height: 105px; height: 105px; resize: vertical; }
+.destekol-contact-form-card input:focus,
+.destekol-contact-form-card textarea:focus { border-color: #098494; }
+.destekol-contact-form-card button[type="submit"] { border-radius: 9px; background: linear-gradient(100deg,#066090,#0a5171); padding: 11px 16px; font-size: 14px; }
+.destekol-contact-form-card button[type="submit"]:hover { filter: brightness(1.08); }
+.destekol-contact-form-card form > p { font-size: 11px; color: #71859c; }
+.destekol-contact-faq > section { background: transparent; border: 0; padding: 0; }
+.destekol-contact-faq > section > div { padding: 26px 28px 0; border: 1px solid #e5f0f5; border-radius: 22px; background: #fff; box-shadow: 0 8px 25px #0a517105; }
+.destekol-contact-faq header { margin-bottom: 20px; }
+.destekol-contact-faq header > span { background: transparent; font-size: 11px; margin-bottom: 4px; letter-spacing: .02em; padding: 0; }
+.destekol-contact-faq header p { font-size: 13px; }
+.destekol-contact-faq dl { display: grid; gap: 9px; }
+.destekol-contact-faq dl > div { border: 1px solid #e5eef4; border-radius: 12px; padding: 0 18px; }
+.destekol-contact-faq dl button { padding: 12px 0; }
+.destekol-contact-faq dl button > span { color: #063962; font-size: 14px; }
+.destekol-contact-faq dl button > div { width: 28px; height: 28px; }
+.destekol-contact-faq dd { padding-top: 0; font-size: 13px; }
+.destekol-contact-faq dd p { color: #71859c; line-height: 1.85; }
+.destekol-contact-faq header + div { border: 0; padding: 0; box-shadow: none; margin-bottom: 22px; }
+.destekol-contact-faq aside { border-radius: 0; border-width: 1px 0 0; box-shadow: none; padding: 18px 0; gap: 16px; }
+.destekol-contact-faq aside h4 { color: #063962; font-size: 16px; }
+.destekol-contact-faq aside p { font-size: 12px; }
+.destekol-contact-faq aside a { background: linear-gradient(110deg,#d9a750,#c79239); border-radius: 8px; padding: 10px 18px; }
+@media (max-width: 767px) {
+  .destekol-contact-details, .destekol-contact-form-section, .destekol-contact-faq { width: calc(100% - 28px); }
+  .destekol-contact-details { padding-top: 24px; margin-bottom: 16px; }
+  .destekol-contact-heading { margin-bottom: 14px; }
+  .destekol-contact-cards { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .destekol-contact-cards > div { min-height: 88px; padding: 16px; padding-inline-start: 80px; border-radius: 14px; }
+  .destekol-contact-icon { width: 46px; height: 46px; top: 16px; inset-inline-start: 16px; }
+  .destekol-contact-notice { margin: 12px 2px 0; text-align: start; font-size: 11px; }
+  .destekol-contact-form-section.has-image { grid-template-columns: minmax(0,1fr); }
+  .destekol-contact-form-section { gap: 12px; margin-block: 16px; }
+  .destekol-contact-photo { min-height: 0; height: 180px; border-radius: 14px; }
+  .destekol-contact-photo > img { object-position: center 57%; }
+  .destekol-contact-form-card { padding: 20px 16px 16px; border-radius: 16px; }
+  .destekol-contact-form-card form > .grid { grid-template-columns: minmax(0,1fr); gap: 12px; }
+  .destekol-contact-faq > section > div { padding: 20px 14px 0; border-radius: 16px; }
+  .destekol-contact-faq dl > div { padding-inline: 12px; }
+  .destekol-contact-faq dl button > span { font-size: 13px; }
+  .destekol-contact-faq aside { flex-direction: row; }
+  .destekol-contact-faq aside h4 { font-size: 14px; }
+  .destekol-contact-faq aside a { padding: 9px 12px; font-size: 12px; }
+}
+/* Destekol news content. Shared navigation, intro image, waves and achievements stay untouched. */
+.destekol-news-page { background: #f5fbfd; }
+.destekol-news-list { max-width: 1232px; margin: 0 auto; padding: 46px 24px 35px; scroll-margin-top: 105px; }
+.destekol-news-top { margin-bottom: 18px; }
+.destekol-news-top.has-featured { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); align-items: end; gap: 22px; }
+.destekol-news-introduction { text-align: start; min-width: 0; align-self: start; }
+.destekol-news-eyebrow { display: block; color: #066090; font-size: 11px; font-weight: 750; letter-spacing: .04em; margin-bottom: 5px; }
+.destekol-news-eyebrow::before { content: ""; display: inline-block; width: 24px; height: 2px; background: #d9a750; vertical-align: middle; margin-inline-end: 7px; }
+.destekol-news-introduction h2 { color: #063962; font-size: clamp(24px, 2.5vw, 34px); line-height: 1.3; font-weight: 800; letter-spacing: -.025em; }
+.destekol-news-introduction > p { color: #526f86; font-size: 14px; line-height: 1.7; max-width: 560px; margin-top: 5px; }
+.destekol-news-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+.destekol-news-filters a { display: inline-flex; align-items: center; min-height: 30px; padding: 5px 13px; color: #174c6c; background: #fff; border: 1px solid #dae9ef; border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1.3; transition: background .2s, color .2s; }
+.destekol-news-filters a:hover { color: #066090; background: #e5f5f8; }
+.destekol-news-filters a[aria-current="page"] { color: #fff; border-color: #d9a750; background: linear-gradient(120deg, #e1b359, #c8933e); }
+.destekol-news-card { min-width: 0; overflow: hidden; background: #fff; border: 1px solid #e5edf3; border-radius: 16px; box-shadow: 0 10px 24px #0a51710c; }
+.destekol-news-card-link { display: flex; flex-direction: column; height: 100%; color: inherit; }
+.destekol-news-card-image { position: relative; flex: 0 0 auto; height: 165px; overflow: hidden; background: #eaf5f6; }
+.destekol-news-card-image img { transition: transform .35s ease; }
+.destekol-news-card:hover img { transform: scale(1.035); }
+.destekol-news-category { position: absolute; left: 12px; bottom: 10px; z-index: 1; background: #fff; color: #066090; border-radius: 999px; padding: 5px 10px; font-size: 11px; font-weight: 700; line-height: 1; box-shadow: 0 3px 12px #062e4b33; }
+.destekol-news-card-copy { min-width: 0; flex: 1; display: flex; flex-direction: column; align-items: flex-start; padding: 14px 17px 15px; text-align: start; }
+.destekol-news-card-copy time { display: inline-flex; align-items: center; gap: 5px; color: #758da3; font-size: 11px; margin-bottom: 8px; }
+.destekol-news-card-copy h3 { color: #063962; font-size: 16px; line-height: 1.45; font-weight: 800; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.destekol-news-card-copy p { color: #6a7e90; font-size: 12px; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px; }
+.destekol-news-read-more { margin-top: auto; display: inline-flex; align-items: center; gap: 7px; color: #066090; font-size: 12px; font-weight: 750; }
+.destekol-news-card--featured .destekol-news-card-link { flex-direction: row; direction: ltr; height: 230px; }
+.destekol-news-card--featured .destekol-news-card-image { width: 56%; height: 100%; }
+.destekol-news-card--featured .destekol-news-card-copy { width: 44%; padding: 18px; }
+.destekol-news-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+.destekol-news-empty { color: #526f86; text-align: center; background: #fff; border: 1px solid #e5edf3; border-radius: 14px; padding: 40px 20px; }
+.destekol-news-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin-top: 24px; }
+.destekol-news-pagination > span { display: inline-flex; gap: 6px; align-items: center; }
+.destekol-news-pagination a { min-width: 36px; height: 36px; padding: 0 11px; border: 1px solid #d9e7ee; border-radius: 9px; color: #063962; background: #fff; font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+.destekol-news-pagination a[aria-current="page"], .destekol-news-pagination a:hover { color: #fff; border-color: #066090; background: #066090; }
+.destekol-news-pagination-gap { color: #72869c; padding-inline: 3px; }
+.destekol-news-newsletter { max-width: 1232px; margin: 0 auto; padding: 0 24px 28px; position: relative; display: flex; align-items: center; gap: 22px; }
+.destekol-news-newsletter > svg { position: absolute; z-index: 2; inset-inline-end: 45px; bottom: 48px; color: #0b80b0; background: #fff; border-radius: 18px; padding: 14px; box-shadow: 0 6px 22px #06609024; }
+.destekol-news-newsletter > section { width: 100%; padding: 0; background: transparent; border: 0; }
+.destekol-news-newsletter > section > div { max-width: none; padding: 0; }
+.destekol-news-newsletter > section > div > div { padding: 20px 145px 20px 24px !important; background: linear-gradient(110deg,#e7f8fb,#f7fcfe) !important; box-shadow: none; border: 1px solid #d7edf3; border-radius: 18px; }
+.destekol-news-newsletter > section > div > div > div { max-width: none; display: grid; grid-template-columns: minmax(0,1fr) minmax(300px, .8fr); align-items: center; gap: 20px; }
+.destekol-news-newsletter header { margin: 0; text-align: start; }
+.destekol-news-newsletter header > div, .destekol-news-newsletter header > span { display: none; }
+.destekol-news-newsletter h2 { color: #063962; font-size: 20px; line-height: 1.4; margin: 0 0 4px; }
+.destekol-news-newsletter header p { color: #526f86; font-size: 12px; line-height: 1.6; }
+.destekol-news-newsletter form { max-width: none; width: 100%; }
+.destekol-news-newsletter form > div { border: 1px solid #d6e7ed; border-radius: 9px; box-shadow: none; }
+.destekol-news-newsletter form button { background: linear-gradient(100deg,#066090,#0a5171) !important; border-radius: 7px; }
+.destekol-news-newsletter footer { display: none; }
+@media (max-width: 850px) {
+  .destekol-news-top.has-featured { grid-template-columns: minmax(0,1fr); gap: 18px; }
+  .destekol-news-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .destekol-news-newsletter > section > div > div { padding-inline-end: 110px !important; }
+  .destekol-news-newsletter > section > div > div > div { grid-template-columns: minmax(0,1fr); gap: 12px; }
+}
+@media (max-width: 600px) {
+  .destekol-news-list { padding: 26px 14px 22px; scroll-margin-top: 68px; }
+  .destekol-news-introduction { text-align: center; }
+  .destekol-news-introduction h2 { font-size: 24px; }
+  .destekol-news-introduction > p { font-size: 12px; margin-inline: auto; }
+  .destekol-news-filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; margin-inline: -4px; padding: 0 4px 7px; }
+  .destekol-news-filters a { white-space: nowrap; flex: 0 0 auto; }
+  .destekol-news-grid { grid-template-columns: minmax(0,1fr); gap: 11px; }
+  .destekol-news-card--featured .destekol-news-card-link, .destekol-news-card-link { flex-direction: row; direction: ltr; height: 150px; }
+  .destekol-news-card--featured .destekol-news-card-image, .destekol-news-card-image { width: 43%; height: 100%; }
+  .destekol-news-card--featured .destekol-news-card-copy, .destekol-news-card-copy { width: 57%; padding: 9px 10px; }
+  .destekol-news-card-copy time { font-size: 9px; margin-bottom: 4px; }
+  .destekol-news-card-copy h3 { font-size: 12px; line-height: 1.35; margin-bottom: 4px; -webkit-line-clamp: 3; }
+  .destekol-news-card-copy p { font-size: 10px; line-height: 1.35; -webkit-line-clamp: 2; margin-bottom: 4px; }
+  .destekol-news-category { font-size: 9px; bottom: 7px; left: 7px; }
+  .destekol-news-read-more { font-size: 10px; }
+  .destekol-news-newsletter { padding: 0 14px 18px; }
+  .destekol-news-newsletter > svg { display: none; }
+  .destekol-news-newsletter > section > div > div { padding: 16px !important; }
+  .destekol-news-newsletter h2 { font-size: 16px; }
+  .destekol-news-newsletter header p { font-size: 11px; }
+  .destekol-news-newsletter form > div { flex-direction: row; }
+  .destekol-news-newsletter form button { width: auto; padding: 8px 12px; font-size: 11px; }
+}

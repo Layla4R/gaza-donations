@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { adminFetch } from "@/lib/admin-fetch";
 import Link from "next/link";
 import Icon from "@/components/icons";
+import { type NewsCategory, newsCategoryLabel } from "@/lib/news-categories";
+import NewsCategoriesManager from "@/components/admin/NewsCategoriesManager";
 
 interface Post {
   id: string;
@@ -12,10 +14,14 @@ interface Post {
   coverImage?: string;
   isPublished: boolean;
   publishedAt: string;
+  categorySlug?: string | null;
 }
 
 export default function PostsPage() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<NewsCategory[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [savingCategory, setSavingCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
@@ -34,10 +40,12 @@ export default function PostsPage() {
       const params = new URLSearchParams({ page: String(p) });
       if (st) params.set("status", st);
       if (q) params.set("q", q);
+      if (categoryFilter) params.set("category", categoryFilter);
       const res = await adminFetch(`/api/admin/posts?${params}`);
       if (!res.ok) { setError("Failed to load posts"); setLoading(false); return; }
       const d = await res.json();
       setPosts(d.posts || []);
+      setCategories(d.categories || []);
       setTotalCount(d.count || 0);
     } catch { setError("Network error — could not load posts."); }
     setLoading(false);
@@ -77,7 +85,18 @@ export default function PostsPage() {
     } catch { alert("Network error — could not delete post."); }
   }
 
-  useEffect(() => { load(page, statusFilter, serverSearch); }, [page, statusFilter, serverSearch]);
+  useEffect(() => { load(page, statusFilter, serverSearch); }, [page, statusFilter, serverSearch, categoryFilter]);
+
+  async function changeCategory(id: string, categorySlug: string) {
+    setSavingCategory(id); setError("");
+    try {
+      const response = await adminFetch(`/api/admin/posts/${id}`, { method: "PATCH", body: JSON.stringify({ categorySlug: categorySlug || null }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not save category");
+      await load();
+    } catch (err) { setError(err instanceof Error ? err.message : "Could not save category"); }
+    finally { setSavingCategory(null); }
+  }
 
   // Show immediate client-side filter while server search is pending
   const filtered = search
@@ -95,6 +114,10 @@ export default function PostsPage() {
           <p className="text-muted text-sm">Manage your news posts and blog articles</p>
         </div>
         <div className="flex items-center gap-3">
+          {categories.length > 0 && <select aria-label="Filter news category" value={categoryFilter} onChange={e => { setCategoryFilter(e.target.value); setPage(1); }} className="border border-line rounded-xl px-3 py-2.5 text-sm bg-white">
+            <option value="">All categories / كل التصنيفات</option>
+            {categories.map(c => <option key={c.slug} value={c.slug}>{newsCategoryLabel(c, "ar")}</option>)}
+          </select>}
           <div className="relative">
             <Icon name="search" size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
             <input type="search" placeholder="Search posts…" value={search} onChange={e => {
@@ -120,6 +143,7 @@ export default function PostsPage() {
         </div>
       </div>
 
+      {categories.length > 0 && <NewsCategoriesManager categories={categories} onSaved={() => { void load(); }} />}
       {selected.size > 0 && (
         <div className="flex items-center gap-3 mb-4 px-4 py-3 bg-brand/5 border border-brand/20 rounded-xl">
           <span className="text-sm font-semibold text-brand">{selected.size} selected</span>
@@ -154,6 +178,7 @@ export default function PostsPage() {
                   onChange={e => setSelected(e.target.checked ? new Set(filtered.map(p => p.id)) : new Set())} /></th>
                 <th className="text-left py-3 px-4">Title</th>
                 <th className="text-left py-3 px-4">Slug</th>
+                {categories.length > 0 && <th className="text-left py-3 px-4">Category / التصنيف</th>}
                 <th className="text-left py-3 px-4">Status</th>
                 <th className="text-left py-3 px-4">Published</th>
                 <th className="py-3 px-4" />
@@ -177,6 +202,10 @@ export default function PostsPage() {
                     </div>
                   </td>
                   <td className="py-3 px-4 text-muted font-mono text-xs">{p.slug}</td>
+                  {categories.length > 0 && <td className="py-3 px-4"><select aria-label={`Category: ${p.title}`} value={p.categorySlug || ""} disabled={savingCategory !== null} onChange={e => changeCategory(p.id, e.target.value)} className="border border-line rounded-lg p-2 text-xs bg-white max-w-44">
+                    <option value="">غير مصنف / Uncategorized</option>
+                    {categories.map(c => <option key={c.slug} value={c.slug}>{newsCategoryLabel(c, "ar")}</option>)}
+                  </select></td>}
                   <td className="py-3 px-4">
                     <button onClick={() => togglePublish(p.id, p.isPublished)}
                       className={`text-xs font-bold rounded-full px-2.5 py-1 transition ${p.isPublished ? "bg-success/10 text-success hover:bg-success/20" : "bg-muted/10 text-muted hover:bg-muted/20"}`}>
@@ -193,7 +222,7 @@ export default function PostsPage() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="py-12 text-center text-muted">
+                <tr><td colSpan={categories.length ? 7 : 6} className="py-12 text-center text-muted">
                   {search ? `No posts match "${search}"` : "No posts yet. Create your first news article."}
                 </td></tr>
               )}

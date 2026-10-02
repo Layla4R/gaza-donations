@@ -5,8 +5,10 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Icon from "@/components/icons";
 import MediaUpload from "@/components/admin/MediaUpload";
+import { type NewsCategory, newsCategoryLabel } from "@/lib/news-categories";
 
 interface PostFormProps {
+  categories?: NewsCategory[];
   initial?: {
     id?: string;
     title?: string;
@@ -20,10 +22,11 @@ interface PostFormProps {
     gallery?: string[];
     isPublished?: boolean;
     publishedAt?: string;
+    categorySlug?: string | null;
   };
 }
 
-export default function PostForm({ initial = {} }: PostFormProps) {
+export default function PostForm({ initial = {}, categories = [] }: PostFormProps) {
   const router = useRouter();
   const isEdit = !!initial.id;
   const [mounted, setMounted] = useState(false);
@@ -33,6 +36,7 @@ export default function PostForm({ initial = {} }: PostFormProps) {
   }, []);
 
   const [form, setForm] = useState({
+    categorySlug: initial.categorySlug || "",
     title: initial.title || "",
     slug: initial.slug || "",
     excerpt: initial.excerpt || "",
@@ -161,6 +165,13 @@ export default function PostForm({ initial = {} }: PostFormProps) {
         </div>
 
         {/* 1. Cover Image */}
+        {categories.length > 0 && <div>
+          <label htmlFor="news-category" className="block text-xs text-muted font-bold mb-2">Category / التصنيف</label>
+          <select id="news-category" value={form.categorySlug} onChange={e => set("categorySlug", e.target.value)} className={inp}>
+            <option value="">Uncategorized / غير مصنف</option>
+            {categories.map(category => <option key={category.slug} value={category.slug}>{newsCategoryLabel(category, "ar")} — {newsCategoryLabel(category, "en")}</option>)}
+          </select>
+        </div>}
         <MediaUpload
           value={form.coverImage}
           onChange={(v) => set("coverImage", v)}

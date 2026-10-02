@@ -587,6 +587,9 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
       { key: "title", label: "Title", type: "text" },
       { key: "subtitle", label: "Subtitle", type: "text" },
       { key: "email", label: "Recipient Email", type: "text" },
+      { key: "image", label: "Destekol — صورة بجانب نموذج التواصل", type: "image" },
+      { key: "imageAlt", label: "وصف الصورة", type: "text" },
+      { key: "contactHeading", label: "Destekol — عنوان بطاقات التواصل (اختياري)", type: "text" },
     ],
   },
   {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/auth";
+import { getRequestSite } from "@/lib/request-site";
+import { validNewsCategory } from "@/lib/news-categories-server";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
@@ -14,6 +16,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
   const body = await req.json();
   const data: any = {};
+  if (getRequestSite().id === "destekol" && body.categorySlug !== undefined) {
+    if (!(await validNewsCategory(body.categorySlug))) return NextResponse.json({ error: "Invalid news category" }, { status: 400 });
+    data.categorySlug = body.categorySlug || null;
+  }
   
   // السماح بالحقول الجديدة في التحديث
   const allowedKeys = [

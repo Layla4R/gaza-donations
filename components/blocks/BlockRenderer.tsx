@@ -35,6 +35,7 @@ interface RendererContext {
   settings?: any;
   isDestekol?: boolean;
   isDestekolAboutPage?: boolean;
+  isDestekolContactPage?: boolean;
   aboutRowIndex?: number;
 }
 
@@ -849,6 +850,23 @@ export default function BlockRenderer({
     }
 
     case "contact_form": {
+      if (context?.isDestekolContactPage) {
+        return (
+          <section className={`destekol-contact-form-section${p.image ? " has-image" : ""}`}>
+            {p.image && <figure className="destekol-contact-photo">
+              <Image src={p.image} alt={p.imageAlt || ""} fill sizes="(max-width: 767px) 100vw, 33vw" className="object-cover" />
+              <svg aria-hidden="true" viewBox="0 0 480 90" preserveAspectRatio="none"><path d="M0 30Q120 105 250 40T480 45V90H0Z" fill="#098494" fillOpacity=".55" /><path d="M0 60Q140 15 280 65T480 35V90H0Z" fill="#0a5171" fillOpacity=".6" /></svg>
+            </figure>}
+            <div className="destekol-contact-form-card" dir={isRTL ? "rtl" : "ltr"}>
+              <header>
+                {p.title && <h2>{p.title}</h2>}
+                {p.subtitle && <p>{p.subtitle}</p>}
+              </header>
+              <ContactForm locale={locale} dict={dict} email={email} />
+            </div>
+          </section>
+        );
+      }
       const contactEyebrow = locale === "fr"
         ? "Nous contacter"
         : locale === "tr"

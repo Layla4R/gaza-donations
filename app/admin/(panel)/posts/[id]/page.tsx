@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import PostForm from "@/components/admin/PostForm";
 import NewsPostTranslationsPanel from "@/components/admin/NewsPostTranslationsPanel";
+import { getNewsCategories } from "@/lib/news-categories-server";
 
 export const revalidate = 0;
 
@@ -15,7 +16,7 @@ export default async function EditPostPage({ params }: { params: { id: string } 
 
   return (
     <div className="p-6 sm:p-8 w-full space-y-8">
-      <PostForm initial={post} />
+      <PostForm initial={post} categories={await getNewsCategories()} />
       <div>
         <NewsPostTranslationsPanel
           postId={post.id}

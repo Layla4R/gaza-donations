@@ -6,10 +6,12 @@ import { getPageBySlug } from "@/lib/pageData";
 import { getRequestSite } from "@/lib/request-site";
 import DestekolPageIntro from "@/components/site/DestekolPageIntro";
 import { normalizeDestekolBrandCopy } from "@/lib/destekol-brand-copy";
+import DestekolNewsPage from "@/components/site/DestekolNewsPage";
 
 export const revalidate = 0;
 
-export default async function NewsPage({ params: { locale } }: { params: { locale: string } }) {
+export default async function NewsPage({ params: { locale }, searchParams = {} }: { params: { locale: string }; searchParams?: { category?: string | string[]; page?: string | string[] } }) {
+  if (getRequestSite().id === "destekol") return <DestekolNewsPage locale={locale} searchParams={searchParams} />;
   const supabase = getSupabaseOrNull();
   const [postsRes, dict, page] = await Promise.all([
     supabase ? supabase.from("NewsPost").select("*").eq("isPublished", true).order("publishedAt", { ascending: false }) : Promise.resolve({ data: [] }),

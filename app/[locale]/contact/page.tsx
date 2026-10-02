@@ -236,12 +236,14 @@ export default async function ContactPage({
   const safeJsonLd = (data: unknown) =>
     JSON.stringify(data).replace(/</g, "\\u003c");
 
-  const rendererContext = { isDestekol, locale, dict, primaryColor, accentColor };
+  const rendererContext = { isDestekol, isDestekolContactPage: isDestekol, locale, dict, primaryColor, accentColor };
+  const contactBlock = sections.find((section: any) => section.type === "contact_form");
+  const directContactTitle = contactBlock?.props?.contactHeading || contactBlock?.data?.contactHeading;
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100">
+    <div className={isDestekol ? "destekol-contact-page min-h-screen pb-12" : "bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100"}>
       {isDestekol && <DestekolPageIntro locale={locale} title={pageTitle} description={pageDescription} />}
-      <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section>
+      {!isDestekol && <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section>}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(contactSchema) }}
@@ -276,23 +278,23 @@ export default async function ContactPage({
         </div>
       </div>}
 
-      <div className="max-w-screen-xl mx-auto px-6 pt-8 pb-4">
+      <div className={isDestekol ? "destekol-contact-details" : "max-w-screen-xl mx-auto px-6 pt-8 pb-4"}>
         {/* Direct Summary Block (SEO / E-E-A-T) */}
         <section
           aria-label="Direct Contact Summary"
           itemScope
           itemType="http://schema.org/Organization"
-          className="mb-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm"
+          className={isDestekol ? "destekol-contact-summary" : "mb-8 rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-sm"}
         >
           <meta itemProp="name" content={isDestekol ? getDestekolOrganizationName(locale) : "4Relief Humanitarian Foundation"} />
           
-          <div className="flex items-center gap-3 mb-3">
+          <div className={isDestekol ? "destekol-contact-heading" : "flex items-center gap-3 mb-3"}>
             <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
               <Icon name="shield-check" size={18} />
             </div>
             <div>
               <h2 className="font-bold text-slate-900 text-sm sm:text-base">
-                {t(
+                {isDestekol ? directContactTitle || t("تواصل معنا مباشرة", "Get in touch directly", "Contactez-nous directement", "Bizimle doğrudan iletişime geçin") : t(
                   "قنوات الدعم والتواصل المباشر",
                   "Direct Support & Official Channels",
                   "Canaux de Support Officiels",
@@ -310,8 +312,9 @@ export default async function ContactPage({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-medium bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+          <div className={isDestekol ? "destekol-contact-cards" : "grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-medium bg-slate-50 p-3.5 rounded-xl border border-slate-100"}>
             <div>
+              {isDestekol && <div className="destekol-contact-icon"><Icon name="mail" size={28} /></div>}
               <span className="block text-slate-700 mb-0.5">
                 {t("البريد الرسمي", "Official Email", "Email Officiel", "Resmi E-posta")}
               </span>
@@ -320,6 +323,7 @@ export default async function ContactPage({
               </a>
             </div>
             <div>
+              {isDestekol && <div className="destekol-contact-icon"><Icon name="phone" size={28} /></div>}
               <span className="block text-slate-700 mb-0.5">
                 {t("الهاتف والواتساب", "Phone / WhatsApp", "Téléphone / WhatsApp", "Telefon / WhatsApp")}
               </span>
@@ -328,28 +332,28 @@ export default async function ContactPage({
               </a> : <span>{contactEmail}</span>}
             </div>
             <div>
+              {isDestekol && <div className="destekol-contact-icon"><Icon name="map-pin" size={28} /></div>}
               <span className="block text-slate-700 mb-0.5">
                 {t("المقر الرئيسي", "Headquarters", "Siège Social", "Genel Merkez")}
               </span>
               <strong className="text-slate-900 block truncate" itemProp="address" itemScope itemType="http://schema.org/PostalAddress">
+                {isDestekol && <><span itemProp="streetAddress">{street}</span><br /></>}
                 <span itemProp="addressLocality">{locality}</span>, <span itemProp="addressCountry">{country}</span>
               </strong>
             </div>
           </div>
         </section>
+        {isDestekol && <section className="destekol-contact-notice" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section>}
       </div>
 
-      {isDestekol && <address dir="ltr" className="max-w-screen-xl mx-auto px-6 pb-8 not-italic leading-relaxed">{DESTEKOL_ADDRESS}</address>}
       {/* عرض الأقسام المترجمة عبر BlockRenderer */}
       {sections.length > 0 ? (
         <div className="space-y-4">
-          {sections.map((section: any, idx: number) => (
-            <BlockRenderer
-              key={section.id || idx}
-              section={section}
-              context={rendererContext}
-            />
-          ))}
+          {sections.map((section: any, idx: number) => isDestekol && section.type === "faq" ? (
+            <div key={section.id || idx} className="destekol-contact-faq">
+              <BlockRenderer section={section} context={rendererContext} />
+            </div>
+          ) : <BlockRenderer key={section.id || idx} section={section} context={rendererContext} />)}
         </div>
       ) : (
         /* Fallback Layout */
