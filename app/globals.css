@@ -470,7 +470,8 @@ body[data-site="destekol"] .home-section--destekol_achievements { margin-top: 0;
 .destekol-impact:not(:last-child)::after { content: ""; position: absolute; inset-inline-end: -14px; width: 1px; height: 44px; background: #e0edf2; }
 .destekol-impact-icon { flex-shrink: 0; display: grid; place-items: center; width: 70px; height: 70px; border-radius: 50%; background: #e1f4f6; color: #098494; }
 .destekol-impact-icon > :is(svg,img) { width: 43px; height: 43px; object-fit: contain; }
-.destekol-impact strong { display: block; text-align: start; color: #063962; font-size: 25px; font-weight: 800; }
+.destekol-impact > div { flex: 1; min-width: 0; text-align: center; }
+.destekol-impact strong { display: block; text-align: center; color: #063962; font-size: 25px; font-weight: 800; }
 .destekol-impact div > span { display: block; color: #0a5171; font-size: 14px; line-height: 1.4; }
 body[data-site="destekol"] .home-section--quick_donate { margin: 10px 2% 0; }
 body[data-site="destekol"] .home-layout .hero-quick-donate { margin-top: 0; border-radius: 16px; background: linear-gradient(110deg,#0a5171,#066090); }
