@@ -9,6 +9,10 @@ export function normalizePublicContact<T>(value: T, email = OFFICIAL_EMAIL): T {
   if (typeof value === "string") {
     let text = value.replace(/[a-z0-9._%+-]+@(?:forrelief|4relief|destekol)\.org/gi, email);
     if (email === OFFICIAL_EMAIL) text = text
+      .replace('ونخضع لرقابة هيئة الشركات البريطانية (Companies House) لضمان أعلى معايير الحوكمة', 'والشركة مسجلة لدى هيئة الشركات البريطانية (Companies House) برقم 17306194')
+      .replace('we are regulated by the UK Companies House to ensure the highest standards of governance', 'the company is registered with Companies House under number 17306194')
+      .replace('nous sommes réglementés par la Companies House du Royaume-Uni pour garantir les normes de gouvernance les plus élevées', 'la société est enregistrée auprès de Companies House sous le numéro 17306194')
+      .replace('+44 20 1234 5678', OFFICIAL_PHONE)
       .replace(/جمعية خيرية مسجلة|جمعية مسجلة غير ربحية|منظمة غير ربحية(?:\s*\(NGO\))?|مؤسسة غير ربحية|منظمة إنسانية مسجلة ومستقلة/g, 'جهة تعمل في مشاريع إنسانية وإغاثية')
       .replace(/registered (?:independent )?(?:charit(?:y|able association)|NGO)|non[- ]profit (?:organisation|organization|foundation)/gi, 'humanitarian relief organisation')
       .replace(/ONG indépendante enregistrée|ONG Indépendante Enregistrée|ONG Non Lucrative/gi, 'Organisation humanitaire')

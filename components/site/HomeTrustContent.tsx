@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { donationAvailabilityText } from '@/lib/donation-availability';
 import { COMPANY_RECORD_URL, HOME_SUMMARY_UPDATED, getHomeTrustContent } from '@/lib/home-trust-content';
 import { getSupabaseOrNull } from '@/lib/supabase';
 export default async function HomeTrustContent({locale, siteUrl}: {locale: string; siteUrl: string}) {
@@ -6,18 +7,8 @@ export default async function HomeTrustContent({locale, siteUrl}: {locale: strin
   const db = getSupabaseOrNull();
   const settings = db ? await db.from('SiteSettings').select('enableStripe,enablePaypal').eq('id','default').maybeSingle() : null;
   const enabled = settings?.data?.enableStripe === true || settings?.data?.enablePaypal === true;
-  const status: Record<string, string> = enabled ? {
-    ar: 'يمكنك التبرع باستخدام وسائل الدفع المتاحة في صفحة التبرع. راجع المبلغ والعملة ودورية الدفع وسياسة الاسترداد قبل التأكيد.',
-    en: 'You can donate using the payment methods available on the donation page. Review the amount, currency, payment frequency and refund policy before confirming.',
-    fr: 'Vous pouvez faire un don avec les moyens disponibles sur la page de don. Vérifiez le montant, la devise, la fréquence et la politique de remboursement.',
-    tr: 'Bağış sayfasındaki mevcut ödeme yöntemlerini kullanabilirsiniz. Onaylamadan önce tutarı, para birimini, sıklığı ve iade politikasını inceleyin.',
-  } : {
-    ar: 'الدفع الإلكتروني غير متاح حالياً. للاستفسار عن التبرعات، تواصل مع info@forrelief.org. وجود نموذج التبرع لا يعني نجاح الدفع أو استلام المال.',
-    en: 'Online payments are currently unavailable. For donation enquiries, contact info@forrelief.org. A donation form does not confirm payment or receipt of funds.',
-    fr: 'Les paiements en ligne sont actuellement indisponibles. Pour toute question sur les dons, contactez info@forrelief.org.',
-    tr: 'Çevrimiçi ödemeler şu anda kullanılamıyor. Bağış soruları için info@forrelief.org ile iletişime geçin.',
-  };
-  const copy = {...original, faq: original.faq.map(([question, answer], index) => [question, index === 1 ? status[locale] || status.en : answer])};
+  const status = donationAvailabilityText(locale, enabled);
+  const copy = {...original, faq: original.faq.map(([question, answer], index) => [question, index === 1 ? status : answer])};
   const links=[COMPANY_RECORD_URL, '/'+locale+'/about', '/'+locale+'/financial-transparency', '/'+locale+'/privacy', '/'+locale+'/complaints'];
   const faq={ '@context':'https://schema.org', '@type':'FAQPage', '@id':siteUrl+'/'+locale+'/#official-answers', mainEntity:copy.faq.map(([question,answer],i)=>({'@type':'Question',name:question,url:siteUrl+'/'+locale+'/#official-answer-'+i,acceptedAnswer:{'@type':'Answer',text:answer}})) };
   return <section id="official-information" className="bg-slate-50 border-y border-slate-100 py-12" dir={locale==='ar'?'rtl':'ltr'}>

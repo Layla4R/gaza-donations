@@ -1,5 +1,6 @@
 import { getRequestSite } from "@/lib/request-site";
 import CompanyIdentity from "@/components/site/CompanyIdentity";
+import { donationAvailabilityText } from "@/lib/donation-availability";
 import { companyRegisteredAddress } from "@/lib/company-identity";
 import { officialEmail, OFFICIAL_PHONE, OFFICIAL_WHATSAPP_URL, DESTEKOL_ADDRESS, normalizePublicContact, launchCopy } from "@/lib/public-contact";
 import type { Metadata } from "next";
@@ -104,7 +105,7 @@ export default async function ContactPage({
     supabase
       ?.from("SiteSettings")
       .select(
-        "contactEmail,contactPhone,whatsappNumber,facebookUrl,twitterUrl,instagramUrl,linkedinUrl,youtubeUrl"
+        "contactEmail,contactPhone,whatsappNumber,facebookUrl,twitterUrl,instagramUrl,linkedinUrl,youtubeUrl,enableStripe,enablePaypal"
       )
       .eq("id", "default")
       .maybeSingle() || { data: null },
@@ -119,6 +120,8 @@ export default async function ContactPage({
       .eq("slug", "contact")
       .maybeSingle() || { data: null },
   ]);
+
+  if (!isDestekol) copy.status = donationAvailabilityText(locale, settings?.enableStripe === true || settings?.enablePaypal === true);
 
   // 2. جلب الأقسام المترجمة من جدول PageTranslation إذا كانت اللغة ليست العربية
   let sections: any[] = Array.isArray(pageData?.sections) ? pageData.sections : [];
@@ -147,6 +150,7 @@ export default async function ContactPage({
       sections,
     }, locale));
   }
+  if (!isDestekol) sections = normalizePublicContact(sections);
 
   const primaryColor = appearance?.primaryColor || "var(--color-brand, #0069D2)";
   const accentColor = appearance?.accentColor || "var(--color-accent, #F00F5A)";
