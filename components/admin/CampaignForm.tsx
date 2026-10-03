@@ -16,7 +16,6 @@ interface CampaignData {
 const CATEGORIES = ["food","medical","shelter","education","water","general"];
 const COUNTRIES = [
   { value: "", label: "— Not specified —" },
-  { value: "غزة", label: "Gaza 🇵🇸" },
   { value: "فلسطين", label: "Palestine 🇵🇸" },
   { value: "اليمن", label: "Yemen 🇾🇪" },
   { value: "سوريا", label: "Syria 🇸🇾" },
@@ -48,7 +47,7 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
     isFeatured: initial?.isFeatured ?? false,
     isZakatable: initial?.isZakatable ?? false,
     authorName: initial?.authorName || "فريق الرقابة الميدانية والشفافية — 4Relief",
-    authorRole: initial?.authorRole || "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%",
+    authorRole: initial?.authorRole || "مشاريع إنسانية وإغاثية | تدقيق مالي وشفافية 100%",
     publishedAt: initial?.publishedAt ? new Date(initial.publishedAt).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
   });
   const [saving, setSaving] = useState(false);
@@ -167,7 +166,7 @@ export default function CampaignForm({ initial }: { initial?: CampaignData }) {
           </div>
           <div>
             <label className={lbl}>Trust Badge / Role (شارة الاعتماد والترخيص)</label>
-            <input value={form.authorRole} onChange={e => upd("authorRole", e.target.value)} placeholder="e.g. منظمة إنسانية مسجلة ومستقلة" className={inp} />
+            <input value={form.authorRole} onChange={e => upd("authorRole", e.target.value)} placeholder="e.g. مشاريع إنسانية وإغاثية" className={inp} />
           </div>
           <div>
             <label className={lbl}>Publication Date (تاريخ النشر الصريح)</label>

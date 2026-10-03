@@ -47,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
     applicationName: name,
     title: { default: fullName, template: `%s | ${name}` },
     description,
-    keywords: [name, "humanitarian aid", "humanitarian foundation", "donations", "charity", "relief campaigns", "emergency aid", "Gaza donations", "humanitarian crowdfunding"],
+    keywords: [name, "humanitarian aid", "humanitarian foundation", "donations", "charity", "relief campaigns", "emergency aid", "humanitarian donations", "humanitarian crowdfunding"],
     authors: [{ name: fullName, url: siteUrl }],
     creator: fullName,
     publisher: fullName,

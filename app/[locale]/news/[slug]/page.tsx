@@ -217,7 +217,7 @@ export default async function NewsPostPage({
 
   const txtTrustBadge = post.authorRole || post.author_role || (isDestekol
     ? (isAr ? "جمعية Destekol الخيرية المسجلة | تقرير ميداني موثق 100%" : isTr ? "Kayıtlı Destekol hayır derneği | Doğrulanmış saha raporu" : isFr ? "Association caritative Destekol enregistrée | Rapport de terrain vérifié" : "Registered Destekol charitable association | Verified field report")
-    : (isEn ? "Registered Independent NGO | Verified Field Report" : isTr ? "Kayıtlı Bağımsız STK | Doğrulanmış Saha Raporu" : isFr ? "ONG indépendante enregistrée | Rapport de terrain vérifié" : "منظمة إنسانية مسجلة ومستقلة | تقرير ميداني موثق 100%"));
+    : (isEn ? "Humanitarian Relief Projects | Verified Field Report" : isTr ? "İnsani yardım projeleri | Doğrulanmış Saha Raporu" : isFr ? "Projets humanitaires | Rapport de terrain vérifié" : "مشاريع إنسانية وإغاثية | تقرير ميداني موثق 100%"));
 
   const txtPublishedAt = isEn ? "Published:" : isTr ? "Yayınlanma:" : isFr ? "Publié:" : "تاريخ النشر:";
   const txtUpdatedAt = isEn ? "Last Updated:" : isTr ? "Son Güncelleme:" : isFr ? "Dernière mise à jour:" : "آخر تحديث:";

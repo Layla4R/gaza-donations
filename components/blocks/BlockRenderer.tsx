@@ -290,7 +290,7 @@ export default function BlockRenderer({
         {
           title: locale === "ar" ? "مشروع صهاريج مياه الشرب المعقمة" : "Clean Water Tankers Project",
           category: locale === "ar" ? "الإصحاح المائي (WASH)" : "Water & Sanitation",
-          location: locale === "ar" ? "غزة — المخيمات ومراكز الإيواء" : "Gaza — Shelter Camps",
+          location: locale === "ar" ? "المخيمات ومراكز الإيواء" : "Shelter Camps",
           status: locale === "ar" ? "قيد التنفيذ المستمر" : "Active Field Operation",
           image: "https://images.unsplash.com/photo-1542810634-71277d95dcbb?w=800&q=80",
           description: locale === "ar" ? "نقل وتوزيع آلاف اللترات من مياه الشرب المعقمة يومياً على الأسر النازحة للوقاية من تلوث المياه والأمراض." : "Daily distribution of purified drinking water via mobile tankers to displaced families.",
@@ -300,7 +300,7 @@ export default function BlockRenderer({
         {
           title: locale === "ar" ? "المخبز الآلي المجتمعي للوجبات اليومية" : "Community Automatic Bakery Project",
           category: locale === "ar" ? "الأمن الغذائي" : "Food Security",
-          location: locale === "ar" ? "شمال قطاع غزة" : "North Gaza",
+          location: locale === "ar" ? "مناطق تنفيذ المشاريع" : "Project locations",
           status: locale === "ar" ? "استجابة عاجلة" : "Emergency Response",
           image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=800&q=80",
           description: locale === "ar" ? "تشغيل مخبز مجتمعي لإنتاج وتوزيع ربطات الخبز الطازج مجاناً للأسر التي تعاني من المجاعة والجوع الحاد." : "Operating a local bakery to produce and distribute free fresh bread parcels daily.",
@@ -347,7 +347,7 @@ export default function BlockRenderer({
                 "image": item.image,
                 "location": {
                   "@type": "Place",
-                  "name": item.location || "Gaza"
+                  "name": item.location || "Project locations"
                 },
                 "keywords": item.category,
                 "fundraiser": { "@id": `${siteUrl}/#organization` }

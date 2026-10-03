@@ -394,14 +394,14 @@ export default function EmailEditorPage() {
 
   const demoVars: Record<string,string> = {
     donorName:"John Smith", amount:"$50", receiptNumber:"4R-20260712-A1B2",
-    campaign:"Gaza Relief", date:"12/07/2026", type:"One-time",
+    campaign:"Humanitarian Relief", date:"12/07/2026", type:"One-time",
     donorEmail:"john@example.com", provider:"Stripe",
     senderName:"Jane Doe", senderEmail:"jane@example.com",
     message:"I'd like to ask about the campaign...", subject:"Inquiry",
     email:"user@example.com", unsubscribeUrl:"#",
     verifyUrl:"https://forrelief.org/verify-email?token=xxx",
     resetUrl:"https://forrelief.org/reset-password?token=xxx",
-    expiryHours:"24", campaignName:"Gaza Relief", siteUrl:"https://forrelief.org",
+    expiryHours:"24", campaignName:"Humanitarian Relief", siteUrl:"https://forrelief.org",
   };
 
   useEffect(() => {

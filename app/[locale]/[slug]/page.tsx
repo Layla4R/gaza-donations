@@ -15,6 +15,7 @@ import { LOCALES, loadTranslations } from "@/lib/i18n";
 import { PageSection } from "@/lib/blocks";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { getRequestSite } from "@/lib/request-site";
+import CompanyIdentity from "@/components/site/CompanyIdentity";
 import { normalizeDestekolBrandCopy, normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 0;
@@ -110,10 +111,10 @@ const TRUST_TRANSLATIONS: Record<string, Record<string, string>> = {
     fr: "Accréditation ONG & Transparence",
   },
   verifiedSubtitle: {
-    ar: "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%",
-    en: "Registered Independent NGO | 100% Financial Governance",
-    tr: "Kayıtlı Bağımsız STK | %100 Mali Şeffaflık ve Denetim",
-    fr: "ONG Indépendante Enregistrée | Gouvernance Financière 100%",
+    ar: "مشاريع إنسانية وإغاثية | تدقيق مالي وشفافية 100%",
+    en: "Humanitarian Relief Projects | 100% Financial Governance",
+    tr: "İnsani yardım projeleri | %100 Mali Şeffaflık ve Denetim",
+    fr: "Projets humanitaires | Gouvernance Financière 100%",
   },
   foundedLabel: {
     ar: "سنة التأسيس",
@@ -128,10 +129,10 @@ const TRUST_TRANSLATIONS: Record<string, Record<string, string>> = {
     fr: "Statut Juridique",
   },
   legalValue: {
-    ar: "منظمة غير ربحية (NGO)",
-    en: "Registered NGO",
-    tr: "Kayıtlı STK / Vakıf",
-    fr: "ONG Non Lucrative",
+    ar: "شركة خاصة محدودة بالأسهم",
+    en: "Private company limited by shares",
+    tr: "Özel limited şirket",
+    fr: "Société privée à responsabilité limitée",
   },
   transparencyLabel: {
     ar: "الشفافية المالية",
@@ -210,12 +211,6 @@ sectors: {
       en: `Our Projects | ${brandName}`,
       fr: `Nos Projets | ${brandName}`,
       tr: `Projelerimiz | ${brandName}`,
-    },
-    gaza: {
-      ar: `استجابة غزة | ${brandName}`,
-      en: `Gaza Relief & Response | ${brandName}`,
-      fr: `Urgence Gazah | ${brandName}`,
-      tr: `Gazze İnsani Yardım | ${brandName}`,
     },
     partnerships: {
       ar: `الشراكات المؤسسية | ${fullName}`,
@@ -396,6 +391,7 @@ export default async function DynamicPage({
 }) {
   const { slug, locale } = params;
   const { isDestekol, siteUrl, brandName, fullName } = await getDomainContext(locale);
+  if (!isDestekol && slug === "license") notFound();
   const supabase = getSupabaseOrNull();
 
   const [appearanceResult, page, campaigns, dict] = await Promise.all([
@@ -634,6 +630,7 @@ const workSubtitles: Record<string, string> = {
         }}
       />
 
+      {!isDestekol && ["about", "about-us"].includes(slug) && <CompanyIdentity locale={locale} />}
       {isDestekol ? (
         <DestekolPageIntro locale={locale} title={displayTitle} description={displaySubtitle} />
       ) : !isDestekolAboutPage && <header

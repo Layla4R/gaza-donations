@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (pages?.length) {
     for (const page of pages) {
-      if (!page.slug) {
+      if (!page.slug || page.slug === "license") {
         continue;
       }
 

@@ -1,6 +1,8 @@
 
 import { loadTranslations } from "@/lib/i18n";
 import DonateClient from "./client";
+import CompanyIdentity from "@/components/site/CompanyIdentity";
+import { getRequestSite } from "@/lib/request-site";
 
 export default async function DonatePage({
   params: { locale },
@@ -11,6 +13,8 @@ export default async function DonatePage({
 }) {
   const dict = await loadTranslations(locale);
   return (
+    <>
+    {getRequestSite().id !== "destekol" && <CompanyIdentity locale={locale} />}
     <DonateClient
       locale={locale}
       dict={dict}
@@ -19,5 +23,6 @@ export default async function DonatePage({
       campaignId={searchParams?.campaign}
       storyId={searchParams?.story}
     />
+    </>
   );
 }

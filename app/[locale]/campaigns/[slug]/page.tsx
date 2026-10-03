@@ -148,12 +148,12 @@ export default async function CampaignDetailPage({
       ? "Association caritative Destekol enregistrée | Transparence financière à 100%"
       : "Registered Destekol charitable association | 100% Financial Transparency"
     : isEn
-    ? "Registered Independent NGO | 100% Financial Transparency"
+    ? "Humanitarian Relief Projects | 100% Financial Transparency"
     : isTr
-    ? "Kayıtlı Bağımsız STK | %100 Finansal Şeffaflık"
+    ? "İnsani yardım projeleri | %100 Finansal Şeffaflık"
     : isFr
-    ? "ONG indépendante enregistrée | Transparence financière à 100%"
-    : "منظمة إنسانية مسجلة ومستقلة | تدقيق مالي وشفافية 100%");
+    ? "Projets humanitaires | Transparence financière à 100%"
+    : "مشاريع إنسانية وإغاثية | تدقيق مالي وشفافية 100%");
 
   const txtReviewedBy = isEn
     ? "Reviewed & Verified by:"

@@ -5,6 +5,7 @@ import { OFFICIAL_EMAIL, DESTEKOL_ADDRESS } from "@/lib/public-contact";
 
 
 import Link from "next/link";
+import { companyIdentity } from "@/lib/company-identity";
 import Image from "next/image";
 import Icon from "@/components/icons";
 import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
@@ -241,7 +242,7 @@ export default function SiteFooter({
   const safeNavItems = Array.isArray(navItems)
     ? navItems
     : [];
-  const legalItems = LEGAL_SLUGS;
+  const legalItems = isDestekol ? LEGAL_SLUGS : LEGAL_SLUGS.filter(item => item.slug !== "license");
 
   return (
     <footer
@@ -304,13 +305,7 @@ export default function SiteFooter({
                     tr: "Destekol, insani yardım ve kalkınma alanlarında şeffaflık ve sorumlulukla faaliyet gösteren resmî kayıtlı, kâr amacı gütmeyen bir hayır derneğidir.",
                   }
                 )
-              : settings?.footerDescription ||
-                d("footer.description", {
-                  ar: "مؤسسة إنسانية عالمية مسجلة، تعمل بشفافية تامة لإيصال تبرعاتكم عبر منصتها الرقمية وشراكاتها الميدانية.",
-                  en: "A registered independent humanitarian donation platform operating with full transparency.",
-                  fr: "Une plateforme de dons humanitaires indépendante enregistrée fonctionnant en toute transparence.",
-                  tr: "Tam şeffaflıkla faaliyet gösteren kayıtlı bağımsız bir insani yardım bağış platformu.",
-                })}
+              : companyIdentity[locale] || companyIdentity.en}
           </p>
 
           {/* =================================================

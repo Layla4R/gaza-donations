@@ -4,7 +4,15 @@ export const DESTEKOL_EMAIL = "info@destekol.org";
 export const DESTEKOL_ADDRESS = "TAŞDELEN MAH. BUKET SOKAK DIŞKAPI NO: 1-3, İÇKAPI NO: 38, ÇEKMEKÖY / İSTANBUL, TÜRKİYE";
 export const officialEmail = (isDestekol: boolean) => isDestekol ? DESTEKOL_EMAIL : OFFICIAL_EMAIL;
 export function normalizePublicContact<T>(value: T, email = OFFICIAL_EMAIL): T {
-  if (typeof value === "string") return value.replace(/[a-z0-9._%+-]+@(?:forrelief|4relief|destekol)\.org/gi, email) as T;
+  if (typeof value === "string") {
+    let text = value.replace(/[a-z0-9._%+-]+@(?:forrelief|4relief|destekol)\.org/gi, email);
+    if (email === OFFICIAL_EMAIL) text = text
+      .replace(/جمعية خيرية مسجلة|جمعية مسجلة غير ربحية|منظمة غير ربحية(?:\s*\(NGO\))?|مؤسسة غير ربحية|منظمة إنسانية مسجلة ومستقلة/g, 'جهة تعمل في مشاريع إنسانية وإغاثية')
+      .replace(/registered (?:independent )?(?:charit(?:y|able association)|NGO)|non[- ]profit (?:organisation|organization|foundation)/gi, 'humanitarian relief organisation')
+      .replace(/ONG indépendante enregistrée|ONG Indépendante Enregistrée|ONG Non Lucrative/gi, 'Organisation humanitaire')
+      .replace(/Kayıtlı Bağımsız STK|Kayıtlı STK \/ Vakıf/g, 'İnsani yardım projeleri');
+    return text as T;
+  }
   if (Array.isArray(value)) return value.map(item => normalizePublicContact(item, email)) as T;
   if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, normalizePublicContact(item, email)])) as T;
   return value;
