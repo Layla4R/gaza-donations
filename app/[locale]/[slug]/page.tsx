@@ -536,6 +536,14 @@ const workSubtitles: Record<string, string> = {
         tr: "Kayıtlı hayır derneği | %100 mali şeffaflık",
       } as Record<string, string>)[locale] || "Registered charitable association | 100% financial governance";
     }
+    if (!isDestekol && ["verifiedTitle", "verifiedSubtitle", "transparencyValue"].includes(key)) {
+      const companyCopy: Record<string, Record<string, string>> = {
+        verifiedTitle: {ar:"بيانات تسجيل الشركة",en:"Company registration details",fr:"Enregistrement de la société",tr:"Şirket kayıt bilgileri"},
+        verifiedSubtitle: {ar:"FOR RELIEF LTD — مسجلة في إنجلترا وويلز برقم 17306194",en:"FOR RELIEF LTD — registered in England and Wales, number 17306194",fr:"FOR RELIEF LTD — enregistrée en Angleterre et au pays de Galles, numéro 17306194",tr:"FOR RELIEF LTD — İngiltere ve Galler’de kayıtlı, numara 17306194"},
+        transparencyValue: {ar:"معلومات المشاريع والسياسات",en:"Project information and policies",fr:"Informations sur les projets et politiques",tr:"Proje bilgileri ve politikalar"},
+      };
+      return companyCopy[key][locale] || companyCopy[key].en;
+    }
     const value = TRUST_TRANSLATIONS[key]?.[locale] || TRUST_TRANSLATIONS[key]?.en || "";
     return isDestekol ? normalizeDestekolBrandText(value, locale) : value;
   };
@@ -683,7 +691,7 @@ const workSubtitles: Record<string, string> = {
               <span className="block text-slate-700 text-s font-medium">
                 {tTrust("foundedLabel")}
               </span>
-              <strong className="text-slate-900">2026</strong>
+              <strong className="text-slate-900">{isDestekol ? '2026' : '29 / 06 / 2026'}</strong>
             </div>
             <div>
               <span className="block text-slate-700 text-s font-medium">

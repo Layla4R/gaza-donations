@@ -83,7 +83,7 @@ export default function DonateWidget({ locale, dict, primaryColor, accentColor, 
                   { icon: "shield-check" as const, ar: "دفع آمن ومشفر 100%",          en: "100% Secure Payment",        fr: "Paiement 100% Sécurisé",       tr: "100% Güvenli Ödeme" },
                   { icon: "hand-heart"   as const, ar: "وصول مباشر للمستحق",           en: "Direct Impact",              fr: "Impact Direct",                tr: "Doğrudan Etki" },
                   { icon: "file-text"    as const, ar: "تقارير شفافية دورية",         en: "Transparency Reports",       fr: "Rapports de transparence",     tr: "Şeffaflık Raporları" },
-                  { icon: "globe"        as const, ar: "دعم موثوق ومرخص",             en: "Verified & Licensed",        fr: "Vérifié & Certifié",           tr: "Lisanslı ve Güvenilir" },
+                  { icon: "globe"        as const, ar: "بيانات الشركة متاحة للتحقق", en: "Company Registration Available", fr: "Enregistrement de la société consultable", tr: "Şirket kaydı doğrulanabilir" },
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100/80">
                     <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/60 text-brand flex items-center justify-center shrink-0 shadow-sm">

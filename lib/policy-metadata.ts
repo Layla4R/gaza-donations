@@ -1,5 +1,6 @@
 import { policies } from './current-policies';
 import { restoredPolicies } from './restored-policies';
+import { restoredPoliciesEn } from './restored-policies-en';
 import { getRequestSite } from './request-site';
 const titles: Record<string, string[]> = {
   "ar": [
@@ -50,7 +51,7 @@ const titles: Record<string, string[]> = {
 const slugs = ['privacy','terms','refund-policy','cookie-policy','aml-policy','complaints','financial-transparency','how-we-use-donations','license'];
 export function getPolicyMetadata(slug: string, locale: string) {
   if (getRequestSite().id !== 'destekol' && restoredPolicies[slug]) {
-    const { title, description } = restoredPolicies[slug];
+    const { title, description } = (locale === 'en' ? restoredPoliciesEn : restoredPolicies)[slug];
     return { title, description };
   }
   const language = titles[locale] ? locale : 'ar';
