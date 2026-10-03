@@ -1,5 +1,7 @@
 import { getRequestSite } from "@/lib/request-site";
 import HomeTrustContent from "@/components/site/HomeTrustContent";
+import DestekolAnswers from "@/components/site/DestekolAnswers";
+import { getDestekolAnswers } from "@/lib/destekol-answers";
 import { COMPANY_RECORD_URL, getHomeTrustContent } from "@/lib/home-trust-content";
 import { officialEmail } from "@/lib/public-contact";
 import type { Metadata } from "next";
@@ -8,7 +10,6 @@ import { getHomeData } from "@/lib/services/home.service";
 import { headers } from "next/headers";
 import ChatWidget from "@/components/site/ChatWidget";
 import BlockRenderer from "@/components/blocks/BlockRenderer"; // استيراد BlockRenderer
-import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
 
 export const revalidate = 300;
 
@@ -59,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : (OPTIMIZED_HOME_TITLES[locale] || OPTIMIZED_HOME_TITLES.en);
 
   const description = isDestekol
-    ? normalizeDestekolBrandText(getHomeTrustContent(locale).intro, locale)
+    ? getDestekolAnswers(locale).intro
     : getHomeTrustContent(locale).intro;
 
   const currentUrl = `${siteUrl}/${locale}`;
@@ -70,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     alternates: {
       canonical: currentUrl,
-      languages: Object.fromEntries(["ar", "en", "fr", "tr"].map(language => [language, `${siteUrl}/${language}`])),
+      languages: { ...Object.fromEntries(["ar", "en", "fr", "tr"].map(language => [language, `${siteUrl}/${language}`])), "x-default": `${siteUrl}/${isDestekol ? "tr" : "en"}` },
     },
 
     openGraph: {
@@ -136,7 +137,7 @@ export default async function HomePage({ params }: PageProps) {
   const pageUrl = `${siteUrl}/${locale}`;
 
   const description = isDestekol
-    ? normalizeDestekolBrandText(getHomeTrustContent(locale).intro, locale)
+    ? getDestekolAnswers(locale).intro
     : getHomeTrustContent(locale).intro;
 
   const publishedDateISO = data.page?.createdAt;
@@ -171,7 +172,7 @@ export default async function HomePage({ params }: PageProps) {
           url: `${siteUrl}${isDestekol ? "/brand/destekol-logo.png" : "/brand/logo.png"}`,
         },
 
-        areaServed: [
+        ...(!isDestekol ? { areaServed: [
           "Global",
           "United Arab Emirates",
           "Middle East",
@@ -183,7 +184,7 @@ export default async function HomePage({ params }: PageProps) {
           "United Kingdom",
           "United States",
           "Türkiye"
-        ],
+        ] } : {}),
         knowsAbout: [
           "Humanitarian Relief",
           "Emergency Aid",
@@ -233,6 +234,7 @@ export default async function HomePage({ params }: PageProps) {
       ))}
       
       {!isDestekol && <div className="home-section"><HomeTrustContent locale={locale} siteUrl={siteUrl} /></div>}
+      {isDestekol && <div className="home-section"><DestekolAnswers locale={locale} /></div>}
 
       {/* عرض مكون الدردشة بشكل منفصل إذا كان يجب أن يظهر دائماً */}
       <ChatWidget key={locale} locale={locale} />

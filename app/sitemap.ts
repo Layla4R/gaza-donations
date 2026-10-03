@@ -3,9 +3,12 @@ import type { MetadataRoute } from "next";
 import { getSupabaseOrNull } from "@/lib/supabase";
 import { LOCALES } from "@/lib/i18n";
 
-const SITE_URL = "https://forrelief.org";
+import { getRequestSite } from "@/lib/request-site";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const SITE_URL = getRequestSite().url;
   const supabase = getSupabaseOrNull();
 
   // LOCALES is a readonly tuple, so do not cast it to string[].
@@ -147,5 +150,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  return urls;
+  return urls.map(item => {
+    const path = new URL(item.url).pathname.replace(/^\/(ar|en|fr|tr)(?=\/|$)/, "");
+    return {
+      ...item,
+      alternates: {
+        languages: Object.fromEntries(locales.map(locale => [locale, `${SITE_URL}/${locale}${path}`])),
+      },
+    };
+  });
 }

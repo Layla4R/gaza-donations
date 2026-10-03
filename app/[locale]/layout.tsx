@@ -1,3 +1,4 @@
+import { getDestekolAnswers } from "@/lib/destekol-answers";
 import { getRequestSite } from "@/lib/request-site";
 import { PUBLIC_SITE_SETTINGS_SELECT, pickPublicSiteSettings, type PublicSiteSettings } from "@/lib/public-site-settings";
 import { notFound } from "next/navigation";
@@ -92,7 +93,7 @@ export async function generateMetadata({
   const rawTitleText = localeData.title(brandName);
   const titleText = isDestekol ? normalizeDestekolBrandText(rawTitleText, locale) : rawTitleText;
   const description = isDestekol
-    ? normalizeDestekolBrandText(localeData.description, locale)
+    ? getDestekolAnswers(locale).intro
     : localeData.description;
 
   return {
@@ -111,7 +112,7 @@ export async function generateMetadata({
         en: `${siteUrl}/en`,
         fr: `${siteUrl}/fr`,
         tr: `${siteUrl}/tr`,
-        "x-default": `${siteUrl}/en`,
+        "x-default": `${siteUrl}/${isDestekol ? "tr" : "en"}`,
       },
     },
 
@@ -236,8 +237,8 @@ function buildSiteSchemas(
       "@type": "ImageObject",
       url: `${siteUrl}${isDestekol ? "/brand/destekol-logo.png" : "/brand/logo.png"}`,
     },
-    description: localeData.description,
-    areaServed: [
+    description: isDestekol ? getDestekolAnswers(locale).intro : localeData.description,
+    ...(!isDestekol ? { areaServed: [
       "Global",
       "United Arab Emirates",
       "Middle East",
@@ -249,7 +250,7 @@ function buildSiteSchemas(
       "United Kingdom",
       "United States",
       "Türkiye"
-    ],
+    ] } : {}),
     sameAs: [
       settings?.facebookUrl,
       settings?.twitterUrl,
