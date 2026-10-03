@@ -56,11 +56,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const settings: any = data?.settings || {};
 
   const siteTitle = isDestekol
-    ? identity
+    ? (cleanSchemaText(data?.page?.title) || identity)
     : (OPTIMIZED_HOME_TITLES[locale] || OPTIMIZED_HOME_TITLES.en);
 
   const description = isDestekol
-    ? getDestekolAnswers(locale).intro
+    ? (cleanSchemaText(data?.page?.description) || getDestekolAnswers(locale).intro)
     : getHomeTrustContent(locale).intro;
 
   const currentUrl = `${siteUrl}/${locale}`;
@@ -137,7 +137,7 @@ export default async function HomePage({ params }: PageProps) {
   const pageUrl = `${siteUrl}/${locale}`;
 
   const description = isDestekol
-    ? getDestekolAnswers(locale).intro
+    ? (cleanSchemaText(data.page?.description) || getDestekolAnswers(locale).intro)
     : getHomeTrustContent(locale).intro;
 
   const publishedDateISO = data.page?.createdAt;
@@ -150,7 +150,7 @@ export default async function HomePage({ params }: PageProps) {
         "@type": "WebPage",
         "@id": `${pageUrl}/#webpage`,
         url: pageUrl,
-        name: isDestekol ? identity : "4Relief | International Humanitarian Foundation & Emergency Relief",
+        name: isDestekol ? (cleanSchemaText(data.page?.title) || identity) : "4Relief | International Humanitarian Foundation & Emergency Relief",
         description,
         inLanguage: locale,
         ...(publishedDateISO ? { datePublished: publishedDateISO } : {}),

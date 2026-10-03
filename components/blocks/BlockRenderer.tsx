@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/format";
 import DonationWidget from "@/components/site/DonateWidget";
 import ContactForm from "@/components/blocks/ContactForm";
 import NewsletterForm from "@/components/blocks/NewsletterForm";
+import { resolveNewsletterCopy } from "@/lib/newsletter-copy";
 import CampaignCard from "@/components/blocks/CampaignCard";
 import Icon from "@/components/icons";
 import CountUp from "@/components/blocks/CountUp";
@@ -908,6 +909,7 @@ export default function BlockRenderer({
 
     case "newsletter": {
       const destekolNewsletter = context?.isDestekol === true && context?.isHomePage === true;
+      const newsletter = destekolNewsletter ? resolveNewsletterCopy(context?.locale || "tr", p) : p;
       return (
         <section
           className={destekolNewsletter ? "destekol-newsletter-section" : "relative py-16 sm:py-20 text-white overflow-hidden bg-brand transition-colors"}
@@ -918,10 +920,10 @@ export default function BlockRenderer({
           <div className={destekolNewsletter ? "destekol-newsletter-inner" : "relative z-10 max-w-screen-xl mx-auto px-6 text-center"}>
             {!destekolNewsletter && <div className="w-12 h-12 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm"><Icon name="mail" size={22} className="text-white" /></div>}
             <div className={destekolNewsletter ? "destekol-newsletter-copy" : ""}>
-              {p.title && <h2 className={destekolNewsletter ? "" : "font-display text-2xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight"}>{p.title}</h2>}
-              {p.subtitle && <p className={destekolNewsletter ? "" : "text-white/80 mb-8 text-xs sm:text-sm max-w-lg mx-auto"}>{p.subtitle}</p>}
+              {newsletter.title && <h2 className={destekolNewsletter ? "" : "font-display text-2xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight"}>{newsletter.title}</h2>}
+              {newsletter.subtitle && <p className={destekolNewsletter ? "" : "text-white/80 mb-8 text-xs sm:text-sm max-w-lg mx-auto"}>{newsletter.subtitle}</p>}
             </div>
-            <NewsletterForm buttonText={p.buttonText} placeholder={p.placeholder} successText={p.successText} />
+            <NewsletterForm buttonText={newsletter.buttonText} placeholder={newsletter.placeholder} successText={newsletter.successText} />
           </div>
           {destekolNewsletter && <svg className="destekol-newsletter-wave destekol-newsletter-wave--bottom" aria-hidden="true" viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 42c196-59 300 17 492 4 175-12 287-48 474-14s308 37 474-3v51H0Z" fill="currentColor"/></svg>}
         </section>
