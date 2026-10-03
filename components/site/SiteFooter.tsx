@@ -1,7 +1,7 @@
 "use client";
 
 import type { PublicSiteSettings } from "@/lib/public-site-settings";
-import { OFFICIAL_EMAIL, DESTEKOL_ADDRESS } from "@/lib/public-contact";
+import { OFFICIAL_EMAIL, OFFICIAL_PHONE, OFFICIAL_WHATSAPP_URL, DESTEKOL_ADDRESS } from "@/lib/public-contact";
 
 
 import Link from "next/link";
@@ -238,6 +238,10 @@ export default function SiteFooter({
   const contactEmail = isDestekol
     ? DESTEKOL_EMAIL
     : OFFICIAL_EMAIL;
+  const contactPhone = isDestekol ? settings?.contactPhone : OFFICIAL_PHONE;
+  const whatsappUrl = isDestekol
+    ? (settings?.whatsappNumber ? `https://wa.me/${settings.whatsappNumber.replace(/\D/g, "")}` : "")
+    : OFFICIAL_WHATSAPP_URL;
 
   const safeNavItems = Array.isArray(navItems)
     ? navItems
@@ -639,11 +643,11 @@ export default function SiteFooter({
               {isDestekol && <li dir="ltr" className="leading-relaxed break-words">{DESTEKOL_ADDRESS}</li>}
 
               {/* Phone */}
-              {settings?.contactPhone && (
+              {contactPhone && (
                 <li>
                   <a
-                    href={`tel:${settings.contactPhone}`}
-                    aria-label={`Call ${settings.contactPhone}`}
+                    href={`tel:${contactPhone}`}
+                    aria-label={`Call ${contactPhone}`}
                     className="flex items-center gap-2 hover:text-white transition"
                   >
                     <Icon
@@ -652,16 +656,16 @@ export default function SiteFooter({
                       className="text-white/80 shrink-0"
                     />
 
-                    {settings.contactPhone}
+                    <span dir="ltr">{contactPhone}</span>
                   </a>
                 </li>
               )}
 
               {/* WhatsApp */}
-              {settings?.whatsappNumber && (
+              {whatsappUrl && (
                 <li>
                   <a
-                    href={`https://wa.me/${settings.whatsappNumber}`}
+                    href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Contact us on WhatsApp"

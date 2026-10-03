@@ -1,5 +1,7 @@
 import { getRequestSite } from "@/lib/request-site";
-import { officialEmail, DESTEKOL_ADDRESS, normalizePublicContact, launchCopy } from "@/lib/public-contact";
+import CompanyIdentity from "@/components/site/CompanyIdentity";
+import { companyRegisteredAddress } from "@/lib/company-identity";
+import { officialEmail, OFFICIAL_PHONE, OFFICIAL_WHATSAPP_URL, DESTEKOL_ADDRESS, normalizePublicContact, launchCopy } from "@/lib/public-contact";
 import type { Metadata } from "next";
 import { loadTranslations, LOCALES } from "@/lib/i18n";
 import { getSupabaseOrNull } from "@/lib/supabase";
@@ -152,7 +154,7 @@ export default async function ContactPage({
   const street = isDestekol ? "TAŞDELEN MAH. BUKET SOKAK DIŞKAPI NO: 1-3, İÇKAPI NO: 38" : "71-75 Shelton Street, Covent Garden";
   const locality = isDestekol ? "ÇEKMEKÖY / İSTANBUL" : "London";
   const country = isDestekol ? "TÜRKİYE" : "United Kingdom";
-  const contactPhone = settings?.contactPhone || settings?.whatsappNumber || "";
+  const contactPhone = isDestekol ? settings?.contactPhone || settings?.whatsappNumber || "" : OFFICIAL_PHONE;
 
   const mapEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(isDestekol ? DESTEKOL_ADDRESS : "71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, UK")}&z=15&output=embed`;
   const pageUrl = `${SITE_URL}/${locale}/contact`;
@@ -243,7 +245,7 @@ export default async function ContactPage({
   return (
     <div className={isDestekol ? "destekol-contact-page min-h-screen pb-12" : "bg-slate-50/50 min-h-screen pb-12 border-t border-slate-100"}>
       {isDestekol && <DestekolPageIntro locale={locale} title={pageTitle} description={pageDescription} />}
-      {!isDestekol && <section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section>}
+      {!isDestekol && <><CompanyIdentity locale={locale} /><section className="max-w-screen-xl mx-auto p-6" aria-label="Official contact"><p>{copy.contact}</p><p>{copy.response}</p><p>{copy.status}</p></section></>}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(contactSchema) }}
@@ -328,17 +330,21 @@ export default async function ContactPage({
                 {t("الهاتف والواتساب", "Phone / WhatsApp", "Téléphone / WhatsApp", "Telefon / WhatsApp")}
               </span>
               {contactPhone ? <a href={`tel:${contactPhone}`} itemProp="telephone" className="text-slate-900 font-bold block hover:text-brand">
-                {contactPhone}
+                <span dir="ltr">{contactPhone}</span>
               </a> : <span>{contactEmail}</span>}
+              {!isDestekol && <a href={OFFICIAL_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-2 font-bold text-brand hover:underline">
+                <Icon name="message-circle" size={18} />
+                {t("تواصل عبر واتساب", "Chat on WhatsApp", "Contacter sur WhatsApp", "WhatsApp ile iletişime geçin")}
+              </a>}
             </div>
             <div>
               {isDestekol && <div className="destekol-contact-icon"><Icon name="map-pin" size={28} /></div>}
               <span className="block text-slate-700 mb-0.5">
-                {t("المقر الرئيسي", "Headquarters", "Siège Social", "Genel Merkez")}
+                {isDestekol ? t("المقر الرئيسي", "Headquarters", "Siège Social", "Genel Merkez") : t("العنوان المسجل — FOR RELIEF LTD", "Registered office — FOR RELIEF LTD", "Siège social — FOR RELIEF LTD", "Kayıtlı adres — FOR RELIEF LTD")}
               </span>
-              <strong className="text-slate-900 block truncate" itemProp="address" itemScope itemType="http://schema.org/PostalAddress">
+              <strong className="text-slate-900 block break-words" itemProp="address" itemScope itemType="http://schema.org/PostalAddress">
                 {isDestekol && <><span itemProp="streetAddress">{street}</span><br /></>}
-                <span itemProp="addressLocality">{locality}</span>, <span itemProp="addressCountry">{country}</span>
+                {isDestekol ? <><span itemProp="addressLocality">{locality}</span>, <span itemProp="addressCountry">{country}</span></> : <span>{companyRegisteredAddress}</span>}
               </strong>
             </div>
           </div>

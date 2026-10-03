@@ -111,7 +111,24 @@ export default async function HomePage({ params }: PageProps) {
   const rawSections = Array.isArray(pageSections) ? pageSections : [];
   const sections = isDestekol
     ? rawSections.filter((section: any) => section.type !== "projects")
-    : rawSections;
+    : rawSections.map((section: any) => section.type !== "stats" ? section : {
+        ...section,
+        props: {
+          ...section.props,
+          items: (section.props?.items || []).map((item: any) => {
+            // The old percentage was demo data. Display the policy's planning
+            // target explicitly, rather than suggesting measured expenditure.
+            if (!String(item.value).includes("%") || !/field|ميدان|terrain|saha/i.test(String(item.title))) return item;
+            const labels: Record<string, string> = {
+              ar: "الهدف لتخصيص المساعدات المباشرة",
+              en: "Target allocation for direct aid",
+              fr: "Objectif d’allocation à l’aide directe",
+              tr: "Doğrudan yardım için hedef pay",
+            };
+            return { ...item, value: "85%", title: labels[locale] || labels.en };
+          }),
+        },
+      });
 
   const primaryColor = settings?.primaryColor || "#0069D2";
   const accentColor = settings?.accentColor || "#F00F5A";

@@ -1,4 +1,6 @@
 export const OFFICIAL_EMAIL = "info@forrelief.org";
+export const OFFICIAL_PHONE = "+447938426217";
+export const OFFICIAL_WHATSAPP_URL = "https://wa.me/447938426217";
 // Public editorial content only. Never use this on account/customer records.
 export const DESTEKOL_EMAIL = "info@destekol.org";
 export const DESTEKOL_ADDRESS = "TAŞDELEN MAH. BUKET SOKAK DIŞKAPI NO: 1-3, İÇKAPI NO: 38, ÇEKMEKÖY / İSTANBUL, TÜRKİYE";
