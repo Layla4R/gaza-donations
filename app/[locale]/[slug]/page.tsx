@@ -427,7 +427,7 @@ export default async function DynamicPage({
     );
 
   if (hasProjectArticleContent) {
-    const p = isAr ? "" : `/${locale}`;
+    const p = isDestekol || !isAr ? `/${locale}` : "";
     return (
       <>
         {isDestekol && <DestekolPageIntro locale={locale} title={page.title} description={cleanText(page.description) || null} />}

@@ -45,10 +45,17 @@ function getIconTone(icon: string) {
 }
 
 function localizeHref(href: string, locale: string) {
-  if (/^(?:https?:|mailto:|tel:|#)/i.test(href)) return href;
-  const path = href.startsWith("/") ? href : `/${href}`;
-  if (locale === "ar" || path === `/${locale}` || path.startsWith(`/${locale}/`)) return path;
-  return `/${locale}${path}`;
+  if (/^(?:mailto:|tel:|#)/i.test(href)) return href;
+  let path = href;
+  if (/^(?:https?:)?\/\//i.test(href)) {
+    const url = new URL(href, "https://destekol.org");
+    if (!["destekol.org", "www.destekol.org"].includes(url.hostname)) return href;
+    path = `${url.pathname}${url.search}${url.hash}`;
+  }
+  path = path.startsWith("/") ? path : `/${path}`;
+  // Every language needs an explicit prefix: unprefixed Destekol URLs use Turkish.
+  path = path.replace(/^\/(?:ar|en|fr|tr)(?=\/|\?|#|$)/, "");
+  return `/${locale}${path === "/" ? "" : path}`;
 }
 
 export default function DestekolProjectsSection({ data, locale }: { data: Record<string, any>; locale: string }) {

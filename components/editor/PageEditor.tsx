@@ -595,8 +595,7 @@ export default function PageEditor({
                 />
               </div>
 
-              {!isTranslation && (
-                <MediaUpload
+              <MediaUpload
                   value={coverImage || ""}
                   onChange={(url) => {
                     setCoverImage(url);
@@ -605,7 +604,6 @@ export default function PageEditor({
                   label="1. Main Banner Image"
                   type="image"
                 />
-              )}
 
               <div>
                 <label className="block text-[10px] font-bold text-[#6B7280] uppercase mb-1">
@@ -623,8 +621,7 @@ export default function PageEditor({
                 />
               </div>
 
-              {!isTranslation && (
-                <MediaUpload
+              <MediaUpload
                   value={secondaryImage || ""}
                   onChange={(url) => {
                     setSecondaryImage(url);
@@ -633,7 +630,6 @@ export default function PageEditor({
                   label="3. Secondary Inline Image"
                   type="image"
                 />
-              )}
 
               <div>
                 <label className="block text-[10px] font-bold text-[#6B7280] uppercase mb-1">
@@ -667,8 +663,7 @@ export default function PageEditor({
                 />
               </div>
 
-              {!isTranslation && (
-                <div className="space-y-2 pt-2 border-t border-[#E5E7EB]">
+              <div className="space-y-2 pt-2 border-t border-[#E5E7EB]">
                   <label className="block text-[10px] font-bold text-[#6B7280] uppercase">
                     6. Photo Gallery ({gallery.length})
                   </label>
@@ -700,7 +695,6 @@ export default function PageEditor({
                     type="image"
                   />
                 </div>
-              )}
 
               <div className="pt-2 border-t border-[#E5E7EB]">
                 <MediaUpload

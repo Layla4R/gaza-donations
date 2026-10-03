@@ -45,6 +45,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     applicationName: name,
+    icons: isDestekol
+      ? {
+          icon: { url: "/brand/destekol-favicon-v3.png", type: "image/png" },
+          shortcut: "/brand/destekol-favicon-v3.png",
+          apple: "/brand/destekol-favicon-v3.png",
+        }
+      : { icon: "/favicon.ico", apple: "/apple-touch-icon.png" },
     title: { default: fullName, template: `%s | ${name}` },
     description,
     keywords: [name, "humanitarian aid", "humanitarian foundation", "donations", "charity", "relief campaigns", "emergency aid", "humanitarian donations", "humanitarian crowdfunding"],

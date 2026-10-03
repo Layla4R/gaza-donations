@@ -84,7 +84,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
       
       {/* 1. Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-sm font-medium text-slate-500">
-        <Link href={locale === "ar" ? "/" : `/${locale}/`} className="transition hover:text-brand">
+        <Link href={isDestekol || locale !== "ar" ? `/${locale}/` : "/"} className="transition hover:text-brand">
           {dict["nav.home"] || (isAr ? "الرئيسية" : "Home")}
         </Link>
         <span>/</span>
