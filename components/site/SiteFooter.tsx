@@ -173,7 +173,7 @@ export default function SiteFooter({
 }) {
 
 
-  const p = locale === "ar" ? "" : `/${locale}`;
+  const p = isDestekol ? `/${locale}` : locale === "ar" ? "" : `/${locale}`;
 
   const loc: "ar" | "en" | "fr" | "tr" = [
     "ar",
