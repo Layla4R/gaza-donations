@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { getSupabase } from "@/lib/supabase";
+import { revalidatePath } from "next/cache";
 
 export async function GET(req: NextRequest) {
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
@@ -15,14 +16,18 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
-  const { campaignId, locale, title, summary, description } = await req.json();
+  const { campaignId, locale, title, summary, description, authorName, authorRole } = await req.json();
   if (!campaignId || !locale || !title) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   const supabase = getSupabase();
   const { data, error } = await supabase.from("CampaignTranslation").upsert(
-    { campaignId, locale, title, summary: summary || "", description: description || "", updatedAt: new Date().toISOString() },
+    { campaignId, locale, title, summary: summary || "", description: description || "",
+      ...(authorName !== undefined ? { authorName } : {}),
+      ...(authorRole !== undefined ? { authorRole } : {}),
+      updatedAt: new Date().toISOString() },
     { onConflict: "campaignId,locale" }
   ).select("*").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  revalidatePath("/[locale]/campaigns/[slug]", "page");
   return NextResponse.json({ translation: data });
 }
 

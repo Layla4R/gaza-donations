@@ -495,7 +495,8 @@ export default function CampaignCard({
                 <span className="text-sm font-extrabold text-slate-900">
                   {formatCurrency(
                     safeRaised,
-                    "USD"
+                    currency,
+                    locale
                   )}
                 </span>
 
@@ -503,7 +504,8 @@ export default function CampaignCard({
                   {t("of_goal")}{" "}
                   {formatCurrency(
                     safeGoal,
-                    "USD"
+                    currency,
+                    locale
                   )}
                 </span>
               </div>

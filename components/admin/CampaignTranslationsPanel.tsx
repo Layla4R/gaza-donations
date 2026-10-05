@@ -15,11 +15,13 @@ interface Props {
   baseTitle: string;
   baseSummary: string;
   baseDescription: string;
+  baseAuthorName: string;
+  baseAuthorRole: string;
 }
 
-export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseSummary, baseDescription }: Props) {
+export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseSummary, baseDescription, baseAuthorName, baseAuthorRole }: Props) {
   const [activeLocale, setActiveLocale] = useState("en");
-  const [form, setForm] = useState({ title: "", summary: "", description: "" });
+  const [form, setForm] = useState({ title: "", summary: "", description: "", authorName: "", authorRole: "" });
   const [loading, setLoading] = useState(false);
   const [loadingLocale, setLoadingLocale] = useState(false);
   const [translating, setTranslating] = useState(false);
@@ -33,15 +35,15 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
       const res = await adminFetch(`/api/admin/campaigns/translations?campaignId=${campaignId}&locale=${locale}`);
       const d = await res.json();
       if (d.translation) {
-        setForm({ title: d.translation.title, summary: d.translation.summary, description: d.translation.description });
+        setForm({ title: d.translation.title, summary: d.translation.summary, description: d.translation.description, authorName: d.translation.authorName || "", authorRole: d.translation.authorRole || "" });
         setHasTranslation(true);
       } else {
         // Pre-fill with base (Arabic) as starting point
-        setForm({ title: baseTitle, summary: baseSummary, description: baseDescription });
+        setForm({ title: baseTitle, summary: baseSummary, description: baseDescription, authorName: "", authorRole: "" });
         setHasTranslation(false);
       }
     } catch {
-      setForm({ title: baseTitle, summary: baseSummary, description: baseDescription });
+      setForm({ title: baseTitle, summary: baseSummary, description: baseDescription, authorName: "", authorRole: "" });
     } finally {
       setLoadingLocale(false);
       setIsDirty(false);
@@ -59,11 +61,12 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
       const d = { sections: await autoTranslateContent([baseTitle, baseSummary, baseDescription], activeLocale) };
 
       if (d.sections && Array.isArray(d.sections)) {
-        setForm({
+        setForm(f => ({
+          ...f,
           title: d.sections[0] || baseTitle,
           summary: d.sections[1] || baseSummary,
           description: d.sections[2] || baseDescription,
-        });
+        }));
         setIsDirty(true);
         setStatus({ ok: true, msg: "✨ Translated automatically! Click 'Save Translation' to confirm." });
       } else {
@@ -95,7 +98,7 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
       method: "DELETE", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ campaignId, locale: activeLocale }),
     });
-    setForm({ title: baseTitle, summary: baseSummary, description: baseDescription });
+    setForm({ title: baseTitle, summary: baseSummary, description: baseDescription, authorName: "", authorRole: "" });
     setHasTranslation(false);
     setStatus({ ok: true, msg: "Translation deleted. Falls back to Arabic." });
   }
@@ -115,7 +118,7 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
           <h2 className="font-display font-bold text-ink flex items-center gap-2">
             <Icon name="globe" size={18} className="text-brand" /> Content Translations
           </h2>
-          <p className="text-muted text-xs">Translate campaign title, summary, and description for each language.</p>
+          <p className="text-muted text-xs">Translate campaign content, reviewer team and role. Preserve real personal names; translate team names and organisation descriptions.</p>
         </div>
 
         {/* 🌟 زر الترجمة التلقائية */}
@@ -150,6 +153,14 @@ export default function CampaignTranslationsPanel({ campaignId, baseTitle, baseS
 
       {/* Form */}
       <div className="space-y-4">
+        <div>
+          <label htmlFor="campaign-reviewer" className="block text-xs text-muted font-semibold uppercase tracking-wider mb-1.5">Reviewer name / team</label>
+          <input id="campaign-reviewer" value={form.authorName} placeholder={baseAuthorName} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, authorName: e.target.value })); }} className={inp} />
+        </div>
+        <div>
+          <label htmlFor="campaign-reviewer-role" className="block text-xs text-muted font-semibold uppercase tracking-wider mb-1.5">Reviewer role / organisation description</label>
+          <input id="campaign-reviewer-role" value={form.authorRole} placeholder={baseAuthorRole} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, authorRole: e.target.value })); }} className={inp} />
+        </div>
         <div>
           <label className="block text-xs text-muted font-semibold uppercase tracking-wider mb-1.5">Title *</label>
           <input value={form.title} onChange={e => { setIsDirty(true); setForm(f => ({ ...f, title: e.target.value })); }} className={inp} />

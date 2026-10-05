@@ -51,11 +51,13 @@ export const getCampaignDetails = cache(async (slug: string, locale: string) => 
   let displayTitle = campaign.title;
   let displaySummary = campaign.summary;
   let displayDescription = campaign.description;
+  let displayAuthorName = campaign.authorName;
+  let displayAuthorRole = campaign.authorRole;
 
   if (locale !== "ar") {
     const { data: trans } = await supabase
       .from("CampaignTranslation")
-      .select("title, summary, description")
+      .select("title, summary, description, authorName, authorRole")
       .eq("campaignId", campaign.id)
       .eq("locale", locale)
       .maybeSingle();
@@ -64,6 +66,8 @@ export const getCampaignDetails = cache(async (slug: string, locale: string) => 
       if (trans.title) displayTitle = trans.title;
       if (trans.summary) displaySummary = trans.summary;
       if (trans.description) displayDescription = trans.description;
+      if (trans.authorName) displayAuthorName = trans.authorName;
+      if (trans.authorRole) displayAuthorRole = trans.authorRole;
     }
   }
 
@@ -78,6 +82,8 @@ export const getCampaignDetails = cache(async (slug: string, locale: string) => 
     displayTitle,
     displaySummary,
     displayDescription,
+    displayAuthorName,
+    displayAuthorRole,
     updates: updates || [],
   };
 });

@@ -63,6 +63,8 @@ export default async function EditCampaignPage({ params }: { params: { id: strin
         baseTitle={campaign.title}
         baseSummary={campaign.summary}
         baseDescription={campaign.description}
+        baseAuthorName={campaign.authorName || ""}
+        baseAuthorRole={campaign.authorRole || ""}
       />
 
       {/* Campaign Updates */}

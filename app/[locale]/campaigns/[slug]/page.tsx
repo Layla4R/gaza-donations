@@ -120,7 +120,7 @@ export default async function CampaignDetailPage({
   const pct =
     goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
 
-  const cat = categoryMeta(campaign.category);
+  const cat = categoryMeta(campaign.category, locale);
   const p = locale === "ar" ? "" : `/${locale}`;
   const t = (key: string, fallback: string) => dict[key] || fallback;
 
@@ -129,7 +129,7 @@ export default async function CampaignDetailPage({
   const isFr = locale === "fr";
 
   // 🌟 الربط الديناميكي مع بيانات قاعدة البيانات والحقول الجديدة من الأدمن
-  const authorName = campaign.authorName || (isDestekol
+  const authorName = campaign.displayAuthorName || campaign.authorName || (isDestekol
     ? (locale === "ar" ? "فريق Destekol للمتابعة والشفافية" : "Destekol Monitoring & Transparency Team")
     : isEn
     ? "4Relief Field Audit & Transparency Team"
@@ -139,7 +139,7 @@ export default async function CampaignDetailPage({
     ? "Équipe d'audit sur le terrain et de transparence 4Relief"
     : "فريق الرقابة الميدانية والشفافية — 4Relief");
 
-  const authorRole = campaign.authorRole || (isDestekol
+  const authorRole = campaign.displayAuthorRole || campaign.authorRole || (isDestekol
     ? locale === "ar"
       ? "جمعية Destekol الخيرية غير الربحية | تدقيق مالي وشفافية 100%"
       : locale === "tr"
@@ -406,13 +406,13 @@ export default async function CampaignDetailPage({
                   <span>
                     {txtPublishedAt}{" "}
                     <time dateTime={publishedDateISO}>
-                      {new Date(publishedDateISO).toLocaleDateString(locale)}
+                      {new Date(publishedDateISO).toLocaleDateString(locale, { timeZone: "UTC" })}
                     </time>
                   </span>
                   <span>
                     {txtUpdatedAt}{" "}
                     <time dateTime={updatedDateISO}>
-                      {new Date(updatedDateISO).toLocaleDateString(locale)}
+                      {new Date(updatedDateISO).toLocaleDateString(locale, { timeZone: "UTC" })}
                     </time>
                   </span>
                 </div>
@@ -434,10 +434,10 @@ export default async function CampaignDetailPage({
                 {goal > 0 && (
                   <p>
                     <strong>{t("campaigns.target_goal", "الهدف المالي")}:</strong>{" "}
-                    {formatCurrency(goal, "USD")}
+                    {formatCurrency(goal, "USD", locale)}
                     {" | "}
                     <strong>{t("campaigns.raised_so_far", "المجمع حتى الآن")}:</strong>{" "}
-                    {formatCurrency(raised, "USD")} ({pct}%)
+                    {formatCurrency(raised, "USD", locale)} ({new Intl.NumberFormat(locale, { style: "percent" }).format(pct / 100)})
                   </p>
                 )}
                 {summary && (
@@ -460,21 +460,21 @@ export default async function CampaignDetailPage({
                   <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
                     <div>
                       <span className="font-display text-2xl font-black text-slate-900 sm:text-3xl">
-                        {formatCurrency(raised, "USD")}
+                        {formatCurrency(raised, "USD", locale)}
                       </span>
                       <span className="ms-2 text-xs text-slate-500 sm:text-sm">
                         {t("campaigns.of_goal", "من الهدف")}{" "}
-                        {formatCurrency(goal, "USD")}
+                        {formatCurrency(goal, "USD", locale)}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <span className="rounded-xl bg-brand/10 px-3 py-1 text-xs font-extrabold text-brand sm:text-sm">
-                        {pct}%
+                        {new Intl.NumberFormat(locale, { style: "percent" }).format(pct / 100)}
                       </span>
                       <span className="flex items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 sm:text-sm">
                         <Icon name="heart" size={14} className="text-brand" />
-                        {campaign.donorCount || 0}{" "}
+                        {new Intl.NumberFormat(locale).format(campaign.donorCount || 0)}{" "}
                         {t("campaigns.donors", "متبرع")}
                       </span>
                     </div>
@@ -523,7 +523,7 @@ export default async function CampaignDetailPage({
                           dateTime={new Date(u.createdAt).toISOString()}
                           className="rounded-md border border-slate-100 bg-white px-2.5 py-1 text-xs font-medium text-slate-500"
                         >
-                          {new Date(u.createdAt).toLocaleDateString(locale)}
+                          {new Date(u.createdAt).toLocaleDateString(locale, { timeZone: "UTC" })}
                         </time>
                       </div>
                       <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">

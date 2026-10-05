@@ -8,6 +8,7 @@ import { LOCALES, DEFAULT_LOCALE, type Locale } from "./locales";
 // ── Hardcoded fallbacks — used when DB is empty ──────────────
 export const FALLBACKS: Record<string, Record<string, string>> = {
   ar: {
+    "campaigns.category_label": "التصنيف", "campaigns.target_goal": "الهدف المالي", "campaigns.raised_so_far": "المبلغ المحصل",
     "nav.home": "الرئيسية", "nav.campaigns": "الحملات", "nav.news": "الأخبار",
     "nav.donate": "تبرع الآن", "nav.account": "حسابي", "nav.cart": "السلة", "nav.contact": "اتصل بنا",
     "campaigns.title": "الحملات النشطة", "campaigns.subtitle": "اختر الحملة التي تريد دعمها",
@@ -78,6 +79,7 @@ export const FALLBACKS: Record<string, Record<string, string>> = {
     "legal.how_we_use_donations": "كيف نستخدم التبرعات",
   },
   en: {
+    "campaigns.category_label": "Category", "campaigns.target_goal": "Fundraising goal", "campaigns.raised_so_far": "Amount raised",
     "nav.home": "Home", "nav.campaigns": "Campaigns", "nav.news": "News",
     "nav.donate": "Donate Now", "nav.account": "My Account", "nav.cart": "Cart", "nav.contact": "Contact",
     "campaigns.title": "Active Campaigns", "campaigns.subtitle": "Choose a campaign to support",
@@ -146,6 +148,7 @@ export const FALLBACKS: Record<string, Record<string, string>> = {
     "legal.how_we_use_donations": "How We Use Donations",
   },
   fr: {
+    "campaigns.category_label": "Catégorie", "campaigns.target_goal": "Objectif de collecte", "campaigns.raised_so_far": "Montant collecté",
     "nav.home": "Accueil", "nav.campaigns": "Campagnes", "nav.news": "Actualités",
     "nav.donate": "Faire un Don", "nav.account": "Mon Compte", "nav.cart": "Panier", "nav.contact": "Contact",
     "campaigns.title": "Campagnes Actives", "campaigns.subtitle": "Choisissez une campagne",
@@ -214,6 +217,7 @@ export const FALLBACKS: Record<string, Record<string, string>> = {
     "legal.how_we_use_donations": "Utilisation des Dons",
   },
   tr: {
+    "campaigns.category_label": "Kategori", "campaigns.target_goal": "Bağış hedefi", "campaigns.raised_so_far": "Toplanan tutar",
     "nav.home": "Ana Sayfa", "nav.campaigns": "Kampanyalar", "nav.news": "Haberler",
     "nav.donate": "Bağış Yap", "nav.account": "Hesabım", "nav.cart": "Sepet", "nav.contact": "İletişim",
     "campaigns.title": "Aktif Kampanyalar", "campaigns.subtitle": "Desteklemek istediğiniz kampanyayı seçin",
