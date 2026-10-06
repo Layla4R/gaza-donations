@@ -1,3 +1,4 @@
+import { localizePublicContent } from "@/lib/public-content-localization";
 import CookieBanner from "@/components/site/CookieBanner";
 import SiteFooter from "@/components/site/SiteFooter";
 import SiteHeader from "@/components/site/SiteHeader";
@@ -102,11 +103,11 @@ const SLUG_TO_NAV_LABEL: Record<string, Record<string, string>> = {
 async function getSiteData(locale: string) {
     const supabase = getSupabaseOrNull();
     if (!supabase) {
-        return {
+        return localizePublicContent({
             pages: [],
             settings: null,
             dict: {},
-        };
+        }, locale);
     }
     const [pagesRes, settings, dict] = await Promise.all([
         supabase
@@ -127,11 +128,11 @@ async function getSiteData(locale: string) {
     let pages = pagesRes.map((page: any) => {
         const labels = SLUG_TO_NAV_LABEL[page.slug];
         if (!labels)
-            return page;
-        return {
+            return localizePublicContent(page, locale);
+        return localizePublicContent({
             ...page,
             title: labels[locale] || labels.en || page.title,
-        };
+        }, locale);
     });
     if (locale !== "ar" && pagesRes.length > 0) {
         try {
@@ -155,7 +156,7 @@ async function getSiteData(locale: string) {
         catch {
         }
     }
-    return { pages, settings, dict };
+    return localizePublicContent({ pages, settings, dict }, locale);
 }
 function safeJsonLd(data: unknown) {
     return JSON.stringify(data).replace(/</g, "\\u003c");

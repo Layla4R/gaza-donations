@@ -66,11 +66,11 @@ export default function AccountClient({ locale, dict: D, }: {
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="font-display text-3xl font-extrabold text-ink">
-              {D["account.welcome"] || "مرحباً"}، {donor.name}
+              {D["account.welcome"] || "مرحباً"}{locale === "ar" ? "، " : ", "}{donor.name}
             </h1>
             {donor.emailVerified && (<span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-success/10 text-success border border-success/20">
                 <Icon name="shield-check" size={14}/>
-                {locale === "ar" ? "حساب موثق" : "Verified"}
+                {locale === "ar" ? "حساب موثق" : locale === "fr" ? "Vérifié" : locale === "tr" ? "Doğrulandı" : "Verified"}
               </span>)}
           </div>
 

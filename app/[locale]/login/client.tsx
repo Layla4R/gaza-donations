@@ -1,4 +1,5 @@
 "use client";
+import { publicErrorMessage } from "@/lib/public-messages";
 import Icon from "@/components/icons";
 import { countries } from "countries-list";
 import Image from "next/image";
@@ -118,7 +119,7 @@ export default function LoginClient({ locale, dict: D, }: {
             router.refresh();
         }
         catch (e: any) {
-            setError(e.message);
+            setError(publicErrorMessage(e.message, locale));
         }
         finally {
             setLoading(false);
@@ -153,7 +154,7 @@ export default function LoginClient({ locale, dict: D, }: {
             setForm({ name: "", email: "", password: "", confirm: "", country: "" });
         }
         catch (e: any) {
-            setError(e.message);
+            setError(publicErrorMessage(e.message, locale));
         }
         finally {
             setLoading(false);
@@ -264,7 +265,7 @@ export default function LoginClient({ locale, dict: D, }: {
             </label>
             <div className="relative">
               <input required type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => set("password", e.target.value)} className={`${inp} pe-11`}/>
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute top-1/2 -translate-y-1/2 end-3.5 text-muted hover:text-ink transition p-1" aria-label="عرض/إخفاء كلمة المرور">
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute top-1/2 -translate-y-1/2 end-3.5 text-muted hover:text-ink transition p-1" aria-label={locale === "ar" ? "عرض/إخفاء كلمة المرور" : locale === "fr" ? "Afficher/masquer le mot de passe" : locale === "tr" ? "Şifreyi göster/gizle" : "Show/hide password"}>
                 {showPassword ? (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
                     <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
@@ -284,7 +285,7 @@ export default function LoginClient({ locale, dict: D, }: {
               </label>
               <div className="relative">
                 <input required type={showConfirm ? "text" : "password"} value={form.confirm} onChange={(e) => set("confirm", e.target.value)} className={`${inp} pe-11`}/>
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute top-1/2 -translate-y-1/2 end-3.5 text-muted hover:text-ink transition p-1" aria-label="عرض/إخفاء تأكيد كلمة المرور">
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute top-1/2 -translate-y-1/2 end-3.5 text-muted hover:text-ink transition p-1" aria-label={locale === "ar" ? "عرض/إخفاء تأكيد كلمة المرور" : locale === "fr" ? "Afficher/masquer la confirmation du mot de passe" : locale === "tr" ? "Şifre onayını göster/gizle" : "Show/hide password confirmation"}>
                   {showConfirm ? (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
                       <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>

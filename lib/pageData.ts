@@ -1,3 +1,4 @@
+import { localizePublicContent } from "@/lib/public-content-localization";
 import { getSupabaseOrNull } from "./supabase";
 export interface PageData {
     id: string;
@@ -28,7 +29,7 @@ export interface CampaignLite {
 export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageData | null> {
     const supabase = getSupabaseOrNull();
     if (!supabase)
-        return null;
+        return localizePublicContent(null, locale);
     const { data: base } = await supabase
         .from("Page")
         .select("id, slug, title, description, sections, createdAt, updatedAt")
@@ -36,7 +37,7 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
         .eq("isPublished", true)
         .maybeSingle();
     if (!base)
-        return null;
+        return localizePublicContent(null, locale);
     // For non-Arabic locales, check for translation
     if (locale !== "ar") {
         const { data: trans } = await supabase
@@ -46,7 +47,7 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
             .eq("locale", locale)
             .maybeSingle();
         if (trans) {
-            return {
+            return localizePublicContent({
                 id: base.id,
                 slug: base.slug,
                 title: trans.title,
@@ -54,10 +55,10 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
                 sections: trans.sections as any[],
                 createdAt: base.createdAt,
                 updatedAt: trans.updatedAt || base.updatedAt,
-            };
+            }, locale);
         }
     }
-    return {
+    return localizePublicContent({
         id: base.id,
         slug: base.slug,
         title: base.title,
@@ -65,7 +66,7 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
         sections: base.sections as any[],
         createdAt: base.createdAt,
         updatedAt: base.updatedAt,
-    };
+    }, locale);
 }
 /**
  * Get active campaigns with automatic translation fallback based on locale.
@@ -73,7 +74,7 @@ export async function getPageBySlug(slug: string, locale = "ar"): Promise<PageDa
 export async function getCampaignsLite(locale = "ar"): Promise<CampaignLite[]> {
     const supabase = getSupabaseOrNull();
     if (!supabase)
-        return [];
+        return localizePublicContent([], locale);
     try {
         const { data: campaigns } = await supabase
             .from("Campaign")
@@ -82,10 +83,10 @@ export async function getCampaignsLite(locale = "ar"): Promise<CampaignLite[]> {
             .order("isFeatured", { ascending: false })
             .limit(6);
         if (!campaigns || campaigns.length === 0)
-            return [];
+            return localizePublicContent([], locale);
         // إذا كانت اللغة عربية، إرجاع الحملات كما هي
         if (locale === "ar")
-            return campaigns as CampaignLite[];
+            return localizePublicContent(campaigns as CampaignLite[], locale);
         // جلب الترجمات الخاصة باللغة المحددة
         const campaignIds = campaigns.map((c) => c.id);
         const { data: translations } = await supabase
@@ -94,10 +95,10 @@ export async function getCampaignsLite(locale = "ar"): Promise<CampaignLite[]> {
             .in("campaignId", campaignIds)
             .eq("locale", locale);
         if (!translations || translations.length === 0)
-            return campaigns as CampaignLite[];
+            return localizePublicContent(campaigns as CampaignLite[], locale);
         const transMap = new Map(translations.map((t) => [t.campaignId, t]));
         // دمج الترجمة إن وجدت
-        return campaigns.map((campaign) => {
+        return localizePublicContent(campaigns.map((campaign) => {
             const trans = transMap.get(campaign.id);
             if (!trans)
                 return campaign;
@@ -107,10 +108,10 @@ export async function getCampaignsLite(locale = "ar"): Promise<CampaignLite[]> {
                 summary: trans.summary || campaign.summary,
                 description: trans.description || campaign.description,
             };
-        }) as CampaignLite[];
+        }) as CampaignLite[], locale);
     }
     catch (error) {
         console.error("Error loading campaigns with translations:", error);
-        return [];
+        return localizePublicContent([], locale);
     }
 }

@@ -1,4 +1,5 @@
 "use client";
+import { publicErrorMessage } from "@/lib/public-messages";
 import Icon from "@/components/icons";
 import { useState } from "react";
 const AMOUNTS = [5, 10, 25, 50, 100];
@@ -39,7 +40,7 @@ export default function DonateClient({ locale, dict: D, initialAmount, initialFr
             if (d.url)
                 window.location.href = d.url;
             else
-                setError(d.error || D["common.error"] || "Error");
+                setError(publicErrorMessage(d.error || D["common.error"] || "Error", locale));
         }
         catch {
             setError(D["common.error"] || "Error");

@@ -4,6 +4,7 @@ import { launchCopy,normalizePublicContact,officialEmail } from "@/lib/public-co
 import { restoredPolicies } from "@/lib/restored-policies";
 import { restoredPoliciesEn } from "@/lib/restored-policies-en";
 import Link from "next/link";
+import { localizePublicContent } from "@/lib/public-content-localization";
 export default function LegalPageContent({ slug, locale }: {
     slug: string;
     locale: string;
@@ -12,12 +13,12 @@ export default function LegalPageContent({ slug, locale }: {
     const email = officialEmail(!isRestored);
     const copy = normalizePublicContact(launchCopy[locale] || launchCopy.ar, email);
     const restored = locale === 'en' ? restoredPoliciesEn : restoredPolicies;
-    const sections = normalizePublicContact(isRestored ? restored[slug]?.sections : (policies[locale] || policies.ar)[slug], email);
+    const sections = normalizePublicContact(localizePublicContent(isRestored ? restored[slug]?.sections : (policies[locale] || policies.ar)[slug], locale), email);
     if (!sections)
         return null;
     const heading = { ar: "قناة التواصل الرسمية", en: "Official contact", fr: "Contact officiel", tr: "Resmî iletişim" }[locale] || "قناة التواصل الرسمية";
     const updated = { ar: "آخر تحديث: 24 سبتمبر 2026", en: "Updated: 24 September 2026", fr: "Mise à jour : 24 septembre 2026", tr: "Güncelleme: 24 Eylül 2026" }[locale] || "24 September 2026";
-    return <div className="bg-slate-50/50 py-12 border-t border-slate-100" dir={isRestored && locale !== 'en' || locale === "ar" ? "rtl" : "ltr"}>
+    return <div className="bg-slate-50/50 py-12 border-t border-slate-100" dir={locale === "ar" ? "rtl" : "ltr"}>
     <div className="max-w-screen-xl mx-auto px-6">
       {!isRestored && <><p className="mb-4 text-sm text-slate-500">{updated}</p>
       <p className="mb-8 rounded-2xl border border-blue-100 bg-blue-50 p-5 text-slate-800">{copy.status}</p></>}

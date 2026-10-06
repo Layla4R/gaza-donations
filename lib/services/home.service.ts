@@ -1,16 +1,17 @@
+import { localizePublicContent } from "@/lib/public-content-localization";
 import { getPageBySlug } from "@/lib/pageData";
 import { getSupabaseOrNull } from "@/lib/supabase";
 export async function getHomeData(locale: string) {
     const supabase = getSupabaseOrNull();
     if (!supabase) {
-        return {
+        return localizePublicContent({
             page: null,
             settings: null,
             campaigns: [],
             posts: [],
             stats: { total: 0, families: 0 },
             pageSections: [],
-        };
+        }, locale);
     }
     const [page, settingsRes, campaignsRes, postsRes, statsRes] = await Promise.all([
         getPageBySlug("home", locale),
@@ -33,12 +34,12 @@ export async function getHomeData(locale: string) {
             campaigns = campaigns.map((campaign: any) => {
                 const trans: any = transMap.get(campaign.id);
                 if (!trans)
-                    return campaign;
-                return {
+                    return localizePublicContent(campaign, locale);
+                return localizePublicContent({
                     ...campaign,
                     title: trans.title || campaign.title,
                     summary: trans.summary || campaign.summary,
-                };
+                }, locale);
             });
         }
     }
@@ -53,7 +54,7 @@ export async function getHomeData(locale: string) {
             kindnessCampaigns = kindnessCampaigns.map(c => ({ ...c, title: names.get(c.id) || c.title }));
         }
     }
-    return {
+    return localizePublicContent({
         kindnessCampaigns,
         page,
         pageSections: page?.sections || [],
@@ -61,5 +62,5 @@ export async function getHomeData(locale: string) {
         campaigns,
         posts: postsRes.data || [],
         stats: statsRes.data || { total: 0, families: 0 },
-    };
+    }, locale);
 }

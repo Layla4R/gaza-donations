@@ -1,4 +1,5 @@
 "use client";
+import { publicErrorMessage } from "@/lib/public-messages";
 import Icon from "@/components/icons";
 import { countries } from "countries-list";
 import Link from "next/link";
@@ -119,14 +120,14 @@ export default function SettingsClient({ locale, dict: D, }: {
             const d = await res.json();
             setStatus(d.ok
                 ? { ok: true, msg: D["account.saved"] || "تم حفظ التغييرات بنجاح!" }
-                : { ok: false, msg: d.error || "حدث خطأ أثناء الحفظ" });
+                : { ok: false, msg: publicErrorMessage(d.error || "حدث خطأ أثناء الحفظ", locale) });
             if (d.ok) {
                 setForm((f) => ({ ...f, curPw: "", newPw: "", confirm: "" }));
                 router.refresh();
             }
         }
         catch {
-            setStatus({ ok: false, msg: "حدث خطأ في الاتصال بالخادم" });
+            setStatus({ ok: false, msg: publicErrorMessage("حدث خطأ في الاتصال بالخادم", locale) });
         }
         finally {
             setSaving(false);

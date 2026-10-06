@@ -1,3 +1,4 @@
+import { localizePublicText } from "@/lib/public-content-localization";
 import CampaignCard from "@/components/blocks/CampaignCard";
 import Icon from "@/components/icons";
 import { categoryMeta } from "@/lib/categories";
@@ -96,7 +97,7 @@ export default async function CampaignDetailPage({ params, }: {
     const pct = goal > 0 ? Math.min(100, Math.round((raised / goal) * 100)) : 0;
     const cat = categoryMeta(campaign.category, locale);
     const p = locale === "ar" ? "" : `/${locale}`;
-    const t = (key: string, fallback: string) => dict[key] || fallback;
+    const t = (key: string, fallback: string) => dict[key] || localizePublicText(fallback, locale);
     const isEn = locale === "en";
     const isTr = locale === "tr";
     const isFr = locale === "fr";

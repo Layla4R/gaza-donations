@@ -12,7 +12,8 @@ function service(translation) {
     const query = { select() { return query; }, eq() { return query; }, maybeSingle: async () => ({ data: table === "Campaign" ? campaign : translation }), order: async () => ({ data: [] }) };
     return query;
   }};
-  return load("lib/services/campaign.service.ts", { "@/lib/supabase": { getSupabaseOrNull: () => db }, react: { cache: fn => fn } });
+  const localization = load("lib/public-content-localization.ts", { "./generated/public-content-translations.json": { default: require("../lib/generated/public-content-translations.json") } });
+  return load("lib/services/campaign.service.ts", { "@/lib/supabase": { getSupabaseOrNull: () => db }, "@/lib/public-content-localization": localization, react: { cache: fn => fn } });
 }
 test("campaign metadata follows the selected translation while keeping base data intact", async () => {
   for (const locale of ["en", "fr", "tr"]) {

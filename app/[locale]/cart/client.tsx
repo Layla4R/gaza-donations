@@ -1,4 +1,5 @@
 "use client";
+import { publicErrorMessage } from "@/lib/public-messages";
 import Icon from "@/components/icons";
 import Link from "next/link";
 import { useEffect,useState } from "react";
@@ -84,7 +85,7 @@ export default function CartClient({ locale, dict: D }: {
                     window.location.href = d.url;
                 }
                 else {
-                    setError(d.error || t("common.error", "حدث خطأ", "An error occurred", "Une erreur s'est produite", "Bir hata oluştu"));
+                    setError(publicErrorMessage(d.error || t("common.error", "حدث خطأ", "An error occurred", "Une erreur s'est produite", "Bir hata oluştu"), locale));
                 }
             }
             catch {
@@ -115,7 +116,7 @@ export default function CartClient({ locale, dict: D }: {
                 window.location.href = d.url;
             }
             else {
-                setError(d.error || t("common.error", "حدث خطأ", "An error occurred", "Une erreur s'est produite", "Bir hata oluştu"));
+                setError(publicErrorMessage(d.error || t("common.error", "حدث خطأ", "An error occurred", "Une erreur s'est produite", "Bir hata oluştu"), locale));
             }
         }
         catch {

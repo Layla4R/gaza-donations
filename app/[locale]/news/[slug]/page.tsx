@@ -1,3 +1,4 @@
+import { localizePublicContent } from "@/lib/public-content-localization";
 import Icon from "@/components/icons";
 import { LOCALES,loadTranslations } from "@/lib/i18n";
 import { normalizePublicContact,officialEmail } from "@/lib/public-contact";
@@ -71,7 +72,7 @@ async function getPostWithTranslation(slug: string, locale: string) {
         .eq("isPublished", true)
         .maybeSingle();
     if (!post) {
-        return null;
+        return localizePublicContent(null, locale);
     }
     let displayTitle = post.title;
     let displayExcerpt = post.excerpt;
@@ -106,7 +107,7 @@ async function getPostWithTranslation(slug: string, locale: string) {
         displayBody2,
         displayVideoUrl,
     };
-    return result;
+    return localizePublicContent(result, locale);
 }
 export async function generateMetadata({ params, }: {
     params: {

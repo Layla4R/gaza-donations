@@ -1,4 +1,5 @@
 "use client";
+import { publicErrorMessage } from "@/lib/public-messages";
 import Icon from "@/components/icons";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -30,7 +31,7 @@ function ResetClientContent({ locale, dict: D }: {
         const res = await fetch("/api/donor/reset-password", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token, password: pw }) });
         const d = await res.json();
         if (!res.ok) {
-            setError(d.error || "Error");
+            setError(publicErrorMessage(d.error || "Error", locale));
             setLoading(false);
             return;
         }

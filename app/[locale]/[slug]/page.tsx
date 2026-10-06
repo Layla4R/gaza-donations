@@ -1,3 +1,4 @@
+import { localizePublicContent } from "@/lib/public-content-localization";
 import BlockRenderer from "@/components/blocks/BlockRenderer";
 import Icon from "@/components/icons";
 import CompanyIdentity from "@/components/site/CompanyIdentity";
@@ -78,7 +79,7 @@ const LEGAL_TITLES: Record<string, Record<string, string>> = {
         ar: "الشفافية المالية",
         en: "Financial Transparency",
         fr: "Transparence Financière",
-        tr: "Mali Şeffاflık",
+        tr: "Mali Şeffaflık",
     },
     "how-we-use-donations": {
         ar: "كيف نستخدم التبرعات",
@@ -121,7 +122,7 @@ const TRUST_TRANSLATIONS: Record<string, Record<string, string>> = {
     transparencyLabel: {
         ar: "الشفافية المالية",
         en: "Financial Transparency",
-        tr: "Mali Şeffافية",
+        tr: "Mali Şeffaflık",
         fr: "Transparence Financière",
     },
     transparencyValue: {
@@ -254,7 +255,7 @@ function getSchemaType(slug: string) {
 async function getFullPageData(slug: string, locale: string) {
     const supabase = getSupabaseOrNull();
     if (!supabase)
-        return null;
+        return localizePublicContent(null, locale);
     const { data: page } = await supabase
         .from("Page")
         .select("*")
@@ -262,7 +263,7 @@ async function getFullPageData(slug: string, locale: string) {
         .eq("isPublished", true)
         .maybeSingle();
     if (!page)
-        return null;
+        return localizePublicContent(null, locale);
     let title = page.title;
     let description = page.description || "";
     let body = page.body || page.content || "";
@@ -318,7 +319,7 @@ async function getFullPageData(slug: string, locale: string) {
         videoUrl,
         sections,
     };
-    return result;
+    return localizePublicContent(result, locale);
 }
 export async function generateMetadata({ params, }: {
     params: {
@@ -400,6 +401,12 @@ export default async function DynamicPage({ params, }: {
         Boolean(page.body || page.body2 || page.body3 || page.coverImage || page.videoUrl || page.secondaryImage || (Array.isArray(page.gallery) && page.gallery.length > 0));
     if (hasProjectArticleContent) {
         const p = !isAr ? `/${locale}` : "";
+        const projectLabels = ({
+            ar: ["فريق المتابعة والتوثيق الميداني", "مشروع إغاثي موثق ميدانياً | شفافية 100%", "العودة إلى المشاريع", "مشروع إغاثي ميداني"],
+            en: ["Field Monitoring Team", "Verified Field Project | 100% Audited", "Back to Projects", "Relief Project"],
+            fr: ["Équipe de suivi sur le terrain", "Projet de terrain vérifié | Transparence à 100 %", "Retour aux projets", "Projet humanitaire"],
+            tr: ["Saha izleme ekibi", "Doğrulanmış saha projesi | %100 şeffaflık", "Projelere dön", "İnsani yardım projesi"],
+        } as Record<string, string[]>)[locale];
         return (<>
         {false}
         <ProjectArticleLayout hideHeader={isSite} data={{
@@ -414,16 +421,16 @@ export default async function DynamicPage({ params, }: {
                 videoUrl: page.videoUrl || null,
                 publishedAtISO: page.createdAt || new Date().toISOString(),
                 updatedAtISO: page.updatedAt || new Date().toISOString(),
-                authorName: isAr ? "فريق المتابعة والتوثيق الميداني" : "Field Monitoring Team",
-                trustBadge: isAr ? "مشروع إغاثي موثق ميدانياً | شفافية 100%" : "Verified Field Project | 100% Audited",
+                authorName: projectLabels[0],
+                trustBadge: projectLabels[1],
             }} context={{
                 locale,
                 dict,
                 isAr,
                 brandName: fullName,
                 backLink: `${p}/projects`,
-                backText: dict["projects.back"] || (isAr ? "العودة إلى المشاريع" : "Back to Projects"),
-                categoryLabel: isAr ? "مشروع إغاثي ميداني" : "Relief Project",
+                backText: dict["projects.back"] || projectLabels[2],
+                categoryLabel: projectLabels[3],
                 donateUrl: `${p}/donate`,
             }}/>
       </>);

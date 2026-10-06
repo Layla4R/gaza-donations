@@ -17,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import FaqSection from "../site/FaqSection";
 import AboutOverviewSection from "./AboutOverviewSection";
+import { localizePublicContent } from "@/lib/public-content-localization";
 interface RendererContext {
     isHomePage?: boolean;
     campaigns?: CampaignLite[];
@@ -49,7 +50,7 @@ export default function BlockRenderer({ section, context, }: {
 }) {
     const email = officialEmail(!!context?.isSite);
     const rawProps = section.props || (section as any).data || {};
-    const brandedProps = rawProps;
+    const brandedProps = localizePublicContent(rawProps, context?.locale || "ar");
     const dict = context?.dict
         ? context.dict
         : {};

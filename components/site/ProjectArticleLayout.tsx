@@ -41,6 +41,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
     const isSite = false;
     data = normalizePublicContact(data, officialEmail(isSite));
     const { locale, dict, isAr, backLink, backText, categoryLabel, donateUrl } = context;
+    const t = (ar: string, en: string, fr: string, tr: string) => locale === "ar" ? ar : locale === "fr" ? fr : locale === "tr" ? tr : en;
     const youtubeEmbed = getYouTubeEmbedUrl(data.videoUrl);
     const txtWrittenBy = locale === "en" ? "Supervised by:" : locale === "tr" ? "Sorumlu:" : locale === "fr" ? "Supervisé par:" : "إشراف وتوثيق:";
     const txtPublishedAt = locale === "en" ? "Published:" : locale === "tr" ? "Yayınlanma:" : locale === "fr" ? "Publié:" : "تاريخ التوثيق:";
@@ -111,7 +112,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
               </time>
             </span>
             {donateUrl && (<Link href={donateUrl} className="px-6 py-2.5 bg-brand hover:bg-brand/90 text-white font-bold rounded-xl text-sm transition-all shadow-md hover:shadow-lg">
-                {dict["campaign.donate"] || (isAr ? "تبرع الآن للمشروع" : "Donate Now")}
+                {dict["campaigns.donate"] || t("تبرع الآن للمشروع", "Donate Now", "Faire un don", "Bağış yap")}
               </Link>)}
           </div>
         </div>
@@ -126,7 +127,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
       {data.excerpt && (<section className="mb-10 border-s-4 border-brand bg-brand/5 p-5 sm:p-6 rounded-e-2xl text-sm sm:text-base leading-relaxed text-slate-800">
           <strong className="block mb-2 text-sm uppercase tracking-wider text-brand font-bold flex items-center gap-2">
             <Icon name="check-circle" size={18}/>
-            {isAr ? "ملخص المشروع الإغاثي" : "Project Summary"}
+            {t("ملخص المشروع الإغاثي", "Project Summary", "Résumé du projet", "Proje özeti")}
           </strong>
           <p className="font-medium text-slate-700 leading-loose">{data.excerpt}</p>
         </section>)}
@@ -160,7 +161,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
           {data.gallery && data.gallery.length > 0 && (<section className="pt-8 mt-8 border-t border-slate-200">
               <h3 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 mb-5 flex items-center gap-2">
                 <Icon name="image" size={20} className="text-brand"/>
-                {isAr ? "مشاهد وسائط من الميدان" : "Field Photo Gallery"}
+                {t("مشاهد وسائط من الميدان", "Field Photo Gallery", "Photos du terrain", "Saha fotoğrafları")}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {data.gallery.map((imgUrl, idx) => (<div key={idx} className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group">
@@ -175,7 +176,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
             <div className="bg-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-xl border border-slate-800">
               <div className="flex items-center gap-2 mb-3 px-1 text-xs font-bold text-slate-300 uppercase tracking-wider">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"/>
-                {isAr ? "تغطية مرئية خاصة" : "Special Video Coverage"}
+                {t("تغطية مرئية خاصة", "Special Video Coverage", "Reportage vidéo", "Video raporu")}
               </div>
 
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-black border border-slate-700 shadow-inner">
@@ -183,7 +184,7 @@ export default function ProjectArticleLayout({ data, context, hideHeader = false
               </div>
 
               <p className="text-xs text-slate-400 mt-4 px-1 leading-relaxed font-medium">
-                {isAr ? "تقرير توثيقي مصور يستعرض استجابة فرق 4Relief الميدانية للأزمة ومجريات العمل على الأرض." : "Documentary video highlighting 4Relief's field response to the crisis."}
+                {t("تقرير توثيقي مصور يستعرض استجابة فرق 4Relief الميدانية للأزمة ومجريات العمل على الأرض.", "Documentary video highlighting 4Relief's field response to the crisis.", "Une vidéo documentaire présente la réponse des équipes de 4Relief sur le terrain.", "4Relief ekiplerinin sahadaki çalışmalarını gösteren belgesel video.")}
               </p>
             </div>
           </aside>)}

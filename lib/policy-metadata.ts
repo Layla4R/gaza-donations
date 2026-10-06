@@ -1,4 +1,5 @@
 import { policies } from './current-policies';
+import { localizePublicContent } from './public-content-localization';
 import { restoredPolicies } from './restored-policies';
 import { restoredPoliciesEn } from './restored-policies-en';
 const titles: Record<string, string[]> = {
@@ -51,7 +52,7 @@ const slugs = ['privacy', 'terms', 'refund-policy', 'cookie-policy', 'aml-policy
 export function getPolicyMetadata(slug: string, locale: string) {
     if (restoredPolicies[slug]) {
         const { title, description } = (locale === 'en' ? restoredPoliciesEn : restoredPolicies)[slug];
-        return { title, description };
+        return localizePublicContent({ title, description }, locale);
     }
     const language = titles[locale] ? locale : 'ar';
     const title = titles[language][slugs.indexOf(slug)] || slug;

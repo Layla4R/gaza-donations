@@ -1,4 +1,5 @@
 "use client";
+import { publicErrorMessage } from "@/lib/public-messages";
 import Icon from "@/components/icons";
 import { useState } from "react";
 export default function ContactForm({ email, locale = "ar", dict = {} }: {
@@ -22,7 +23,7 @@ export default function ContactForm({ email, locale = "ar", dict = {} }: {
             });
             const d = await res.json();
             if (!res.ok) {
-                setError(d.error || t("حدث خطأ", "Error", "Erreur", "Hata"));
+                setError(publicErrorMessage(d.error || t("حدث خطأ", "Error", "Erreur", "Hata"), locale));
                 setStatus("error");
                 return;
             }
