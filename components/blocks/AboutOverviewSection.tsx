@@ -1,99 +1,55 @@
-import Image from "next/image";
 import Icon from "@/components/icons";
-
+import Image from "next/image";
 interface Props {
-  data?: any;
-  locale?: string;
-  isDestekol?: boolean;
+    data?: any;
+    locale?: string;
+    isSite?: boolean;
 }
-
-export default function AboutOverviewSection({ data, locale = "ar", isDestekol = false }: Props) {
-  const isAr = locale === "ar";
-
-  if (isDestekol) {
-    const heading = isAr ? data?.heading_ar : data?.heading_en || data?.heading_ar;
-    const quote = isAr ? data?.quote_ar : data?.quote_en || data?.quote_ar;
-    const cards = Array.isArray(data?.cards)
-      ? data.cards.map((card: any) => ({
-          title: (isAr ? card.title_ar : card.title_en) || card.title || "",
-          description: (isAr ? card.desc_ar : card.desc_en) || card.description || "",
-          image: card.image || "",
-        })).filter((card: any) => card.title || card.description || card.image)
-      : [];
-
-    if (!heading && !quote && cards.length === 0) return null;
-
-    return (
-      <section className="destekol-about-overview" dir={isAr ? "rtl" : "ltr"}>
-        {(heading || quote) && (
-          <header className="destekol-about-overview-intro">
-            {heading && <h2>{heading}</h2>}
-            {quote && <p>{quote}</p>}
-          </header>
-        )}
-        <div className="destekol-about-overview-list">
-          {cards.map((card: any, index: number) => (
-            <article className={`destekol-about-overview-card${index % 2 ? " is-reversed" : ""}`} key={`${card.title}-${index}`}>
-              {card.image && <figure><Image src={card.image} alt={card.title} fill sizes="(max-width: 768px) 100vw, 42vw" className="object-cover" /></figure>}
-              <div className="destekol-about-overview-copy" dir={isAr ? "rtl" : "ltr"}>
-                {card.title && <h3>{card.title}</h3>}
-                <span aria-hidden="true" />
-                {card.description && <p>{card.description}</p>}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-    );
-  }
-
-  // 🌟 تحويل العنوان إلى صيغة سؤال مباشر يبحث عنه الذكاء الاصطناعي (Question-based H2)
-  const heading = isAr
-    ? data?.heading_ar || "ما هي رؤية مؤسسة 4Relief الإنسانية وكيف تضمن الشفافية المالية؟"
-    : data?.heading_en || "What is the mission of 4Relief Humanitarian Foundation and how is transparency ensured?";
-
-  // 🌟 صياغة فقرة مستقلة (Self-Contained Passage) تشتمل على كثافة إحصائية صريحة
-  const defaultQuote = isAr
-    ? "تلتزم مؤسسة 4Relief Humanitarian Foundation بتقديم الإغاثة الإنسانية المباشرة بأعلى معايير الحوكمة المالية، حيث نطبق نسبة مصاريف تشغيلية لا تتجاوز 5% لضمان وصول 95% من التبرعات لمستحقيها. نجحت المنصة منذ تأسيسها عام 2026 في دعم 150,000+ مستفيد وتغطية 12+ دولة متأثرة بالأزمات بتمويل تجاوز $482,300."
-    : "4Relief Humanitarian Foundation is dedicated to delivering direct emergency relief with maximum financial transparency, maintaining a strict 5% administrative fee cap to ensure 95% of donations reach the field. Since 2026, the foundation has supported 150,000+ beneficiaries across 12 crisis-affected regions with over $482,300 in aid.";
-
-  const quote = isAr
-    ? data?.quote_ar || defaultQuote
-    : data?.quote_en || defaultQuote;
-
-  const cards = data?.cards || [
-    {
-      title_ar: "نسبة اقتطاع تشغيلي 5%",
-      title_en: "5% Administrative Cap",
-      desc_ar: "تضمن مؤسسة 4Relief وصول 95% من أموال التبرعات المباشرة للمشاريع الميدانية والإغاثية.",
-      desc_en: "4Relief Foundation guarantees that 95% of direct donations go straight to field relief projects.",
-      icon: "shield-check",
-    },
-    {
-      title_ar: "150,000+ مستفيد",
-      title_en: "150,000+ Beneficiaries",
-      desc_ar: "وصلت المساعدات الغذائية والطبية والطارئة لأكثر من 150,000 فرد في المجتمعات الأكثر احتياجاً.",
-      desc_en: "Food, medical, and emergency aid reached over 150,000 individuals in vulnerable communities.",
-      icon: "heart",
-    },
-    {
-      title_ar: "12+ دولة ومناطق أزمات",
-      title_en: "12+ Countries Covered",
-      desc_ar: "تغطي استجابة 4Relief الميدانية أكثر من 12 دولة عبر شبكة شركاء موثقين ومعتمدين.",
-      desc_en: "4Relief field response covers more than 12 countries through vetted local partners.",
-      icon: "globe",
-    },
-    {
-      title_ar: "تقارير توثيق كل 30 يوماً",
-      title_en: "30-Day Audit Reports",
-      desc_ar: "تحديثات ميدانية ودوريات تدقيق مالي دورية تمكن المتبرع من تتبع أثر المساعدات بالصور والبيانات.",
-      desc_en: "Field updates and financial audit reports allow donors to track impact with photos and metrics.",
-      icon: "file-text",
-    },
-  ];
-
-  return (
-    <section className="py-12 sm:py-20 bg-slate-50/60 border-t border-slate-100">
+export default function AboutOverviewSection({ data, locale = "ar", isSite = false }: Props) {
+    const isAr = locale === "ar";
+    ;
+    // 🌟 تحويل العنوان إلى صيغة سؤال مباشر يبحث عنه الذكاء الاصطناعي (Question-based H2)
+    const heading = isAr
+        ? data?.heading_ar || "ما هي رؤية مؤسسة 4Relief الإنسانية وكيف تضمن الشفافية المالية؟"
+        : data?.heading_en || "What is the mission of 4Relief Humanitarian Foundation and how is transparency ensured?";
+    // 🌟 صياغة فقرة مستقلة (Self-Contained Passage) تشتمل على كثافة إحصائية صريحة
+    const defaultQuote = isAr
+        ? "تلتزم مؤسسة 4Relief Humanitarian Foundation بتقديم الإغاثة الإنسانية المباشرة بأعلى معايير الحوكمة المالية، حيث نطبق نسبة مصاريف تشغيلية لا تتجاوز 5% لضمان وصول 95% من التبرعات لمستحقيها. نجحت المنصة منذ تأسيسها عام 2026 في دعم 150,000+ مستفيد وتغطية 12+ دولة متأثرة بالأزمات بتمويل تجاوز $482,300."
+        : "4Relief Humanitarian Foundation is dedicated to delivering direct emergency relief with maximum financial transparency, maintaining a strict 5% administrative fee cap to ensure 95% of donations reach the field. Since 2026, the foundation has supported 150,000+ beneficiaries across 12 crisis-affected regions with over $482,300 in aid.";
+    const quote = isAr
+        ? data?.quote_ar || defaultQuote
+        : data?.quote_en || defaultQuote;
+    const cards = data?.cards || [
+        {
+            title_ar: "نسبة اقتطاع تشغيلي 5%",
+            title_en: "5% Administrative Cap",
+            desc_ar: "تضمن مؤسسة 4Relief وصول 95% من أموال التبرعات المباشرة للمشاريع الميدانية والإغاثية.",
+            desc_en: "4Relief Foundation guarantees that 95% of direct donations go straight to field relief projects.",
+            icon: "shield-check",
+        },
+        {
+            title_ar: "150,000+ مستفيد",
+            title_en: "150,000+ Beneficiaries",
+            desc_ar: "وصلت المساعدات الغذائية والطبية والطارئة لأكثر من 150,000 فرد في المجتمعات الأكثر احتياجاً.",
+            desc_en: "Food, medical, and emergency aid reached over 150,000 individuals in vulnerable communities.",
+            icon: "heart",
+        },
+        {
+            title_ar: "12+ دولة ومناطق أزمات",
+            title_en: "12+ Countries Covered",
+            desc_ar: "تغطي استجابة 4Relief الميدانية أكثر من 12 دولة عبر شبكة شركاء موثقين ومعتمدين.",
+            desc_en: "4Relief field response covers more than 12 countries through vetted local partners.",
+            icon: "globe",
+        },
+        {
+            title_ar: "تقارير توثيق كل 30 يوماً",
+            title_en: "30-Day Audit Reports",
+            desc_ar: "تحديثات ميدانية ودوريات تدقيق مالي دورية تمكن المتبرع من تتبع أثر المساعدات بالصور والبيانات.",
+            desc_en: "Field updates and financial audit reports allow donors to track impact with photos and metrics.",
+            icon: "file-text",
+        },
+    ];
+    return (<section className="py-12 sm:py-20 bg-slate-50/60 border-t border-slate-100">
       <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         {/* 🌟 H2 Title formatted as direct query */}
@@ -113,29 +69,14 @@ export default function AboutOverviewSection({ data, locale = "ar", isDestekol =
           {cards.map((card: any, idx: number) => {
             const title = isAr ? card.title_ar : card.title_en;
             const desc = isAr ? card.desc_ar : card.desc_en;
-
-            return (
-              <article
-                key={idx}
-                className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 flex flex-col group text-start"
-              >
+            return (<article key={idx} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 flex flex-col group text-start">
                 {/* Image Container */}
                 <figure className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
-                  {card.image ? (
-                    <Image
-                      src={card.image}
-                      alt={title || "About card image"}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-brand/5 flex items-center justify-center text-brand/30">
-                      <Icon name={card.icon || "globe"} size={36} />
-                    </div>
-                  )}
+                  {card.image ? (<Image src={card.image} alt={title || "About card image"} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-500"/>) : (<div className="w-full h-full bg-brand/5 flex items-center justify-center text-brand/30">
+                      <Icon name={card.icon || "globe"} size={36}/>
+                    </div>)}
                   <figcaption className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full bg-white shadow-md flex items-center justify-center border border-slate-100 text-brand z-10">
-                    <Icon name={card.icon || "globe"} size={20} />
+                    <Icon name={card.icon || "globe"} size={20}/>
                   </figcaption>
                 </figure>
 
@@ -148,12 +89,10 @@ export default function AboutOverviewSection({ data, locale = "ar", isDestekol =
                     {desc}
                   </p>
                 </div>
-              </article>
-            );
-          })}
+              </article>);
+        })}
         </div>
 
       </header>
-    </section>
-  );
+    </section>);
 }

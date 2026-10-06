@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: process.env.NEXT_DIST_DIR || ".next",
+  // Development must never reuse stale production chunks (or overwrite them).
+  distDir: process.env.NEXT_DIST_DIR ||
+    (process.env.NODE_ENV === "development" ? ".next-development" : ".next-production"),
   poweredByHeader: false,
   experimental: { serverComponentsExternalPackages: ["node-edge-tts"] },
   staticPageGenerationTimeout: 180,

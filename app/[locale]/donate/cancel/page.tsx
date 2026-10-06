@@ -1,38 +1,34 @@
-import Link from "next/link";
 import Icon from "@/components/icons";
 import { loadTranslations } from "@/lib/i18n";
 import { getSupabaseOrNull } from "@/lib/supabase";
-
-export default async function DonateCancelPage({
-  params: { locale },
-  searchParams,
-}: {
-  params: { locale: string };
-  searchParams: { donation?: string };
+import Link from "next/link";
+export default async function DonateCancelPage({ params: { locale }, searchParams, }: {
+    params: {
+        locale: string;
+    };
+    searchParams: {
+        donation?: string;
+    };
 }) {
-  const dict = await loadTranslations(locale);
-  const p = locale === "ar" ? "" : `/${locale}`;
-
-  // Mark pending donation as FAILED on cancel
-  const donationId = searchParams?.donation;
-  if (donationId) {
-    const supabase = getSupabaseOrNull();
-    if (supabase) {
-      await supabase
-        .from("Donation")
-        .update({ status: "FAILED" })
-        .eq("id", donationId)
-        .eq("status", "PENDING");
+    const dict = await loadTranslations(locale);
+    const p = locale === "ar" ? "" : `/${locale}`;
+    // Mark pending donation as FAILED on cancel
+    const donationId = searchParams?.donation;
+    if (donationId) {
+        const supabase = getSupabaseOrNull();
+        if (supabase) {
+            await supabase
+                .from("Donation")
+                .update({ status: "FAILED" })
+                .eq("id", donationId)
+                .eq("status", "PENDING");
+        }
     }
-  }
-
-  const t = (key: string, fallback: string) => dict[key] || fallback;
-
-  return (
-    <div className="min-h-[70vh] flex items-center justify-center bg-section-gradient px-6 py-16">
+    const t = (key: string, fallback: string) => dict[key] || fallback;
+    return (<div className="min-h-[70vh] flex items-center justify-center bg-section-gradient px-6 py-16">
       <div className="bg-white rounded-2xl shadow-xl border border-line p-10 max-w-md text-center">
         <div className="w-16 h-16 rounded-full bg-line flex items-center justify-center mx-auto mb-5">
-          <Icon name="x" size={28} className="text-muted" />
+          <Icon name="x" size={28} className="text-muted"/>
         </div>
         <h1 className="font-display text-2xl font-extrabold text-ink mb-3">
           {t("donate.cancel_title", "تم إلغاء التبرع")}
@@ -49,6 +45,5 @@ export default async function DonateCancelPage({
           </Link>
         </div>
       </div>
-    </div>
-  );
+    </div>);
 }

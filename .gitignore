@@ -7,3 +7,6 @@ node_modules
 *.log
 .DS_Store
 /out
+
+.npm-cache/
+tsconfig.tsbuildinfo

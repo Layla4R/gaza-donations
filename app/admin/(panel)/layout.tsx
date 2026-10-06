@@ -1,18 +1,18 @@
-import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
 import Breadcrumb from "@/components/admin/Breadcrumb";
 import { ToastProvider } from "@/components/admin/Toast";
+import { getAdminSession } from "@/lib/auth";
 import { getRequestSite } from "@/lib/request-site";
-
-export default async function AdminPanelLayout({ children }: { children: React.ReactNode }) {
-  const session = await getAdminSession();
-  const allowedRoles = ["ADMIN", "EDITOR", "VIEWER"];
-  if (!session || !allowedRoles.includes(session.role)) redirect("/admin/login");
-
-  return (
-    <ToastProvider>
+import { redirect } from "next/navigation";
+export default async function AdminPanelLayout({ children }: {
+    children: React.ReactNode;
+}) {
+    const session = await getAdminSession();
+    const allowedRoles = ["ADMIN", "EDITOR", "VIEWER"];
+    if (!session || !allowedRoles.includes(session.role))
+        redirect("/admin/login");
+    return (<ToastProvider>
       <div className="flex h-screen overflow-hidden bg-dashbg">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
@@ -25,6 +25,5 @@ export default async function AdminPanelLayout({ children }: { children: React.R
           </main>
         </div>
       </div>
-    </ToastProvider>
-  );
+    </ToastProvider>);
 }

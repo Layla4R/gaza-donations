@@ -1,27 +1,35 @@
-import { getRequestSite } from "@/lib/request-site";
-import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
 import { generateDonationReceiptPDF } from "@/lib/pdfReceipt";
-
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
-  const format = new URL(req.url).searchParams.get("format") || "pdf";
-  const supabase = getSupabase();
-  const { data: d } = await supabase.from("Donation").select("*, campaign:Campaign(title)").eq("id", params.id).maybeSingle();
-  if (!d) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const { data: settings } = await supabase.from("SiteSettings").select("siteName, contactEmail").eq("id", "default").maybeSingle();
-  const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
-  const contactEmail = settings?.contactEmail || "info@forrelief.org";
-  const siteUrl = getRequestSite().url;
-  const receipt = d.receiptNumber || d.id.slice(0, 8).toUpperCase();
-  const date = new Date(d.createdAt).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
-  const amount = `${(d.currency || "USD").toUpperCase()} ${Number(d.amount).toFixed(2)}`;
-  const freq = d.frequency === "MONTHLY" ? "Monthly Recurring" : "One-Time";
-  const campaign = (d.campaign as any)?.title || "General Donation";
-
-  if (format === "html") {
-    const html = `<!DOCTYPE html><html dir="ltr" lang="en"><head><meta charset="UTF-8"/>
+import { getRequestSite } from "@/lib/request-site";
+import { getSupabase } from "@/lib/supabase";
+import { NextRequest,NextResponse } from "next/server";
+export async function GET(req: NextRequest, { params }: {
+    params: {
+        id: string;
+    };
+}) {
+    try {
+        await requireAdmin(req);
+    }
+    catch {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const format = new URL(req.url).searchParams.get("format") || "pdf";
+    const supabase = getSupabase();
+    const { data: d } = await supabase.from("Donation").select("*, campaign:Campaign(title)").eq("id", params.id).maybeSingle();
+    if (!d)
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const { data: settings } = await supabase.from("SiteSettings").select("siteName, contactEmail").eq("id", "default").maybeSingle();
+    const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
+    const contactEmail = settings?.contactEmail || "info@forrelief.org";
+    const siteUrl = getRequestSite().url;
+    const receipt = d.receiptNumber || d.id.slice(0, 8).toUpperCase();
+    const date = new Date(d.createdAt).toLocaleDateString("en-GB", { year: "numeric", month: "long", day: "numeric" });
+    const amount = `${(d.currency || "USD").toUpperCase()} ${Number(d.amount).toFixed(2)}`;
+    const freq = d.frequency === "MONTHLY" ? "Monthly Recurring" : "One-Time";
+    const campaign = (d.campaign as any)?.title || "General Donation";
+    if (format === "html") {
+        const html = `<!DOCTYPE html><html dir="ltr" lang="en"><head><meta charset="UTF-8"/>
 <title>Receipt ${receipt}</title>
 <style>@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}body{font-family:'Cairo',Tahoma,Arial,sans-serif;background:#F4F7FD;padding:40px}
@@ -58,22 +66,21 @@ td{padding:14px 0;font-size:14px}td:first-child{color:#5C6880;width:45%}td:last-
   <button class="btn btn-print" onclick="window.print()">🖨️ Print / Save PDF</button>
   <a class="btn btn-pdf" href="/api/admin/invoices/${d.id}">⬇️ Download PDF</a>
 </div></body></html>`;
-    return new NextResponse(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
-  }
-
-  // Real PDF
-  const pdf = await generateDonationReceiptPDF({
-    donorName: d.isAnonymous ? "Anonymous Donor" : d.donorName,
-    donorEmail: d.donorEmail, amount: Number(d.amount), currency: d.currency || "usd",
-    frequency: d.frequency, receiptNumber: receipt,
-    campaignTitle: campaign, provider: d.provider, donationDate: date,
-    siteName, contactEmail, siteUrl,
-  });
-  const pdfBuffer = pdf instanceof Uint8Array ? pdf.buffer : pdf;
-  return new NextResponse(pdfBuffer as ArrayBuffer, {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="receipt-${receipt}.pdf"`,
-    },
-  });
+        return new NextResponse(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    }
+    // Real PDF
+    const pdf = await generateDonationReceiptPDF({
+        donorName: d.isAnonymous ? "Anonymous Donor" : d.donorName,
+        donorEmail: d.donorEmail, amount: Number(d.amount), currency: d.currency || "usd",
+        frequency: d.frequency, receiptNumber: receipt,
+        campaignTitle: campaign, provider: d.provider, donationDate: date,
+        siteName, contactEmail, siteUrl,
+    });
+    const pdfBuffer = pdf instanceof Uint8Array ? pdf.buffer : pdf;
+    return new NextResponse(pdfBuffer as ArrayBuffer, {
+        headers: {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename="receipt-${receipt}.pdf"`,
+        },
+    });
 }

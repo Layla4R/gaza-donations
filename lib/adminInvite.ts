@@ -1,54 +1,48 @@
 import { getRequestSite } from "@/lib/request-site";
 import crypto from "crypto";
-import { getSupabase } from "./supabase";
 import { sendMail } from "./mailer";
 import { PermissionId } from "./permissions";
-
+import { getSupabase } from "./supabase";
 const INVITE_EXPIRY_HOURS = 48;
-
 export async function createAdminInvite(opts: {
-  email: string;
-  name: string;
-  permissions: PermissionId[];
-  invitedBy: string;
+    email: string;
+    name: string;
+    permissions: PermissionId[];
+    invitedBy: string;
 }) {
-  const supabase = getSupabase();
-
-  // Check if already invited or staff
-  const { data: existing } = await supabase
-    .from("AdminInvite").select("id").eq("email", opts.email.toLowerCase()).maybeSingle();
-  if (existing) throw new Error("ALREADY_INVITED");
-
-  const { data: existingUser } = await supabase
-    .from("User").select("id, isStaff").eq("email", opts.email.toLowerCase()).maybeSingle();
-  if (existingUser?.isStaff) throw new Error("ALREADY_STAFF");
-
-  const token = crypto.randomBytes(40).toString("hex");
-  const expiresAt = new Date(Date.now() + INVITE_EXPIRY_HOURS * 60 * 60 * 1000);
-
-  const { data: invite, error } = await supabase.from("AdminInvite").insert({
-    email: opts.email.toLowerCase(),
-    name: opts.name,
-    token,
-    permissions: opts.permissions,
-    invitedBy: opts.invitedBy,
-    expiresAt: expiresAt.toISOString(),
-  }).select("*").single();
-
-  if (error) throw new Error(error.message);
-
-  // Get site settings for branding
-  const { data: settings } = await supabase.from("SiteSettings")
-    .select("siteName, smtpFrom").eq("id", "default").maybeSingle();
-  const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
-  const siteUrl = getRequestSite().url;
-  const acceptUrl = `${siteUrl}/admin/accept-invite?token=${token}`;
-
-  // Send invite email
-  await sendMail({
-    to: opts.email,
-    subject: `You've been invited to join the ${siteName} Admin Panel`,
-    html: `<!DOCTYPE html>
+    const supabase = getSupabase();
+    // Check if already invited or staff
+    const { data: existing } = await supabase
+        .from("AdminInvite").select("id").eq("email", opts.email.toLowerCase()).maybeSingle();
+    if (existing)
+        throw new Error("ALREADY_INVITED");
+    const { data: existingUser } = await supabase
+        .from("User").select("id, isStaff").eq("email", opts.email.toLowerCase()).maybeSingle();
+    if (existingUser?.isStaff)
+        throw new Error("ALREADY_STAFF");
+    const token = crypto.randomBytes(40).toString("hex");
+    const expiresAt = new Date(Date.now() + INVITE_EXPIRY_HOURS * 60 * 60 * 1000);
+    const { data: invite, error } = await supabase.from("AdminInvite").insert({
+        email: opts.email.toLowerCase(),
+        name: opts.name,
+        token,
+        permissions: opts.permissions,
+        invitedBy: opts.invitedBy,
+        expiresAt: expiresAt.toISOString(),
+    }).select("*").single();
+    if (error)
+        throw new Error(error.message);
+    // Get site settings for branding
+    const { data: settings } = await supabase.from("SiteSettings")
+        .select("siteName, smtpFrom").eq("id", "default").maybeSingle();
+    const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
+    const siteUrl = getRequestSite().url;
+    const acceptUrl = `${siteUrl}/admin/accept-invite?token=${token}`;
+    // Send invite email
+    await sendMail({
+        to: opts.email,
+        subject: `You've been invited to join the ${siteName} Admin Panel`,
+        html: `<!DOCTYPE html>
 <html dir="ltr" lang="en">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Admin Invitation — ${siteName}</title></head>
@@ -101,57 +95,52 @@ export async function createAdminInvite(opts: {
   </div>
 </body>
 </html>`,
-  });
-
-  return invite;
-}
-
-export async function acceptAdminInvite(token: string, password: string) {
-  const bcrypt = await import("bcryptjs");
-  const supabase = getSupabase();
-
-  const { data: invite } = await supabase
-    .from("AdminInvite").select("*").eq("token", token).maybeSingle();
-
-  if (!invite) throw new Error("INVALID_TOKEN");
-  if (invite.acceptedAt) throw new Error("ALREADY_ACCEPTED");
-  if (new Date(invite.expiresAt) < new Date()) throw new Error("TOKEN_EXPIRED");
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  // Check if user already exists
-  const { data: existingUser } = await supabase
-    .from("User").select("id").eq("email", invite.email).maybeSingle();
-
-  if (existingUser) {
-    // Update existing user to staff
-    await supabase.from("User").update({
-      name: invite.name,
-      passwordHash,
-      role: "EDITOR", // Staff always get EDITOR role — ADMIN is reserved for owners
-      isStaff: true,
-      permissions: invite.permissions,
-      invitedBy: invite.invitedBy,
-      emailVerified: true,
-    }).eq("id", existingUser.id);
-  } else {
-    // Create new staff user
-    await supabase.from("User").insert({
-      name: invite.name,
-      email: invite.email,
-      passwordHash,
-      role: "EDITOR", // Staff always get EDITOR role — ADMIN is reserved for owners
-      isStaff: true,
-      permissions: invite.permissions,
-      invitedBy: invite.invitedBy,
-      emailVerified: false,
     });
-  }
-
-  // Mark invite as accepted
-  await supabase.from("AdminInvite")
-    .update({ acceptedAt: new Date().toISOString() })
-    .eq("id", invite.id);
-
-  return { name: invite.name, email: invite.email };
+    return invite;
+}
+export async function acceptAdminInvite(token: string, password: string) {
+    const bcrypt = await import("bcryptjs");
+    const supabase = getSupabase();
+    const { data: invite } = await supabase
+        .from("AdminInvite").select("*").eq("token", token).maybeSingle();
+    if (!invite)
+        throw new Error("INVALID_TOKEN");
+    if (invite.acceptedAt)
+        throw new Error("ALREADY_ACCEPTED");
+    if (new Date(invite.expiresAt) < new Date())
+        throw new Error("TOKEN_EXPIRED");
+    const passwordHash = await bcrypt.hash(password, 12);
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+        .from("User").select("id").eq("email", invite.email).maybeSingle();
+    if (existingUser) {
+        // Update existing user to staff
+        await supabase.from("User").update({
+            name: invite.name,
+            passwordHash,
+            role: "EDITOR", // Staff always get EDITOR role — ADMIN is reserved for owners
+            isStaff: true,
+            permissions: invite.permissions,
+            invitedBy: invite.invitedBy,
+            emailVerified: true,
+        }).eq("id", existingUser.id);
+    }
+    else {
+        // Create new staff user
+        await supabase.from("User").insert({
+            name: invite.name,
+            email: invite.email,
+            passwordHash,
+            role: "EDITOR", // Staff always get EDITOR role — ADMIN is reserved for owners
+            isStaff: true,
+            permissions: invite.permissions,
+            invitedBy: invite.invitedBy,
+            emailVerified: false,
+        });
+    }
+    // Mark invite as accepted
+    await supabase.from("AdminInvite")
+        .update({ acceptedAt: new Date().toISOString() })
+        .eq("id", invite.id);
+    return { name: invite.name, email: invite.email };
 }

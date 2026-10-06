@@ -1,85 +1,94 @@
-import { getRequestSite } from "@/lib/request-site";
-import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { getSupabase } from "@/lib/supabase";
 import { sendMail } from "@/lib/mailer";
-
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
-  const supabase = getSupabase();
-  const { data: updates } = await supabase
-    .from("CampaignUpdate")
-    .select("*")
-    .eq("campaignId", params.id)
-    .order("createdAt", { ascending: false })
-    .limit(50);
-  return NextResponse.json({ updates: updates || [] });
+import { getRequestSite } from "@/lib/request-site";
+import { getSupabase } from "@/lib/supabase";
+import { NextRequest,NextResponse } from "next/server";
+export async function GET(req: NextRequest, { params }: {
+    params: {
+        id: string;
+    };
+}) {
+    try {
+        await requireAdmin(req);
+    }
+    catch {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const supabase = getSupabase();
+    const { data: updates } = await supabase
+        .from("CampaignUpdate")
+        .select("*")
+        .eq("campaignId", params.id)
+        .order("createdAt", { ascending: false })
+        .limit(50);
+    return NextResponse.json({ updates: updates || [] });
 }
-
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  try { await requireAdmin(req); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
-
-  const { title, body, notifyDonors } = await req.json();
-  if (!title || !body) return NextResponse.json({ error: "Title and body required" }, { status: 400 });
-
-  const supabase = getSupabase();
-
-  // Save the update
-  const { data: update, error } = await supabase
-    .from("CampaignUpdate")
-    .insert({ campaignId: params.id, title, body })
-    .select("*")
-    .single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  // Load campaign + settings in parallel
-  const [{ data: campaign }, { data: settings }] = await Promise.all([
-    supabase.from("Campaign").select("title, slug").eq("id", params.id).maybeSingle(),
-    supabase.from("SiteSettings").select("siteName, contactEmail, primaryColor, accentColor").eq("id", "default").maybeSingle(),
-  ]);
-
-  const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
-  const primaryColor = (settings as any)?.primaryColor || "#0069D2";
-  const accentColor = (settings as any)?.accentColor || "#F00F5A";
-  const siteUrl = getRequestSite().url;
-
-  let emailsSent = 0;
-  let failedEmails = 0;
-  let donationsData: any[] | null = null;
-
-  if (notifyDonors && campaign) {
-    const { data: donations } = await supabase
-      .from("Donation")
-      .select("donorName, donorEmail")
-      .eq("campaignId", params.id)
-      .eq("status", "COMPLETED")
-      .eq("isAnonymous", false)
-      .limit(1000); // Note: if campaign has >1000 donors, not all will be notified
-    donationsData = donations;
-
-    // Deduplicate by email
-    const seen = new Set<string>();
-    const donors = (donations || []).filter((d: any) => {
-      if (seen.has(d.donorEmail)) return false;
-      seen.add(d.donorEmail);
-      return true;
-    });
-
-    // Escape HTML to prevent XSS in email body
-    const escapeHtml = (s: string) => s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-
-    await Promise.allSettled(donors.map(async (donor: any) => {
-      try {
-        // Use AR locale URL as default (most donors are Arabic speakers)
-        const campaignUrl = `${siteUrl}/ar/campaigns/${campaign.slug}`;
-        const sent = await sendMail({
-          to: donor.donorEmail,
-          subject: `Update: ${campaign.title} — ${title}`,
-          html: `<!DOCTYPE html>
+export async function POST(req: NextRequest, { params }: {
+    params: {
+        id: string;
+    };
+}) {
+    try {
+        await requireAdmin(req);
+    }
+    catch {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const { title, body, notifyDonors } = await req.json();
+    if (!title || !body)
+        return NextResponse.json({ error: "Title and body required" }, { status: 400 });
+    const supabase = getSupabase();
+    // Save the update
+    const { data: update, error } = await supabase
+        .from("CampaignUpdate")
+        .insert({ campaignId: params.id, title, body })
+        .select("*")
+        .single();
+    if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    // Load campaign + settings in parallel
+    const [{ data: campaign }, { data: settings }] = await Promise.all([
+        supabase.from("Campaign").select("title, slug").eq("id", params.id).maybeSingle(),
+        supabase.from("SiteSettings").select("siteName, contactEmail, primaryColor, accentColor").eq("id", "default").maybeSingle(),
+    ]);
+    const siteName = settings?.siteName || "4Relief Humanitarian Foundation";
+    const primaryColor = (settings as any)?.primaryColor || "#0069D2";
+    const accentColor = (settings as any)?.accentColor || "#F00F5A";
+    const siteUrl = getRequestSite().url;
+    let emailsSent = 0;
+    let failedEmails = 0;
+    let donationsData: any[] | null = null;
+    if (notifyDonors && campaign) {
+        const { data: donations } = await supabase
+            .from("Donation")
+            .select("donorName, donorEmail")
+            .eq("campaignId", params.id)
+            .eq("status", "COMPLETED")
+            .eq("isAnonymous", false)
+            .limit(1000); // Note: if campaign has >1000 donors, not all will be notified
+        donationsData = donations;
+        // Deduplicate by email
+        const seen = new Set<string>();
+        const donors = (donations || []).filter((d: any) => {
+            if (seen.has(d.donorEmail))
+                return false;
+            seen.add(d.donorEmail);
+            return true;
+        });
+        // Escape HTML to prevent XSS in email body
+        const escapeHtml = (s: string) => s
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        await Promise.allSettled(donors.map(async (donor: any) => {
+            try {
+                // Use AR locale URL as default (most donors are Arabic speakers)
+                const campaignUrl = `${siteUrl}/ar/campaigns/${campaign.slug}`;
+                const sent = await sendMail({
+                    to: donor.donorEmail,
+                    subject: `Update: ${campaign.title} — ${title}`,
+                    html: `<!DOCTYPE html>
 <html dir="ltr" lang="en">
 <body style="margin:0;padding:40px 0;background:#F4F7FD;font-family:Cairo,Tahoma,Arial,sans-serif;">
   <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #DDE4F0;">
@@ -106,17 +115,18 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   </div>
 </body>
 </html>`,
-        });
-        if (sent) emailsSent++;
-        else failedEmails++;
-      } catch {
-        failedEmails++;
-      }
-    }));
-  }
-
-  const donorLimitReached = (donationsData?.length || 0) >= 1000;
-  return NextResponse.json({ ok: true, update, emailsSent, failedEmails, donorLimitReached });
+                });
+                if (sent)
+                    emailsSent++;
+                else
+                    failedEmails++;
+            }
+            catch {
+                failedEmails++;
+            }
+        }));
+    }
+    const donorLimitReached = (donationsData?.length || 0) >= 1000;
+    return NextResponse.json({ ok: true, update, emailsSent, failedEmails, donorLimitReached });
 }
-
 // DELETE is handled by /[updateId]/route.ts

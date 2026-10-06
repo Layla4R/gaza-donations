@@ -1,12 +1,9 @@
-import { NextResponse } from "next/server";
 import { getCurrentDonor } from "@/lib/donorAuth";
-
+import { NextResponse } from "next/server";
 export async function GET() {
-  const user = await getCurrentDonor();
-  
-  if (!user) {
-    return NextResponse.json({ user: null }, { status: 401 });
-  }
-  
-  return NextResponse.json({ user });
+    const user = await getCurrentDonor();
+    if (!user) {
+        return NextResponse.json({ user: null }, { status: 401 });
+    }
+    return NextResponse.json({ user });
 }

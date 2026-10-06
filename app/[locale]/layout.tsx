@@ -1,314 +1,232 @@
-import { getDestekolAnswers } from "@/lib/destekol-answers";
-import { getRequestSite } from "@/lib/request-site";
-import { PUBLIC_SITE_SETTINGS_SELECT, pickPublicSiteSettings, type PublicSiteSettings } from "@/lib/public-site-settings";
-import { notFound } from "next/navigation";
-import Script from "next/script";
+import CookieBanner from "@/components/site/CookieBanner";
+import SiteFooter from "@/components/site/SiteFooter";
+import SiteHeader from "@/components/site/SiteHeader";
+import SocialSidebar from "@/components/site/SocialSidebar";
+import WhatsAppButton from "@/components/site/WhatsAppButton";
+import { LOCALES,loadTranslations,type Locale,} from "@/lib/i18n";
+import { PUBLIC_SITE_SETTINGS_SELECT,pickPublicSiteSettings,type PublicSiteSettings } from "@/lib/public-site-settings";
+import { getSupabaseOrNull } from "@/lib/supabase";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-
-import SiteHeader from "@/components/site/SiteHeader";
-import SiteFooter from "@/components/site/SiteFooter";
-import WhatsAppButton from "@/components/site/WhatsAppButton";
-import SocialSidebar from "@/components/site/SocialSidebar";
-import CookieBanner from "@/components/site/CookieBanner";
-import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
-
-import { getSupabaseOrNull } from "@/lib/supabase";
-import {
-  LOCALES,
-  loadTranslations,
-  type Locale,
-} from "@/lib/i18n";
-
+import { notFound } from "next/navigation";
+import Script from "next/script";
 // Each domain has independent CMS data; do not reuse generated HTML between sites.
 export const dynamic = "force-dynamic";
-
-const LOCALE_METADATA: Record<
-  string,
-  {
+const LOCALE_METADATA: Record<string, {
     title: (brand: string) => string;
     description: string;
     ogLocale: string;
-  }
-> = {
-  ar: {
-    title: (brand) => `${brand} | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)`,
-    description:
-      "نبني جسور العطاء ونحوّل التعاطف الإنساني إلى أثر مستدام من خلال حملات ومشاريع إنسانية شفافة.",
-    ogLocale: "ar_AR",
-  },
-
-  en: {
-    title: (brand) => `${brand} | International Humanitarian Foundation & Emergency Relief`,
-    description:
-      "Connects donors with transparent humanitarian campaigns and sustainable relief projects worldwide.",
-    ogLocale: "en_US",
-  },
-
-  fr: {
-    title: (brand) => `${brand} | Fondation Humanitaire Internationale & Secours d'Urgence`,
-    description:
-      "Relie les donateurs à des campagnes humanitaires transparentes et à des projets durables.",
-    ogLocale: "fr_FR",
-  },
-
-  tr: {
-    title: (brand) => `${brand} | Uluslararası İnsani Yardım Vakfı`,
-    description:
-      "Bağışçıları şeffaf insani yardım kampanyaları ve sürdürülebilir projelerle buluşturur.",
-    ogLocale: "tr_TR",
-  },
+}> = {
+    ar: {
+        title: (brand) => `${brand} | منظمة إغاثة وإنسانية دولية (Humanitarian Foundation)`,
+        description: "نبني جسور العطاء ونحوّل التعاطف الإنساني إلى أثر مستدام من خلال حملات ومشاريع إنسانية شفافة.",
+        ogLocale: "ar_AR",
+    },
+    en: {
+        title: (brand) => `${brand} | International Humanitarian Foundation & Emergency Relief`,
+        description: "Connects donors with transparent humanitarian campaigns and sustainable relief projects worldwide.",
+        ogLocale: "en_US",
+    },
+    fr: {
+        title: (brand) => `${brand} | Fondation Humanitaire Internationale & Secours d'Urgence`,
+        description: "Relie les donateurs à des campagnes humanitaires transparentes et à des projets durables.",
+        ogLocale: "fr_FR",
+    },
+    tr: {
+        title: (brand) => `${brand} | Uluslararası İnsani Yardım Vakfı`,
+        description: "Bağışçıları şeffaf insani yardım kampanyaları ve sürdürülebilir projelerle buluşturur.",
+        ogLocale: "tr_TR",
+    },
 };
-
 async function getDomainInfo(locale = "en") {
-  const headerList = await headers();
-  const host = headerList.get("host") || "";
-  const isDestekol = getRequestSite().id === "destekol";
-  
-  const siteUrl = isDestekol
-    ? "https://destekol.org"
-    : (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
-
-  const brandName = isDestekol ? "Destekol" : "4Relief";
-  const fullName = isDestekol
-    ? ({ ar: "جمعية Destekol الخيرية غير الربحية", en: "Destekol Charitable Non-Profit Association", fr: "Association caritative Destekol à but non lucratif", tr: "Destekol kâr amacı gütmeyen hayır derneği" } as Record<string, string>)[locale] || "Destekol Charitable Non-Profit Association"
-    : "4Relief Humanitarian Foundation";
-
-  return { isDestekol, siteUrl, brandName, fullName };
+    const headerList = await headers();
+    const host = headerList.get("host") || "";
+    const isSite = false;
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://forrelief.org");
+    const brandName = "4Relief";
+    const fullName = "4Relief Humanitarian Foundation";
+    return { isSite, siteUrl, brandName, fullName };
 }
-
-export async function generateMetadata({
-  params,
-}: {
-  params: { locale: string };
+export async function generateMetadata({ params, }: {
+    params: {
+        locale: string;
+    };
 }): Promise<Metadata> {
-  const { locale } = params;
-  const { isDestekol, siteUrl, brandName, fullName } = await getDomainInfo(locale);
-
-  const localeData =
-    LOCALE_METADATA[locale] ||
-    LOCALE_METADATA.en;
-
-  const currentUrl = `${siteUrl}/${locale}`;
-  const rawTitleText = localeData.title(brandName);
-  const titleText = isDestekol ? normalizeDestekolBrandText(rawTitleText, locale) : rawTitleText;
-  const description = isDestekol
-    ? getDestekolAnswers(locale).intro
-    : localeData.description;
-
-  return {
-    title: {
-      default: titleText,
-      template: `%s | ${fullName}`,
-    },
-
-    description,
-
-    alternates: {
-      canonical: currentUrl,
-
-      languages: {
-        ar: `${siteUrl}/ar`,
-        en: `${siteUrl}/en`,
-        fr: `${siteUrl}/fr`,
-        tr: `${siteUrl}/tr`,
-        "x-default": `${siteUrl}/${isDestekol ? "tr" : "en"}`,
-      },
-    },
-
-    openGraph: {
-      type: "website",
-      url: currentUrl,
-      siteName: fullName,
-      title: titleText,
-      description,
-      locale: localeData.ogLocale,
-    },
-
-    twitter: {
-      card: "summary_large_image",
-      title: titleText,
-      description,
-    },
-  };
+    const { locale } = params;
+    const { isSite, siteUrl, brandName, fullName } = await getDomainInfo(locale);
+    const localeData = LOCALE_METADATA[locale] ||
+        LOCALE_METADATA.en;
+    const currentUrl = `${siteUrl}/${locale}`;
+    const rawTitleText = localeData.title(brandName);
+    const titleText = rawTitleText;
+    const description = localeData.description;
+    return {
+        title: {
+            default: titleText,
+            template: `%s | ${fullName}`,
+        },
+        description,
+        alternates: {
+            canonical: currentUrl,
+            languages: {
+                ar: `${siteUrl}/ar`,
+                en: `${siteUrl}/en`,
+                fr: `${siteUrl}/fr`,
+                tr: `${siteUrl}/tr`,
+                "x-default": `${siteUrl}/${"en"}`,
+            },
+        },
+        openGraph: {
+            type: "website",
+            url: currentUrl,
+            siteName: fullName,
+            title: titleText,
+            description,
+            locale: localeData.ogLocale,
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: titleText,
+            description,
+        },
+    };
 }
-
-const SLUG_TO_NAV_LABEL: Record<
-  string,
-  Record<string, string>
-> = {
-  about: { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
-  "about-us": { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
-  contact: { ar: "اتصل بنا", en: "Contact", fr: "Contact", tr: "İletişim" },
-  transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
-  "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
-  "how-we-work": { ar: "كيف نعمل", en: "How We Work", fr: "Comment ça marche", tr: "Nasıl Çalışırız" },
+const SLUG_TO_NAV_LABEL: Record<string, Record<string, string>> = {
+    about: { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
+    "about-us": { ar: "من نحن", en: "About Us", fr: "À Propos", tr: "Hakkımızda" },
+    contact: { ar: "اتصل بنا", en: "Contact", fr: "Contact", tr: "İletişim" },
+    transparency: { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+    "financial-transparency": { ar: "الشفافية", en: "Transparency", fr: "Transparence", tr: "Şeffaflık" },
+    "how-we-work": { ar: "كيف نعمل", en: "How We Work", fr: "Comment ça marche", tr: "Nasıl Çalışırız" },
 };
-
 async function getSiteData(locale: string) {
-  const supabase = getSupabaseOrNull();
-
-  if (!supabase) {
-    return {
-      pages: [],
-      settings: null,
-      dict: {},
-    };
-  }
-
-  const [pagesRes, settings, dict] = await Promise.all([
-    supabase
-      .from("Page")
-      .select("id,slug,title")
-      .eq("isPublished", true)
-      .eq("showInMenu", true)
-      .order("order", { ascending: true })
-      .then((result) => result.data || []),
-
-    supabase
-      .from("SiteSettings")
-      .select(PUBLIC_SITE_SETTINGS_SELECT)
-      .eq("id", "default")
-      .maybeSingle()
-      .then((result) => pickPublicSiteSettings(result.data)),
-
-    loadTranslations(locale),
-  ]);
-
-  let pages = pagesRes.map((page: any) => {
-    const labels = SLUG_TO_NAV_LABEL[page.slug];
-    if (!labels) return page;
-
-    return {
-      ...page,
-      title: labels[locale] || labels.en || page.title,
-    };
-  });
-
-  if (locale !== "ar" && pagesRes.length > 0) {
-    try {
-      const ids = pagesRes.map((page: any) => page.id);
-      const { data: translations } = await supabase
-        .from("PageTranslation")
-        .select("pageId,title")
-        .eq("locale", locale)
-        .in("pageId", ids);
-
-      if (translations?.length) {
-        const translationMap: Record<string, string> = {};
-        for (const translation of translations) {
-          translationMap[translation.pageId] = translation.title;
-        }
-
-        pages = pages.map((page: any) => ({
-          ...page,
-          title: translationMap[page.id] || page.title,
-        }));
-      }
-    } catch {
-      // Use original titles
+    const supabase = getSupabaseOrNull();
+    if (!supabase) {
+        return {
+            pages: [],
+            settings: null,
+            dict: {},
+        };
     }
-  }
-
-  return { pages, settings, dict };
+    const [pagesRes, settings, dict] = await Promise.all([
+        supabase
+            .from("Page")
+            .select("id,slug,title")
+            .eq("isPublished", true)
+            .eq("showInMenu", true)
+            .order("order", { ascending: true })
+            .then((result) => result.data || []),
+        supabase
+            .from("SiteSettings")
+            .select(PUBLIC_SITE_SETTINGS_SELECT)
+            .eq("id", "default")
+            .maybeSingle()
+            .then((result) => pickPublicSiteSettings(result.data)),
+        loadTranslations(locale),
+    ]);
+    let pages = pagesRes.map((page: any) => {
+        const labels = SLUG_TO_NAV_LABEL[page.slug];
+        if (!labels)
+            return page;
+        return {
+            ...page,
+            title: labels[locale] || labels.en || page.title,
+        };
+    });
+    if (locale !== "ar" && pagesRes.length > 0) {
+        try {
+            const ids = pagesRes.map((page: any) => page.id);
+            const { data: translations } = await supabase
+                .from("PageTranslation")
+                .select("pageId,title")
+                .eq("locale", locale)
+                .in("pageId", ids);
+            if (translations?.length) {
+                const translationMap: Record<string, string> = {};
+                for (const translation of translations) {
+                    translationMap[translation.pageId] = translation.title;
+                }
+                pages = pages.map((page: any) => ({
+                    ...page,
+                    title: translationMap[page.id] || page.title,
+                }));
+            }
+        }
+        catch {
+        }
+    }
+    return { pages, settings, dict };
 }
-
 function safeJsonLd(data: unknown) {
-  return JSON.stringify(data).replace(/</g, "\\u003c");
+    return JSON.stringify(data).replace(/</g, "\\u003c");
 }
-
-function buildSiteSchemas(
-  locale: string, 
-  settings: PublicSiteSettings | null,
-  localeData: { description: string }, 
-  siteUrl: string, 
-  fullName: string, 
-  brandName: string,
-  isDestekol: boolean
-) {
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": ["NGO", "Organization"],
-    "@id": `${siteUrl}/#organization`,
-    name: fullName,
-    alternateName: isDestekol ? ["Destekol", fullName] : ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
-    url: siteUrl,
-    logo: {
-      "@type": "ImageObject",
-      url: `${siteUrl}${isDestekol ? "/brand/destekol-logo.png" : "/brand/logo.png"}`,
-    },
-    description: isDestekol ? getDestekolAnswers(locale).intro : localeData.description,
-    ...(!isDestekol ? { areaServed: [
-      "Global",
-      "United Arab Emirates",
-      "Middle East",
-      "Saudi Arabia",
-      "Qatar",
-      "Kuwait",
-      "Germany",
-      "France",
-      "United Kingdom",
-      "United States",
-      "Türkiye"
-    ] } : {}),
-    sameAs: [
-      settings?.facebookUrl,
-      settings?.twitterUrl,
-      settings?.instagramUrl,
-      settings?.linkedinUrl,
-      settings?.youtubeUrl,
-      ...(!isDestekol ? ["https://find-and-update.company-information.service.gov.uk/company/17306194"] : []),
-    ].filter(Boolean),
-  };
-
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": `${siteUrl}/#website`,
-    url: siteUrl,
-    name: fullName,
-    inLanguage: locale,
-    publisher: { "@id": `${siteUrl}/#organization` },
-  };
-
-  return { organizationSchema, websiteSchema };
+function buildSiteSchemas(locale: string, settings: PublicSiteSettings | null, localeData: {
+    description: string;
+}, siteUrl: string, fullName: string, brandName: string, isSite: boolean) {
+    const organizationSchema = {
+        "@context": "https://schema.org",
+        "@type": ["NGO", "Organization"],
+        "@id": `${siteUrl}/#organization`,
+        name: fullName,
+        alternateName: ["4Relief", "4Relief NGO", "4Relief International Humanitarian Foundation"],
+        url: siteUrl,
+        logo: {
+            "@type": "ImageObject",
+            url: `${siteUrl}${"/brand/logo.png"}`,
+        },
+        description: localeData.description,
+        ...({ areaServed: [
+                "Global",
+                "United Arab Emirates",
+                "Middle East",
+                "Saudi Arabia",
+                "Qatar",
+                "Kuwait",
+                "Germany",
+                "France",
+                "United Kingdom",
+                "United States",
+                "Türkiye"
+            ] }),
+        sameAs: [
+            settings?.facebookUrl,
+            settings?.twitterUrl,
+            settings?.instagramUrl,
+            settings?.linkedinUrl,
+            settings?.youtubeUrl,
+            ...(["https://find-and-update.company-information.service.gov.uk/company/17306194"]),
+        ].filter(Boolean),
+    };
+    const websiteSchema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: fullName,
+        inLanguage: locale,
+        publisher: { "@id": `${siteUrl}/#organization` },
+    };
+    return { organizationSchema, websiteSchema };
 }
-
-export default async function LocaleLayout({
-  children,
-  params: { locale },
-}: {
-  children: React.ReactNode;
-  params: { locale: string };
+export default async function LocaleLayout({ children, params: { locale }, }: {
+    children: React.ReactNode;
+    params: {
+        locale: string;
+    };
 }) {
-  if (!LOCALES.includes(locale as Locale)) {
-    notFound();
-  }
-
-  const { isDestekol, siteUrl, brandName, fullName } = await getDomainInfo(locale);
-  const { pages, settings, dict } = await getSiteData(locale);
-  const localeData = LOCALE_METADATA[locale] || LOCALE_METADATA.en;
-  
-  const { organizationSchema, websiteSchema } = buildSiteSchemas(
-    locale, 
-    settings, 
-    localeData, 
-    siteUrl, 
-    fullName, 
-    brandName, 
-    isDestekol
-  );
-
-  const pixelId = settings?.facebookPixelId;
-  const gaId = settings?.gaMeasurementId;
-
-  // تحديد الاتجاه تلقائياً بناءً على اللغة
-  const dir = locale === "ar" ? "rtl" : "ltr";
-
-  return (
-    <div className="flex min-h-screen flex-col" dir={dir} lang={locale}>
-      {pixelId && (
-        <Script id="meta-pixel" strategy="afterInteractive">
+    if (!LOCALES.includes(locale as Locale)) {
+        notFound();
+    }
+    const { isSite, siteUrl, brandName, fullName } = await getDomainInfo(locale);
+    const { pages, settings, dict } = await getSiteData(locale);
+    const localeData = LOCALE_METADATA[locale] || LOCALE_METADATA.en;
+    const { organizationSchema, websiteSchema } = buildSiteSchemas(locale, settings, localeData, siteUrl, fullName, brandName, isSite);
+    const pixelId = settings?.facebookPixelId;
+    const gaId = settings?.gaMeasurementId;
+    // تحديد الاتجاه تلقائياً بناءً على اللغة
+    const dir = locale === "ar" ? "rtl" : "ltr";
+    return (<div className="flex min-h-screen flex-col" dir={dir} lang={locale}>
+      {pixelId && (<Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
             {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -322,12 +240,10 @@ export default async function LocaleLayout({
             fbq('init', '${pixelId}');
             fbq('track', 'PageView');
           `}
-        </Script>
-      )}
+        </Script>)}
 
-      {gaId && (
-        <>
-          <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
+      {gaId && (<>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive"/>
           <Script id="google-analytics" strategy="afterInteractive">
             {`
               window.dataLayer = window.dataLayer || [];
@@ -336,32 +252,21 @@ export default async function LocaleLayout({
               gtag('config', '${gaId}');
             `}
           </Script>
-        </>
-      )}
+        </>)}
 
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(organizationSchema) }}/>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteSchema) }}/>
 
-      <SiteHeader isDestekol={isDestekol} navItems={pages} settings={settings} locale={locale} dict={dict} transparent={false} />
-      <CookieBanner isDestekol={isDestekol} locale={locale} />
+      <SiteHeader isSite={isSite} navItems={pages} settings={settings} locale={locale} dict={dict} transparent={false}/>
+      <CookieBanner isSite={isSite} locale={locale}/>
 
       <main className="flex-1 pt-20">
         {children}
       </main>
 
-      <SiteFooter isDestekol={isDestekol} navItems={pages} settings={settings} locale={locale} dict={dict} />
-      <WhatsAppButton phone={settings?.whatsappNumber} />
+      <SiteFooter isSite={isSite} navItems={pages} settings={settings} locale={locale} dict={dict}/>
+      <WhatsAppButton phone={settings?.whatsappNumber}/>
 
-      <SocialSidebar
-        whatsapp={settings?.whatsappNumber}
-        facebook={settings?.facebookUrl}
-        twitter={settings?.twitterUrl}
-        instagram={settings?.instagramUrl}
-        tiktok={settings?.tiktokUrl}
-        youtube={settings?.youtubeUrl}
-        linkedin={settings?.linkedinUrl}
-        position={(settings?.socialPosition as "left" | "right") || "right"}
-      />
-    </div>
-  );
+      <SocialSidebar whatsapp={settings?.whatsappNumber} facebook={settings?.facebookUrl} twitter={settings?.twitterUrl} instagram={settings?.instagramUrl} tiktok={settings?.tiktokUrl} youtube={settings?.youtubeUrl} linkedin={settings?.linkedinUrl} position={(settings?.socialPosition as "left" | "right") || "right"}/>
+    </div>);
 }

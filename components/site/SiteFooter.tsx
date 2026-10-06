@@ -1,272 +1,206 @@
 "use client";
-
-import type { PublicSiteSettings } from "@/lib/public-site-settings";
-import { OFFICIAL_EMAIL, OFFICIAL_PHONE, OFFICIAL_WHATSAPP_URL, DESTEKOL_ADDRESS } from "@/lib/public-contact";
-
-
-import Link from "next/link";
-import { companyIdentity } from "@/lib/company-identity";
-import Image from "next/image";
 import Icon from "@/components/icons";
-import { normalizeDestekolBrandText } from "@/lib/destekol-brand-copy";
-
+import { companyIdentity } from "@/lib/company-identity";
+import { OFFICIAL_EMAIL,OFFICIAL_PHONE,OFFICIAL_WHATSAPP_URL } from "@/lib/public-contact";
+import type { PublicSiteSettings } from "@/lib/public-site-settings";
+import Image from "next/image";
+import Link from "next/link";
 interface NavItem {
-  slug: string;
-  title: string;
+    slug: string;
+    title: string;
 }
-
 const LEGAL_SLUGS: Array<{
-  slug: string;
-  key: string;
-  fallbacks: Record<string, string>;
+    slug: string;
+    key: string;
+    fallbacks: Record<string, string>;
 }> = [
-  {
-    slug: "privacy",
-    key: "legal.privacy",
-    fallbacks: {
-      ar: "سياسة الخصوصية",
-      en: "Privacy Policy",
-      fr: "Politique de Confidentialité",
-      tr: "Gizlilik Politikası",
+    {
+        slug: "privacy",
+        key: "legal.privacy",
+        fallbacks: {
+            ar: "سياسة الخصوصية",
+            en: "Privacy Policy",
+            fr: "Politique de Confidentialité",
+            tr: "Gizlilik Politikası",
+        },
     },
-  },
-  {
-    slug: "terms",
-    key: "legal.terms",
-    fallbacks: {
-      ar: "الشروط والأحكام",
-      en: "Terms & Conditions",
-      fr: "Conditions d'Utilisation",
-      tr: "Kullanım Koşulları",
+    {
+        slug: "terms",
+        key: "legal.terms",
+        fallbacks: {
+            ar: "الشروط والأحكام",
+            en: "Terms & Conditions",
+            fr: "Conditions d'Utilisation",
+            tr: "Kullanım Koşulları",
+        },
     },
-  },
-  {
-    slug: "refund-policy",
-    key: "legal.refund_policy",
-    fallbacks: {
-      ar: "سياسة الاسترداد",
-      en: "Refund Policy",
-      fr: "Politique de Remboursement",
-      tr: "İade Politikası",
+    {
+        slug: "refund-policy",
+        key: "legal.refund_policy",
+        fallbacks: {
+            ar: "سياسة الاسترداد",
+            en: "Refund Policy",
+            fr: "Politique de Remboursement",
+            tr: "İade Politikası",
+        },
     },
-  },
-  {
-    slug: "cookie-policy",
-    key: "legal.cookie_policy",
-    fallbacks: {
-      ar: "سياسة ملفات تعريف الارتباط",
-      en: "Cookie Policy",
-      fr: "Politique des Cookies",
-      tr: "Çerez Politikası",
+    {
+        slug: "cookie-policy",
+        key: "legal.cookie_policy",
+        fallbacks: {
+            ar: "سياسة ملفات تعريف الارتباط",
+            en: "Cookie Policy",
+            fr: "Politique des Cookies",
+            tr: "Çerez Politikası",
+        },
     },
-  },
-  {
-    slug: "aml-policy",
-    key: "legal.aml_policy",
-    fallbacks: {
-      ar: "مكافحة غسيل الأموال",
-      en: "AML Policy",
-      fr: "Politique Anti-Blanchiment",
-      tr: "Kara Para Aklamayla Mücadele",
+    {
+        slug: "aml-policy",
+        key: "legal.aml_policy",
+        fallbacks: {
+            ar: "مكافحة غسيل الأموال",
+            en: "AML Policy",
+            fr: "Politique Anti-Blanchiment",
+            tr: "Kara Para Aklamayla Mücadele",
+        },
     },
-  },
-  {
-    slug: "complaints",
-    key: "legal.complaints",
-    fallbacks: {
-      ar: "سياسة الشكاوى",
-      en: "Complaints Policy",
-      fr: "Politique de Réclamations",
-      tr: "Şikayet Politikası",
+    {
+        slug: "complaints",
+        key: "legal.complaints",
+        fallbacks: {
+            ar: "سياسة الشكاوى",
+            en: "Complaints Policy",
+            fr: "Politique de Réclamations",
+            tr: "Şikayet Politikası",
+        },
     },
-  },
-  {
-    slug: "financial-transparency",
-    key: "legal.financial_transparency",
-    fallbacks: {
-      ar: "الشفافية المالية",
-      en: "Financial Transparency",
-      fr: "Transparence Financière",
-      tr: "Mali Şeffaflık",
+    {
+        slug: "financial-transparency",
+        key: "legal.financial_transparency",
+        fallbacks: {
+            ar: "الشفافية المالية",
+            en: "Financial Transparency",
+            fr: "Transparence Financière",
+            tr: "Mali Şeffaflık",
+        },
     },
-  },
-  {
-    slug: "how-we-use-donations",
-    key: "legal.how_we_use_donations",
-    fallbacks: {
-      ar: "كيف نستخدم التبرعات",
-      en: "How We Use Donations",
-      fr: "Comment Nous Utilisons les Dons",
-      tr: "Bağışları Nasıl Kullanıyoruz",
+    {
+        slug: "how-we-use-donations",
+        key: "legal.how_we_use_donations",
+        fallbacks: {
+            ar: "كيف نستخدم التبرعات",
+            en: "How We Use Donations",
+            fr: "Comment Nous Utilisons les Dons",
+            tr: "Bağışları Nasıl Kullanıyoruz",
+        },
     },
-  },
-  {
-    slug: "license",
-    key: "legal.license",
-    fallbacks: {
-      ar: "التسجيل والترخيص",
-      en: "Registration & Licensing",
-      fr: "Enregistrement et agrément",
-      tr: "Kayıt ve Ruhsat Bilgileri",
+    {
+        slug: "license",
+        key: "legal.license",
+        fallbacks: {
+            ar: "التسجيل والترخيص",
+            en: "Registration & Licensing",
+            fr: "Enregistrement et agrément",
+            tr: "Kayıt ve Ruhsat Bilgileri",
+        },
     },
-  },
 ];
-
-const SOCIAL_ICONS: Record<
-  string,
-  {
+const SOCIAL_ICONS: Record<string, {
     icon: string;
     label: string;
-  }
-> = {
-  facebookUrl: {
-    icon: "facebook",
-    label: "Facebook",
-  },
-  twitterUrl: {
-    icon: "twitter",
-    label: "Twitter",
-  },
-  instagramUrl: {
-    icon: "instagram",
-    label: "Instagram",
-  },
-  youtubeUrl: {
-    icon: "youtube",
-    label: "YouTube",
-  },
-  linkedinUrl: {
-    icon: "linkedin",
-    label: "LinkedIn",
-  },
-  tiktokUrl: {
-    icon: "tiktok",
-    label: "TikTok",
-  },
+}> = {
+    facebookUrl: {
+        icon: "facebook",
+        label: "Facebook",
+    },
+    twitterUrl: {
+        icon: "twitter",
+        label: "Twitter",
+    },
+    instagramUrl: {
+        icon: "instagram",
+        label: "Instagram",
+    },
+    youtubeUrl: {
+        icon: "youtube",
+        label: "YouTube",
+    },
+    linkedinUrl: {
+        icon: "linkedin",
+        label: "LinkedIn",
+    },
+    tiktokUrl: {
+        icon: "tiktok",
+        label: "TikTok",
+    },
 };
-
 /* =========================================================
-   DESTEKOL OFFICIAL INFORMATION
+   SITE OFFICIAL INFORMATION
 ========================================================= */
-
-const DESTEKOL_EMAIL = "info@destekol.org";
-
-const DESTEKOL_REGISTRATION_NO = "34-283-182";
-
-const DESTEKOL_VERIFICATION_URL =
-  "https://www.turkiye.gov.tr/icisleri-ddb-dernek-sorgulama";
-
 /* ========================================================= */
-
-export default function SiteFooter({
-  isDestekol = false,
-  navItems = [],
-  settings = {},
-  locale = "ar",
-  dict = {},
-}: {
-  isDestekol?: boolean;
-  navItems?: NavItem[];
-  settings?: PublicSiteSettings | null;
-  locale?: string;
-  dict?: Record<string, string>;
+export default function SiteFooter({ isSite = false, navItems = [], settings = {}, locale = "ar", dict = {}, }: {
+    isSite?: boolean;
+    navItems?: NavItem[];
+    settings?: PublicSiteSettings | null;
+    locale?: string;
+    dict?: Record<string, string>;
 }) {
-
-
-  const p = isDestekol ? `/${locale}` : locale === "ar" ? "" : `/${locale}`;
-
-  const loc: "ar" | "en" | "fr" | "tr" = [
-    "ar",
-    "en",
-    "fr",
-    "tr",
-  ].includes(locale)
-    ? (locale as "ar" | "en" | "fr" | "tr")
-    : "ar";
-
-  const d = (
-    key: string,
-    fallbacks: Record<string, string> = {}
-  ) => {
-    const value = (dict && dict[key]) ||
-    fallbacks[loc] ||
-    fallbacks["en"] ||
-    "";
-    return isDestekol ? normalizeDestekolBrandText(value, loc) : value;
-  };
-
-  /* =========================================================
-     Social Links
-  ========================================================= */
-
-  const socialLinks = Object.entries(SOCIAL_ICONS)
-    .filter(
-      ([key]) =>
-        settings?.[
-          key as keyof PublicSiteSettings
-        ]
-    )
-    .map(([key, meta]) => ({
-      url: settings?.[
-        key as keyof PublicSiteSettings
-      ] as string,
-      ...meta,
+    const p = locale === "ar" ? "" : `/${locale}`;
+    const loc: "ar" | "en" | "fr" | "tr" = [
+        "ar",
+        "en",
+        "fr",
+        "tr",
+    ].includes(locale)
+        ? (locale as "ar" | "en" | "fr" | "tr")
+        : "ar";
+    const d = (key: string, fallbacks: Record<string, string> = {}) => {
+        const value = (dict && dict[key]) ||
+            fallbacks[loc] ||
+            fallbacks["en"] ||
+            "";
+        return value;
+    };
+    /* =========================================================
+       Social Links
+    ========================================================= */
+    const socialLinks = Object.entries(SOCIAL_ICONS)
+        .filter(([key]) => settings?.[key as keyof PublicSiteSettings])
+        .map(([key, meta]) => ({
+        url: settings?.[key as keyof PublicSiteSettings] as string,
+        ...meta,
     }));
-
-  /* =========================================================
-     Brand Information Depending On Domain
-  ========================================================= */
-
-  const logoSrc = isDestekol
-    ? "/brand/destekol-logo.png"
-    : settings?.logoImage ||
-      "/brand/logo-horizontal-transparent.png";
-
-  const logoText = isDestekol
-    ? "Destekol"
-    : settings?.logoText || "4Relief";
-
-  const siteName = isDestekol
-    ? "Destekol"
-    : settings?.siteName || "4Relief";
-
-  /*
-   * IMPORTANT:
-   * Destekol always uses its own official email.
-   * 4Relief continues using OFFICIAL_EMAIL.
-   */
-  const contactEmail = isDestekol
-    ? DESTEKOL_EMAIL
-    : OFFICIAL_EMAIL;
-  const contactPhone = isDestekol ? settings?.contactPhone : OFFICIAL_PHONE;
-  const whatsappUrl = isDestekol
-    ? (settings?.whatsappNumber ? `https://wa.me/${settings.whatsappNumber.replace(/\D/g, "")}` : "")
-    : OFFICIAL_WHATSAPP_URL;
-
-  const safeNavItems = Array.isArray(navItems)
-    ? navItems
-    : [];
-  const legalItems = isDestekol ? LEGAL_SLUGS : LEGAL_SLUGS.filter(item => item.slug !== "license");
-
-  return (
-    <footer
-      className={`relative bg-sidebar-gradient text-white mt-auto overflow-hidden${isDestekol ? " destekol-footer" : ""}`}
-      role="contentinfo"
-    >
+    /* =========================================================
+       Brand Information Depending On Domain
+    ========================================================= */
+    const logoSrc = settings?.logoImage ||
+        "/brand/logo-horizontal-transparent.png";
+    const logoText = settings?.logoText || "4Relief";
+    const siteName = settings?.siteName || "4Relief";
+    /*
+     * IMPORTANT:
+     * Site always uses its own official email.
+     * 4Relief continues using OFFICIAL_EMAIL.
+     */
+    const contactEmail = OFFICIAL_EMAIL;
+    const contactPhone = OFFICIAL_PHONE;
+    const whatsappUrl = OFFICIAL_WHATSAPP_URL;
+    const safeNavItems = Array.isArray(navItems)
+        ? navItems
+        : [];
+    const legalItems = LEGAL_SLUGS.filter(item => item.slug !== "license");
+    return (<footer className={`relative bg-sidebar-gradient text-white mt-auto overflow-hidden${""}`} role="contentinfo">
       {/* =====================================================
-          Accent line
-      ===================================================== */}
+              Accent line
+          ===================================================== */}
 
-      <div
-        className="h-1"
-        style={{
-          background: `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
-        }}
-      />
+      <div className="h-1" style={{
+            background: `var(--site-accent-gradient, ${settings?.accentColor ? `linear-gradient(to right, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
+        }}/>
 
       {/* =====================================================
-          Footer Main Content
-      ===================================================== */}
+              Footer Main Content
+          ===================================================== */}
 
       <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 py-10 sm:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
         {/* ===================================================
@@ -274,96 +208,48 @@ export default function SiteFooter({
         =================================================== */}
 
         <div className="lg:col-span-1">
-          <Link
-            href={`${p}/`}
-            aria-label={`${logoText} Home`}
-          >
-            <Image
-              src={logoSrc}
-              alt={logoText}
-              width={175}
-              height={70}
-              className="h-11 w-auto object-contain mb-4"
-            />
+          <Link href={`${p}/`} aria-label={`${logoText} Home`}>
+            <Image src={logoSrc} alt={logoText} width={175} height={70} className="h-11 w-auto object-contain mb-4"/>
           </Link>
 
           {/* Tagline */}
-          {settings?.footerTagline && !isDestekol && (
-            <p className="text-white/80 text-sm font-semibold mb-2">
+          {settings?.footerTagline && !isSite && (<p className="text-white/80 text-sm font-semibold mb-2">
               {settings.footerTagline}
-            </p>
-          )}
+            </p>)}
 
           {/* =================================================
-              Organization Description
-          ================================================= */}
+          Organization Description
+      ================================================= */}
 
           <p className="text-white/80 text-sm leading-relaxed mb-6">
-            {isDestekol
-              ? d(
-                  "footer.description_destekol",
-                  {
-                    ar: "جمعية Destekol الخيرية غير الربحية مسجلة رسمياً، وتعمل في المجال الإنساني والتنموي بشفافية ومسؤولية.",
-                    en: "Destekol is an officially registered charitable association with non-profit status, working in humanitarian and development fields with transparency and accountability.",
-                    fr: "Destekol est une association caritative à but non lucratif officiellement enregistrée, active dans les domaines humanitaire et du développement avec transparence et responsabilité.",
-                    tr: "Destekol, insani yardım ve kalkınma alanlarında şeffaflık ve sorumlulukla faaliyet gösteren resmî kayıtlı, kâr amacı gütmeyen bir hayır derneğidir.",
-                  }
-                )
-              : companyIdentity[locale] || companyIdentity.en}
+            {companyIdentity[locale] || companyIdentity.en}
           </p>
 
           {/* =================================================
-              Social Media
-          ================================================= */}
+          Social Media
+      ================================================= */}
 
-          {socialLinks.length > 0 && (
-            <nav
-              aria-label="Social media channels"
-              className="flex gap-2 flex-wrap mb-6"
-            >
-              {socialLinks.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Visit our ${s.label} page`}
-                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition"
-                >
-                  <Icon
-                    name={s.icon as any}
-                    size={15}
-                    className="text-white/80"
-                  />
-                </a>
-              ))}
-            </nav>
-          )}
+          {socialLinks.length > 0 && (<nav aria-label="Social media channels" className="flex gap-2 flex-wrap mb-6">
+              {socialLinks.map((s) => (<a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit our ${s.label} page`} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 flex items-center justify-center transition">
+                  <Icon name={s.icon as any} size={15} className="text-white/80"/>
+                </a>))}
+            </nav>)}
 
           {/* =================================================
-              Donate Button
-          ================================================= */}
+          Donate Button
+      ================================================= */}
 
-          <Link
-            href={`${p}/donate`}
-            className="inline-flex items-center gap-2 hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition shadow-md"
-            style={{
-              background: isDestekol
-                ? "linear-gradient(135deg, #D9A750, #C79239)"
-                : `var(--destekol-accent-gradient, ${settings?.accentColor ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
-            }}
-          >
-            <Icon
-              name="heart"
-              size={16}
-            />
+          <Link href={`${p}/donate`} className="inline-flex items-center gap-2 hover:opacity-90 text-white font-bold rounded-xl px-5 py-2.5 text-sm transition shadow-md" style={{
+            background: `var(--site-accent-gradient, ${settings?.accentColor ? `linear-gradient(135deg, ${settings.accentColor}, ${settings.accentColor}cc)` : "linear-gradient(135deg, #F00F5A, #FF4D88)"})`,
+        }}>
+            <Icon name="heart" size={16}/>
 
             {d("nav.donate", {
-              ar: "تبرع الآن",
-              en: "Donate Now",
-              fr: "Faire un Don",
-              tr: "Bağış Yap",
-            })}
+            ar: "تبرع الآن",
+            en: "Donate Now",
+            fr: "Faire un Don",
+            tr: "Bağış Yap",
+        })}
           </Link>
         </div>
 
@@ -374,198 +260,151 @@ export default function SiteFooter({
         <nav aria-label="Quick links">
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
             {d("footer.quick_links", {
-              ar: "روابط سريعة",
-              en: "Quick Links",
-              fr: "Liens Rapides",
-              tr: "Hızlı Bağlantılar",
-            })}
+            ar: "روابط سريعة",
+            en: "Quick Links",
+            fr: "Liens Rapides",
+            tr: "Hızlı Bağlantılar",
+        })}
           </h2>
 
           <ul className="space-y-2.5 text-sm text-white/80">
             {/* 4Relief-specific quick links */}
-            {!isDestekol && <li>
-              <Link
-                href={`${p}/why-4relief`}
-                className="flex items-center gap-2 hover:text-white transition group font-semibold text-emerald-300"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-emerald-400 group-hover:bg-white transition"
-                  aria-hidden="true"
-                />
+            {<li>
+              <Link href={`${p}/why-4relief`} className="flex items-center gap-2 hover:text-white transition group font-semibold text-emerald-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 group-hover:bg-white transition" aria-hidden="true"/>
 
                 {d("footer.why_4relief", {
-                  ar: `لماذا ${siteName}؟ (مقارنة)`,
-                  en: `Why ${siteName}? (Comparison)`,
-                  fr: `Pourquoi ${siteName} ?`,
-                  tr: `Neden ${siteName}?`,
-                })}
+                ar: `لماذا ${siteName}؟ (مقارنة)`,
+                en: `Why ${siteName}? (Comparison)`,
+                fr: `Pourquoi ${siteName} ?`,
+                tr: `Neden ${siteName}?`,
+            })}
               </Link>
             </li>}
 
             {/* Institutional partnerships */}
-            {!isDestekol && <li>
-              <Link
-                href={`${p}/institutional-partnerships`}
-                className="flex items-center gap-2 hover:text-white transition group font-semibold text-amber-300"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:bg-white transition"
-                  aria-hidden="true"
-                />
+            {<li>
+              <Link href={`${p}/institutional-partnerships`} className="flex items-center gap-2 hover:text-white transition group font-semibold text-amber-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:bg-white transition" aria-hidden="true"/>
 
-                {d(
-                  "footer.institutional_partnerships",
-                  {
-                    ar: "الشراكات المؤسسية",
-                    en: "Institutional Partnerships",
-                    fr: "Partenariats Institutionnels",
-                    tr: "Kurumsal İş Birlikleri",
-                  }
-                )}
+                {d("footer.institutional_partnerships", {
+                ar: "الشراكات المؤسسية",
+                en: "Institutional Partnerships",
+                fr: "Partenariats Institutionnels",
+                tr: "Kurumsal İş Birlikleri",
+            })}
               </Link>
             </li>}
 
             {/* Dynamic navigation */}
             {safeNavItems.map((item) => {
-              const navKey = `nav.${item.slug}`;
-
-              const translatedTitle =
-                (dict && dict[navKey]) ||
+            const navKey = `nav.${item.slug}`;
+            const translatedTitle = (dict && dict[navKey]) ||
                 (item.slug === "home"
-                  ? d("nav.home", {
-                      ar: "الرئيسية",
-                      en: "Home",
-                      fr: "Accueil",
-                      tr: "Ana Sayfa",
+                    ? d("nav.home", {
+                        ar: "الرئيسية",
+                        en: "Home",
+                        fr: "Accueil",
+                        tr: "Ana Sayfa",
                     })
-                  : item.slug === "about" ||
-                    item.slug === "about-us"
-                  ? d("nav.about", {
-                      ar: "من نحن",
-                      en: "About Us",
-                      fr: "À Propos",
-                      tr: "Hakkımızda",
-                    })
-                  : item.slug === "our-work" ||
-                    item.slug === "sectors"
-                  ? d("nav.our_work", {
-                      ar: "مجالات عملنا",
-                      en: "Our Work",
-                      fr: "Nos Domaines",
-                      tr: "Faaliyetlerimiz",
-                    })
-                  : item.slug === "projects"
-                  ? d("nav.projects", {
-                      ar: "المشاريع الإنسانية",
-                      en: "Projects",
-                      fr: "Projets",
-                      tr: "Projelerimiz",
-                    })
-                  : item.slug ===
-                      "transparency" ||
-                    item.slug ===
-                      "financial-transparency"
-                  ? d("nav.transparency", {
-                      ar: "الشفافية",
-                      en: "Transparency",
-                      fr: "Transparence",
-                      tr: "Şeffaflık",
-                    })
-                  : item.slug === "contact"
-                  ? d("nav.contact", {
-                      ar: "اتصل بنا",
-                      en: "Contact Us",
-                      fr: "Contact",
-                      tr: "İletişim",
-                    })
-                  : item.title);
-
-              /*
-               * Contact is added manually below
-               * to prevent duplication.
-               */
-              if (item.slug === "contact") {
+                    : item.slug === "about" ||
+                        item.slug === "about-us"
+                        ? d("nav.about", {
+                            ar: "من نحن",
+                            en: "About Us",
+                            fr: "À Propos",
+                            tr: "Hakkımızda",
+                        })
+                        : item.slug === "our-work" ||
+                            item.slug === "sectors"
+                            ? d("nav.our_work", {
+                                ar: "مجالات عملنا",
+                                en: "Our Work",
+                                fr: "Nos Domaines",
+                                tr: "Faaliyetlerimiz",
+                            })
+                            : item.slug === "projects"
+                                ? d("nav.projects", {
+                                    ar: "المشاريع الإنسانية",
+                                    en: "Projects",
+                                    fr: "Projets",
+                                    tr: "Projelerimiz",
+                                })
+                                : item.slug ===
+                                    "transparency" ||
+                                    item.slug ===
+                                        "financial-transparency"
+                                    ? d("nav.transparency", {
+                                        ar: "الشفافية",
+                                        en: "Transparency",
+                                        fr: "Transparence",
+                                        tr: "Şeffaflık",
+                                    })
+                                    : item.slug === "contact"
+                                        ? d("nav.contact", {
+                                            ar: "اتصل بنا",
+                                            en: "Contact Us",
+                                            fr: "Contact",
+                                            tr: "İletişim",
+                                        })
+                                        : item.title);
+            /*
+             * Contact is added manually below
+             * to prevent duplication.
+             */
+            if (item.slug === "contact") {
                 return null;
-              }
-
-              return (
-                <li key={item.slug}>
-                  <Link
-                    href={
-                      item.slug === "home"
-                        ? `${p}/`
-                        : `${p}/${item.slug}`
-                    }
-                    className="flex items-center gap-2 hover:text-white transition group"
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition"
-                      aria-hidden="true"
-                    />
+            }
+            return (<li key={item.slug}>
+                  <Link href={item.slug === "home"
+                    ? `${p}/`
+                    : `${p}/${item.slug}`} className="flex items-center gap-2 hover:text-white transition group">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true"/>
 
                     {translatedTitle}
                   </Link>
-                </li>
-              );
-            })}
+                </li>);
+        })}
 
             {/* Campaigns */}
             <li>
-              <Link
-                href={`${p}/campaigns`}
-                className="flex items-center gap-2 hover:text-white transition group"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition"
-                  aria-hidden="true"
-                />
+              <Link href={`${p}/campaigns`} className="flex items-center gap-2 hover:text-white transition group">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true"/>
 
                 {d("nav.campaigns", {
-                  ar: "الحملات الإغاثية",
-                  en: "Campaigns",
-                  fr: "Campagnes",
-                  tr: "Kampanyalar",
-                })}
+            ar: "الحملات الإغاثية",
+            en: "Campaigns",
+            fr: "Campagnes",
+            tr: "Kampanyalar",
+        })}
               </Link>
             </li>
 
             {/* News */}
             <li>
-              <Link
-                href={`${p}/news`}
-                className="flex items-center gap-2 hover:text-white transition group"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition"
-                  aria-hidden="true"
-                />
+              <Link href={`${p}/news`} className="flex items-center gap-2 hover:text-white transition group">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true"/>
 
                 {d("nav.news", {
-                  ar: "الأخبار والميدان",
-                  en: "News",
-                  fr: "Actualités",
-                  tr: "Haberler",
-                })}
+            ar: "الأخبار والميدان",
+            en: "News",
+            fr: "Actualités",
+            tr: "Haberler",
+        })}
               </Link>
             </li>
 
             {/* Contact */}
             <li>
-              <Link
-                href={`${p}/contact`}
-                className="flex items-center gap-2 hover:text-white transition group"
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition"
-                  aria-hidden="true"
-                />
+              <Link href={`${p}/contact`} className="flex items-center gap-2 hover:text-white transition group">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true"/>
 
                 {d("nav.contact", {
-                  ar: "اتصل بنا",
-                  en: "Contact Us",
-                  fr: "Contactez-nous",
-                  tr: "Bize Ulaşın",
-                })}
+            ar: "اتصل بنا",
+            en: "Contact Us",
+            fr: "Contactez-nous",
+            tr: "Bize Ulaşın",
+        })}
               </Link>
             </li>
           </ul>
@@ -578,32 +417,21 @@ export default function SiteFooter({
         <nav aria-label="Legal & Transparency policies">
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
             {d("footer.legal", {
-              ar: "السياسات والشفافية",
-              en: "Legal Policies",
-              fr: "Politiques Légales",
-              tr: "Yasal Politikalar",
-            })}
+            ar: "السياسات والشفافية",
+            en: "Legal Policies",
+            fr: "Politiques Légales",
+            tr: "Yasal Politikalar",
+        })}
           </h2>
 
           <ul className="space-y-2.5 text-sm text-white/80">
-            {legalItems.map((item) => (
-              <li key={item.slug}>
-                <Link
-                  href={`${p}/${item.slug}`}
-                  className="flex items-center gap-2 hover:text-white transition group"
-                >
-                  <span
-                    className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition"
-                    aria-hidden="true"
-                  />
+            {legalItems.map((item) => (<li key={item.slug}>
+                <Link href={`${p}/${item.slug}`} className="flex items-center gap-2 hover:text-white transition group">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/60 group-hover:bg-white transition" aria-hidden="true"/>
 
-                  {d(
-                    item.key,
-                    item.fallbacks
-                  )}
+                  {d(item.key, item.fallbacks)}
                 </Link>
-              </li>
-            ))}
+              </li>))}
           </ul>
         </nav>
 
@@ -614,173 +442,80 @@ export default function SiteFooter({
         <div>
           <h2 className="font-bold text-white/80 mb-5 text-sm tracking-[0.2em] uppercase">
             {d("footer.contact_us", {
-              ar: "معلومات التواصل",
-              en: "Contact Info",
-              fr: "Coordonnées",
-              tr: "İletişim Bilgileri",
-            })}
+            ar: "معلومات التواصل",
+            en: "Contact Info",
+            fr: "Coordonnées",
+            tr: "İletişim Bilgileri",
+        })}
           </h2>
 
           <address className="not-italic">
             <ul className="space-y-3 text-sm text-white/80">
               {/* Email */}
               <li>
-                <a
-                  href={`mailto:${contactEmail}`}
-                  aria-label={`Send email to ${contactEmail}`}
-                  className="flex items-center gap-2 hover:text-white transition"
-                >
-                  <Icon
-                    name="mail"
-                    size={15}
-                    className="text-white/80 shrink-0"
-                  />
+                <a href={`mailto:${contactEmail}`} aria-label={`Send email to ${contactEmail}`} className="flex items-center gap-2 hover:text-white transition">
+                  <Icon name="mail" size={15} className="text-white/80 shrink-0"/>
 
                   {contactEmail}
                 </a>
               </li>
 
-              {isDestekol && <li dir="ltr" className="leading-relaxed break-words">{DESTEKOL_ADDRESS}</li>}
+              {false}
 
               {/* Phone */}
-              {contactPhone && (
-                <li>
-                  <a
-                    href={`tel:${contactPhone}`}
-                    aria-label={`Call ${contactPhone}`}
-                    className="flex items-center gap-2 hover:text-white transition"
-                  >
-                    <Icon
-                      name="phone"
-                      size={15}
-                      className="text-white/80 shrink-0"
-                    />
+              {contactPhone && (<li>
+                  <a href={`tel:${contactPhone}`} aria-label={`Call ${contactPhone}`} className="flex items-center gap-2 hover:text-white transition">
+                    <Icon name="phone" size={15} className="text-white/80 shrink-0"/>
 
                     <span dir="ltr">{contactPhone}</span>
                   </a>
-                </li>
-              )}
+                </li>)}
 
               {/* WhatsApp */}
-              {whatsappUrl && (
-                <li>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Contact us on WhatsApp"
-                    className="flex items-center gap-2 hover:text-white transition"
-                  >
-                    <Icon
-                      name="message-circle"
-                      size={15}
-                      className="text-white/80 shrink-0"
-                    />
+              {whatsappUrl && (<li>
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Contact us on WhatsApp" className="flex items-center gap-2 hover:text-white transition">
+                    <Icon name="message-circle" size={15} className="text-white/80 shrink-0"/>
 
                     WhatsApp
                   </a>
-                </li>
-              )}
+                </li>)}
             </ul>
           </address>
         </div>
       </div>
 
       {/* =====================================================
-          OFFICIAL REGISTRATION / VERIFICATION BAR
-      ===================================================== */}
+              OFFICIAL REGISTRATION / VERIFICATION BAR
+          ===================================================== */}
 
       <div className="border-t border-white/10 py-5 px-6 flex flex-wrap items-center justify-between gap-6 text-sm text-white/70 bg-slate-900/20">
         <div className="flex items-center gap-3 flex-wrap">
           {/* =================================================
-              Destekol registration
-          ================================================= */}
+          Site registration
+      ================================================= */}
 
-          {isDestekol ? (
-            <>
-              <span className="font-bold text-white/90">
-                {d(
-                  "footer.destekol_registered",
-                  {
-                    ar: "جمعية Destekol الخيرية غير الربحية، مسجلة رسمياً:",
-                    en: "Destekol — Registered Charitable Non-Profit Association:",
-                    fr: "Destekol — association caritative à but non lucratif enregistrée :",
-                    tr: "Destekol — Resmî Kayıtlı, Kâr Amacı Gütmeyen Hayır Derneği:",
-                  }
-                )}
-              </span>
-
-              <a
-                href={
-                  DESTEKOL_VERIFICATION_URL
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Verify Destekol registration ${DESTEKOL_REGISTRATION_NO}`}
-                className="inline-flex items-center gap-2 hover:bg-white/20 hover:text-white transition font-bold text-sm sm:text-base bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-sm"
-              >
-                <Icon
-                  name="shield-check"
-                  size={18}
-                  className="text-emerald-400"
-                />
-
-                <span>
-                  DERBİS / e-Devlet
-                  {" — "}
-
-                  {d(
-                    "footer.registration_no",
-                    {
-                      ar: "رقم القيد",
-                      en: "Registration No.",
-                      fr: "N° d'enregistrement",
-                      tr: "Kütük No.",
-                    }
-                  )}
-
-                  {" "}
-
-                  {
-                    DESTEKOL_REGISTRATION_NO
-                  }
-                </span>
-              </a>
-            </>
-          ) : (
-            <>
+          {(<>
               {/* ===============================================
-                  4Relief registration
-              =============================================== */}
+              4Relief registration
+          =============================================== */}
 
               <span className="font-bold text-white/90">
                 {d("footer.verified_on", {
-                  ar: "جهة رسمية مسجلة وموثقة:",
-                  en: "Officially Registered Entity:",
-                  fr: "Entité Officiellement Enregistrée :",
-                  tr: "Resmi Kayıtlı Kurum:",
-                })}
+                ar: "جهة رسمية مسجلة وموثقة:",
+                en: "Officially Registered Entity:",
+                fr: "Entité Officiellement Enregistrée :",
+                tr: "Resmi Kayıtlı Kurum:",
+            })}
               </span>
 
-              <a
-                href="https://find-and-update.company-information.service.gov.uk/company/17306194"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Verify 4Relief registration on GOV.UK"
-                className="inline-flex items-center gap-2 hover:bg-white/20 hover:text-white transition font-bold text-sm sm:text-base bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-sm"
-              >
-                <Icon
-                  name="shield-check"
-                  size={18}
-                  className="text-emerald-400"
-                />
+              <a href="https://find-and-update.company-information.service.gov.uk/company/17306194" target="_blank" rel="noopener noreferrer" aria-label="Verify 4Relief registration on GOV.UK" className="inline-flex items-center gap-2 hover:bg-white/20 hover:text-white transition font-bold text-sm sm:text-base bg-white/10 px-4 py-2 rounded-xl border border-white/20 shadow-sm">
+                <Icon name="shield-check" size={18} className="text-emerald-400"/>
 
                 GOV.UK Register
                 {" "}
                 (No. 17306194)
               </a>
-            </>
-          )}
+            </>)}
         </div>
 
         {/* ===================================================
@@ -788,34 +523,16 @@ export default function SiteFooter({
         =================================================== */}
 
         <span className="font-medium">
-          {isDestekol ? (
-            <>
-              © {new Date().getFullYear()}{" "}
-              Destekol
-              {" — "}
-              {d("footer.rights", {
-                ar: "جميع الحقوق محفوظة",
-                en: "All Rights Reserved",
-                fr: "Tous Droits Réservés",
-                tr: "Tüm Hakları Saklıdır",
-              })}
-            </>
-          ) : (
-            <>
+          {(<>
               {settings?.copyrightText ||
-                `© ${new Date().getFullYear()} ${siteName} — ${d(
-                  "footer.rights",
-                  {
+                `© ${new Date().getFullYear()} ${siteName} — ${d("footer.rights", {
                     ar: "جميع الحقوق محفوظة",
                     en: "All Rights Reserved",
                     fr: "Tous Droits Réservés",
                     tr: "Tüm Hakları Saklıdır",
-                  }
-                )}`}
-            </>
-          )}
+                })}`}
+            </>)}
         </span>
       </div>
-    </footer>
-  );
+    </footer>);
 }
